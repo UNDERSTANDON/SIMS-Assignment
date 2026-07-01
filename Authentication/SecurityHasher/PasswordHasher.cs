@@ -1,4 +1,4 @@
-﻿namespace SIMS_Assignment.SecurityHasher
+﻿namespace SIMS_Assignment.Authentication.SecurityHasher
 {
     public class PasswordHasher : IPasswordHasher
     {

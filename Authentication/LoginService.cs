@@ -1,5 +1,5 @@
 ﻿using SIMS_Assignment.Abstract;
-using SIMS_Assignment.SecurityHasher;
+using SIMS_Assignment.Authentication.SecurityHasher;
 
 namespace SIMS_Assignment.Authentication
 {

@@ -1,6 +1,6 @@
 ﻿using SIMS_Assignment.Abstract;
-using SIMS_Assignment.SecurityHasher;
 using SIMS_Assignment.Models;
+using SIMS_Assignment.Authentication.SecurityHasher;
 
 namespace SIMS_Assignment.Authentication
 {
@@ -31,7 +31,8 @@ namespace SIMS_Assignment.Authentication
                     if (user == null) return false;
                     return _hasher.Verify(password, user.PasswordHash);
                 case AuthAction.Register:
-                    var newUser = new User();
+                    // Since user is the factory method, we must have to default to student user for now. In the future, we can add a parameter to specify the user type.
+                    var newUser = new Student();
                     newUser.PasswordHash = _hasher.Hash(password);
                     return await _storage.SaveUserAsync(newUser);
                 default:
