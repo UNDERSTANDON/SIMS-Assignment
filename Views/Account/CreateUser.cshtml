@@ -1,0 +1,83 @@
+@model SIMS_WEB.Models.CreateUserViewModel
+@{
+    ViewData["Title"] = "Tạo tài khoản";
+    ViewData["ActivePage"] = "CreateUser";
+}
+
+<div class="sims-page" style="max-width:720px">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-user-gear"></i> Tạo tài khoản người dùng
+        </h1>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="sims-alert @(Model.IsSuccess ? "sims-alert-success" : "sims-alert-danger") mb-4">
+            <i class="fa-solid @(Model.IsSuccess ? "fa-circle-check" : "fa-circle-xmark")"></i>
+            <span>@Model.Message</span>
+        </div>
+    }
+
+    <div class="sims-card">
+        <div class="sims-card-header">
+            <i class="fa-solid fa-id-card text-accent"></i>
+            Thông tin tài khoản mới
+        </div>
+
+        <form asp-action="CreateUser" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" placeholder="VD: user001" />
+                    <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" placeholder="Họ và tên đầy đủ" />
+                    <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="email@univ.edu" />
+                    <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Role" class="form-label"></label>
+                    <select asp-for="Role" class="form-select">
+                        <option value="Admin">Admin</option>
+                        <option value="Faculty">Giảng viên</option>
+                        <option value="Student">Sinh viên</option>
+                    </select>
+                    <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" placeholder="Mật khẩu tối thiểu 6 ký tự" />
+                    <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-sims-primary">
+                    <i class="fa-solid fa-user-plus"></i> Tạo tài khoản
+                </button>
+                <button type="reset" class="btn btn-sims-outline">Xóa form</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="sims-alert sims-alert-info mt-4">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Chức năng demo: tài khoản được lưu tạm trong bộ nhớ, khởi động lại ứng dụng sẽ mất dữ liệu mới tạo.</span>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

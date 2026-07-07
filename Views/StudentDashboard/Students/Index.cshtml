@@ -1,0 +1,179 @@
+@model List<SIMS_WEB.Models.Student>
+@{
+    ViewData["Title"] = "Quản lý Sinh viên";
+    ViewData["ActivePage"] = "Students";
+}
+
+<div class="sims-page">
+    <!-- Header -->
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-users"></i> Quản lý Sinh viên
+            <span class="sims-badge badge-primary ms-2">@ViewBag.Total SV</span>
+        </h1>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-sims-primary">
+                <i class="fa-solid fa-plus"></i> Thêm sinh viên
+            </a>
+            <button class="btn btn-sims-outline" onclick="toggleImport()">
+                <i class="fa-solid fa-file-import"></i> Import CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- CSV Import Panel (hidden by default) -->
+    <div id="importPanel" class="sims-card mb-4" style="display:none">
+        <div class="sims-card-header">
+            <i class="fa-solid fa-file-csv text-success-sims"></i>
+            Import danh sách sinh viên từ CSV
+        </div>
+        <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="file-upload-area mb-3" onclick="document.getElementById('csvFile').click()"
+                 ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                 ondrop="handleDrop(event)">
+                <i class="fa-solid fa-cloud-arrow-up mb-2 d-block"></i>
+                <div class="fw-600">Kéo thả file CSV vào đây hoặc <span class="text-primary-sims">chọn file</span></div>
+                <div class="fs-xs text-muted-sims mt-1">Format: MaSV, HoTen, ChuongTrinh, Email</div>
+                <input type="file" id="csvFile" name="csvFile" accept=".csv" class="d-none"
+                       onchange="updateFileName(this)" />
+            </div>
+            <div id="fileName" class="fs-xs text-muted-sims mb-3"></div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-sims-success">
+                    <i class="fa-solid fa-upload"></i> Tải lên & Import
+                </button>
+                <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Hủy</button>
+            </div>
+        </form>
+        <div class="mt-3 p-2 rounded fs-xs" style="background:var(--sims-surface); border:1px solid var(--sims-border)">
+            <strong class="text-muted-sims">Mẫu CSV:</strong><br/>
+            <code style="color:var(--sims-secondary)">SV2024005,Nguyễn Thị E,Công nghệ Thông tin,e.nt@univ.edu</code>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <form method="get" class="mb-3">
+        <div class="input-group" style="max-width:400px">
+            <span class="input-group-text" style="background:var(--sims-surface); border-color:var(--sims-border); color:var(--sims-text-muted)">
+                <i class="fa-solid fa-search"></i>
+            </span>
+            <input type="text" name="search" value="@ViewBag.Search"
+                   class="form-control" placeholder="Tìm theo tên, mã SV..." />
+            <button class="btn btn-sims-outline" type="submit">Tìm</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+            {
+                <a asp-action="Index" class="btn btn-sims-outline"><i class="fa-solid fa-xmark"></i></a>
+            }
+        </div>
+    </form>
+
+    <!-- Table -->
+    @if (!Model.Any())
+    {
+        <div class="sims-card sims-empty">
+            <i class="fa-solid fa-users-slash"></i>
+            <div class="fw-600">Không tìm thấy sinh viên nào</div>
+            <div class="fs-xs text-muted-sims mt-1">Thêm sinh viên mới hoặc thay đổi bộ lọc tìm kiếm</div>
+        </div>
+    }
+    else
+    {
+        <div class="sims-table-wrap">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Sinh viên</th>
+                        <th>Mã SV</th>
+                        <th>Chương trình</th>
+                        <th>Email</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="sims-avatar">@(s.FullName.Length > 0 ? s.FullName[0].ToString().ToUpper() : "?")</div>
+                                    <span class="fw-600">@s.FullName</span>
+                                </div>
+                            </td>
+                            <td><code class="text-primary-sims">@s.StudentId</code></td>
+                            <td><span class="sims-badge badge-purple">@s.Program</span></td>
+                            <td class="text-muted-sims fs-xs">@s.Email</td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a asp-action="Edit" asp-route-id="@s.StudentId"
+                                       class="btn btn-sims-outline btn-sm">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-sims-danger btn-sm"
+                                            onclick="confirmDelete('@s.StudentId', '@s.FullName')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background:var(--sims-card); border-color:var(--sims-border)">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger-sims">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa
+                </h5>
+            </div>
+            <div class="modal-body text-muted-sims" id="deleteMsg"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-sims-outline" data-bs-dismiss="modal">Hủy</button>
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-sims-danger">
+                        <i class="fa-solid fa-trash"></i> Xóa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function toggleImport() {
+    const panel = document.getElementById('importPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function updateFileName(input) {
+    document.getElementById('fileName').textContent =
+        input.files[0] ? '📄 ' + input.files[0].name : '';
+}
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    const input = document.getElementById('csvFile');
+    if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        updateFileName(input);
+    }
+}
+function confirmDelete(id, name) {
+    document.getElementById('deleteMsg').innerHTML =
+        `Bạn có chắc muốn xóa sinh viên <strong class="text-white">${name}</strong>?<br/>
+        <span class="fs-xs">Hành động này không thể hoàn tác.</span>`;
+    document.getElementById('deleteForm').action = `/Students/Delete/${id}`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+}

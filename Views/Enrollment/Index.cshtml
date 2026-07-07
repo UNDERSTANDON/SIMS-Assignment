@@ -1,0 +1,203 @@
+@model SIMS_WEB.Models.EnrollmentViewModel
+@{
+    ViewData["Title"] = "Ghi danh Xep lop";
+    ViewData["ActivePage"] = "Enrollment";
+}
+
+<style>
+.enroll-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+@@media (max-width: 900px) {
+    .enroll-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-list-check fa-sm"></i>
+            Ghi danh / Xep lop
+        </h1>
+        <span class="pattern-badge pattern-facade">Facade Pattern</span>
+    </div>
+
+    <div class="enroll-grid">
+        <!-- LEFT: Form -->
+        <div>
+            <div class="sims-card">
+                <div class="sims-card-header">
+                    <i class="fa-solid fa-pen-to-square" style="color:var(--accent-light)"></i>
+                    Form Ghi danh
+                </div>
+
+                @if (Model.Message != null)
+                {
+                    <div class="sims-alert @(Model.IsSuccess ? "sims-alert-success" : "sims-alert-danger") mb-3">
+                        <i class="fa-solid @(Model.IsSuccess ? "fa-circle-check" : "fa-circle-xmark") fa-sm"></i>
+                        <span>@Model.Message</span>
+                    </div>
+                }
+
+                <form asp-action="Enroll" asp-controller="Enrollment" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="StudentId" class="form-label"></label>
+                        <select asp-for="StudentId" class="form-select">
+                            <option value="">-- Chon sinh vien --</option>
+                            @foreach (var s in Model.Students)
+                            {
+                                <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
+                            }
+                        </select>
+                        <span asp-validation-for="StudentId" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CourseCode" class="form-label"></label>
+                        <select asp-for="CourseCode" class="form-select" onchange="updateCapacity(this)">
+                            <option value="">-- Chon khoa hoc --</option>
+                            @foreach (var c in Model.Courses)
+                            {
+                                <option value="@c.Code"
+                                        data-enrolled="@c.EnrolledCount"
+                                        data-capacity="@c.Capacity"
+                                        data-full="@c.IsFull.ToString().ToLower()">
+                                    @c.Code - @c.Title (@c.EnrolledCount/@c.Capacity)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="CourseCode" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- Capacity indicator — Section 4.5: loading/state feedback -->
+                    <div id="capInfo" style="display:none;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;margin-bottom:1rem;">
+                        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.4rem;">
+                            <span style="color:var(--text-tertiary)">Si so hien tai</span>
+                            <span id="capText" class="font-mono" style="font-weight:600"></span>
+                        </div>
+                        <div class="sims-progress mb-2">
+                            <div class="sims-progress-bar" id="capBar" style="width:0%"></div>
+                        </div>
+                        <div id="fullWarn" class="sims-alert sims-alert-danger" style="display:none;padding:0.5rem 0.65rem;font-size:0.75rem;">
+                            <i class="fa-solid fa-ban fa-xs"></i> Khoa hoc da day si so
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-sims-primary w-100">
+                        <i class="fa-solid fa-plus-circle fa-xs"></i> Ghi danh ngay
+                    </button>
+                </form>
+
+                <!-- Facade Pattern steps — animated only on success -->
+                @if (Model.IsSuccess)
+                {
+                    <div style="margin-top:1.25rem;border-top:1px solid var(--border-subtle);padding-top:1rem;">
+                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">FACADE - SERVICES DA CHAY</div>
+                        <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                            <div class="facade-step visible">
+                                <div class="step-icon" style="background:var(--accent-ghost)"><i class="fa-solid fa-user-check fa-xs" style="color:var(--accent-light)"></i></div>
+                                <div>
+                                    <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">AccountService</div>
+                                    <div class="fs-xs text-muted-sims">Tao tai khoan sinh vien</div>
+                                </div>
+                            </div>
+                            <div class="facade-step visible" style="transition-delay:0.15s">
+                                <div class="step-icon" style="background:var(--success-muted)"><i class="fa-solid fa-file-invoice-dollar fa-xs" style="color:#4ade80"></i></div>
+                                <div>
+                                    <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">BillingService</div>
+                                    <div class="fs-xs text-muted-sims">Khoi tao hoa don hoc phi</div>
+                                </div>
+                            </div>
+                            <div class="facade-step visible" style="transition-delay:0.3s">
+                                <div class="step-icon" style="background:var(--warning-muted)"><i class="fa-solid fa-bell fa-xs" style="color:#fbbf24"></i></div>
+                                <div>
+                                    <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">NotificationService</div>
+                                    <div class="fs-xs text-muted-sims">Gui email xac nhan ghi danh</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- RIGHT: Enrolled list -->
+        <div class="sims-card">
+            <div class="sims-card-header">
+                <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                Danh sach da ghi danh
+                <span class="sims-badge badge-primary ms-auto font-mono">@Model.EnrolledList.Count</span>
+            </div>
+
+            @if (!Model.EnrolledList.Any())
+            {
+                <div class="sims-empty py-3">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <div class="em-title">Chua co ghi danh nao</div>
+                    <div class="em-sub">Dung form ben trai de ghi danh sinh vien vao khoa hoc.</div>
+                </div>
+            }
+            else
+            {
+                <div class="sims-table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sinh vien</th>
+                                <th>Khoa hoc</th>
+                                <th>Thoi gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var e in Model.EnrolledList)
+                            {
+                                var student = Model.Students.FirstOrDefault(s => s.StudentId == e.StudentId);
+                                var course  = Model.Courses.FirstOrDefault(c => c.Code == e.CourseCode);
+                                var init = student?.FullName?.Split(' ').Where(x => x.Length > 0).TakeLast(2).Select(x => x[0]) ?? new[] {'?'};
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-ghost);border:1px solid var(--accent-ring);display:inline-flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:0.62rem;font-weight:700;color:var(--accent-light);flex-shrink:0;">
+                                                @(string.Join("", init).ToUpper())
+                                            </div>
+                                            <span style="font-size:0.85rem">@(student?.FullName ?? e.StudentId)</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <code class="font-mono" style="color:#a78bfa;font-size:0.75rem">@e.CourseCode</code>
+                                        <span class="fs-xs text-muted-sims ms-1">@course?.Title</span>
+                                    </td>
+                                    <td class="fs-xs text-muted-sims font-mono">@e.EnrolledAt.ToString("dd/MM HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function updateCapacity(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const info = document.getElementById('capInfo');
+    if (!sel.value) { info.style.display = 'none'; return; }
+    const enrolled = +opt.dataset.enrolled, cap = +opt.dataset.capacity;
+    const pct = Math.round(enrolled / cap * 100);
+    const full = opt.dataset.full === 'true';
+    document.getElementById('capText').textContent = `${enrolled}/${cap} (${pct}%)`;
+    const bar = document.getElementById('capBar');
+    bar.style.width = pct + '%';
+    bar.className = 'sims-progress-bar ' + (pct >= 100 ? 'danger' : pct >= 80 ? 'warning' : '');
+    document.getElementById('fullWarn').style.display = full ? 'flex' : 'none';
+    info.style.display = 'block';
+}
+</script>
+}
