@@ -1,4 +1,4 @@
-﻿using SIMS_Assignment.Models.CourseRelatedModels;
+using SIMS_Assignment.Models.CourseRelatedModels;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
@@ -13,20 +13,19 @@ namespace SIMS_Assignment.Services.CourseServices
             _assignmentHandler = new AssignmentHandler();
             _submissionHandler = new SubmissionHandler();
         }
-        // Implement methods from ICourseServices interface and delegate to the appropriate handlers
         public void AddMaterials(Material material)
         {
-            _materialHandler.AddMaterials(material);
+            _materialHandler.AddMaterial(material);
         }
 
-        public void EditMaterials(Material material, int i)
+        public void EditMaterials(Material material)
         {
-            _materialHandler.EditMaterials(material, i);
+            _materialHandler.EditMaterial(material);
         }
 
-        public void DeleteMaterials(int materialId, int i)
+        public void DeleteMaterials(string materialId)
         {
-            _materialHandler.DeleteMaterials(materialId, i);
+            _materialHandler.DeleteMaterial(materialId);
         }
 
         public void AddAssignment(Assignment assignment)
@@ -39,7 +38,7 @@ namespace SIMS_Assignment.Services.CourseServices
             _assignmentHandler.EditAssignment(assignment);
         }
 
-        public void DeleteAssignment(int assignmentId)
+        public void DeleteAssignment(string assignmentId)
         {
             _assignmentHandler.DeleteAssignment(assignmentId);
         }
@@ -54,9 +53,9 @@ namespace SIMS_Assignment.Services.CourseServices
             _submissionHandler.EditSubmission(submission);
         }
 
-        public void DeleteSubmission(int submissionId)
+        public void DeleteSubmission(string studentId, string assignmentTitle)
         {
-            _submissionHandler.DeleteSubmission(submissionId);
+            _submissionHandler.DeleteSubmission(studentId, assignmentTitle);
         }
     }
 }

@@ -7,6 +7,5 @@ namespace SIMS_Assignment.Abstract
         Task<bool> SaveUserAsync(User user);
         Task<User> GetUserByNameAsync(string name);
         Task<bool> SaveCourseAsync(Course course);
-        // Password storage methods...
     }
 }

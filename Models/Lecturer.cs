@@ -3,6 +3,6 @@
     public class Lecturer : User
     {
         public string Specialization { get; set; } = string.Empty;
-        public List<string> AssignedCourses { get; set; } = new List<string>();
+        public List<string> AssignedCourses { get; set; } = new();
     }
 }

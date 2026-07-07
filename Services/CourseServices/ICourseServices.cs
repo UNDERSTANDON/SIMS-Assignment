@@ -9,16 +9,16 @@ namespace SIMS_Assignment.Services.CourseServices
         // Materials
         void AddMaterials(Material material);
         void EditMaterials(Material material);
-        void DeleteMaterials(int materialId);
+        void DeleteMaterials(string materialId);
 
         // Assignments
         void AddAssignment(Assignment assignment);
         void EditAssignment(Assignment assignment);
-        void DeleteAssignment(int assignmentId);
+        void DeleteAssignment(string assignmentId);
 
         // Submissions
         void AddSubmission(Submission submission);
         void EditSubmission(Submission submission);
-        void DeleteSubmission(int submissionId);
+        void DeleteSubmission(string studentId, string assignmentTitle);
     }
 }

@@ -4,10 +4,8 @@ using SIMS_Assignment.Models;
 
 namespace SIMS_Assignment.Authentication
 {
-    public class RegisterService : AuthenticateService
+    public class RegisterService(IDataStorage storage, IPasswordHasher hasher) : AuthenticateService(storage, hasher)
     {
-        public RegisterService(IDataStorage storage, IPasswordHasher hasher) : base(storage, hasher) { }
-
         public async Task<bool> RegisterAsync(User user, string password)
         {
             user.PasswordHash = _hasher.Hash(password);

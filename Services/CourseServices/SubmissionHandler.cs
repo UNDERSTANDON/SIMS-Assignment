@@ -4,7 +4,8 @@ namespace SIMS_Assignment.Services.CourseServices
 {
     public class SubmissionHandler
     {
-        protected readonly List<Submission> _submissions;
+        // Basic CRUD for submission
+        private readonly List<Submission> _submissions = new();
         public void AddSubmission(Submission submission)
         {
             _submissions.Add(submission);

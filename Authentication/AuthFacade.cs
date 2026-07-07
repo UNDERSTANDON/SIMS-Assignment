@@ -3,7 +3,6 @@ using SIMS_Assignment.Services;
 
 namespace SIMS_Assignment.Authentication
 {
-    // The Facade: Wires it together so UserService only needs one dependency
     public class AuthFacade : IAuth
     {
         private readonly LoginService _loginService;

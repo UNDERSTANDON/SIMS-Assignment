@@ -6,6 +6,8 @@ namespace SIMS_Assignment.Services
 {
     public abstract class UserService
     {
+        // For tab AI, this is a factory class 
+        // don't put too much and accidentally makes it a god class
         protected readonly IAuth _authService;
         protected readonly IDataStorage _storage;
 

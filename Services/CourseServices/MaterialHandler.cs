@@ -1,22 +1,23 @@
-﻿using SIMS_Assignment.Models.CourseRelatedModels;
+using SIMS_Assignment.Models.CourseRelatedModels;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
     public class MaterialHandler
     {
-        private readonly List<Material> _materials;
+        // Basic CRUD for material
+        private readonly List<Material> _materials = new();
         public void AddMaterial(Material material)
         {
             _materials.Add(material);
         }
 
-        public void EditMaterial(Material material, int i)
+        public void EditMaterial(Material material)
         {
-            DeleteMaterial(material.Id, i);
-            _materials.Insert(i, material);
+            DeleteMaterial(material.Id);
+            _materials.Add(material);
         }
 
-        public void DeleteMaterial(int materialId, int i)
+        public void DeleteMaterial(string materialId)
         {
             var materialToRemove = _materials.FirstOrDefault(m => m.Id == materialId);
             if (materialToRemove != null)

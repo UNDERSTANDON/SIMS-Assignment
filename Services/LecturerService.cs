@@ -6,7 +6,7 @@ namespace SIMS_Assignment.Services
 {
     public class LecturerService : UserService
     {
-        protected readonly Lecturer lecturer;
+        protected readonly Lecturer lecturer = new();
         public LecturerService(IAuth authService, IDataStorage storage)
         : base(authService, storage) { }
 

@@ -6,7 +6,7 @@ namespace SIMS_Assignment.Services
 {
     public class StudentService : UserService
     {
-        protected readonly Student student;
+        protected readonly Student student = new();
         public StudentService(IAuth authService, IDataStorage storage)
         : base(authService, storage) { }
 
@@ -20,6 +20,7 @@ namespace SIMS_Assignment.Services
         public async Task<bool> RegisterCourseAsync(Student student, Course course)
         {
             // Logic implement later
+            student.Courses.Add(course);
             return await _storage.SaveUserAsync(student);
         }
 
@@ -28,6 +29,7 @@ namespace SIMS_Assignment.Services
         {
             // Logic implement later
             Console.WriteLine($"Student Dashboard for {student.Name}");
+            // Waiting for the UI guy to finish
         }
     }
 }
