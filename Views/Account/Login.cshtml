@@ -1,0 +1,306 @@
+@model SIMS_WEB.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Dang nhap";
+    Layout = "_Layout";
+}
+
+<style>
+.login-split {
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    min-height: 100dvh;
+}
+/* Left panel — real image (Section 4.8: image-generation tool first) */
+.login-visual {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+}
+.login-visual img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: 0.6;
+}
+.login-visual-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to right, transparent 60%, var(--surface) 100%),
+        linear-gradient(to bottom, rgba(9,9,11,0.3), rgba(9,9,11,0.5));
+}
+.login-visual-content {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 2rem;
+    max-width: 380px;
+}
+.login-visual-content h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+.login-visual-content p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 300px;
+}
+/* Right panel */
+.login-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+.login-form-wrap {
+    width: 100%;
+    max-width: 360px;
+}
+
+/* Role selector — styled radio group */
+.role-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+}
+.role-option {
+    position: relative;
+    cursor: pointer;
+}
+.role-option input[type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+.role-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.6rem 0.4rem;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: all var(--dur);
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    font-weight: 500;
+}
+.role-label i { font-size: 1rem; }
+.role-option input:checked + .role-label {
+    border-color: var(--accent-light);
+    background: var(--accent-ghost);
+    color: var(--accent-light);
+    box-shadow: 0 0 0 1px var(--accent-ring);
+}
+.role-option.admin input:checked + .role-label  { border-color: #f59e0b; background: rgba(217,119,6,0.08); color: #f59e0b; box-shadow: 0 0 0 1px rgba(217,119,6,0.2); }
+.role-option.faculty input:checked + .role-label{ border-color: #22c55e; background: rgba(22,163,74,0.08); color: #22c55e; box-shadow: 0 0 0 1px rgba(22,163,74,0.2); }
+
+@@media (max-width: 900px) {
+    .login-split { grid-template-columns: 1fr; }
+    .login-visual { display: none; }
+    .login-panel { min-height: 100dvh; border-left: none; }
+}
+</style>
+
+<div class="login-split">
+    <!-- LEFT: campus visual -->
+    <div class="login-visual">
+        <div class="login-visual-fallback" aria-hidden="true"></div>
+        <div class="login-visual-overlay"></div>
+        <div class="login-visual-content">
+            <h2>Hệ thống Quản lý<br/>Sinh viên SIMS</h2>
+            <p>Nền tảng quản lý thông tin sinh viên toàn diện — từ ghi danh, điểm số đến học phí.</p>
+        </div>
+    </div>
+
+    <!-- RIGHT: login form -->
+    <div class="login-panel">
+        <div class="login-form-wrap">
+
+            <!-- Logo mark -->
+            <div class="mb-5">
+                <div class="login-logo-mark d-flex align-items-center gap-2 mb-4">
+                    <div style="width:36px;height:36px;background:var(--accent-ghost);border:1px solid var(--accent-ring);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-graduation-cap fa-sm" style="color:var(--accent-light)"></i>
+                    </div>
+                    <span class="font-mono fw-700" style="font-size:1rem;letter-spacing:-0.02em;">SIMS</span>
+                </div>
+                <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:0.25rem;">Đăng nhập</h1>
+                <p style="font-size:0.8rem;color:var(--text-tertiary);margin:0;">Chọn vai trò và nhập thông tin tài khoản</p>
+            </div>
+
+            @if (Model.IsLocked)
+            {
+                <!-- Locked state — Section 4.5: error state -->
+                <div class="sims-alert sims-alert-danger mb-4">
+                    <i class="fa-solid fa-shield-xmark"></i>
+                    <div>
+                        <div style="font-weight:600;">Tài khoản bị khóa tạm thời</div>
+                        <div style="font-size:0.75rem;margin-top:0.2rem;">Sai 5 lần. Chờ 15 phút để mở khóa tự động.</div>
+                    </div>
+                </div>
+                <div class="lock-countdown mb-4" id="countdown">15:00</div>
+                <div style="font-size:0.75rem;color:var(--text-tertiary);text-align:center;">
+                    Tài khoản sẽ tự động mở sau khi đếm giờ kết thúc.
+                </div>
+            }
+            else
+            {
+                @if (Model.FailedAttempts > 0 && Model.FailedAttempts < 5)
+                {
+                    <div class="sims-alert sims-alert-warning mb-3">
+                        <i class="fa-solid fa-triangle-exclamation fa-sm"></i>
+                        <span>Con <strong>@(5 - Model.FailedAttempts) lần thử</strong> trước khi khóa tài khoản</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="sims-alert sims-alert-danger mb-3">
+                        <i class="fa-solid fa-circle-xmark fa-sm"></i>
+                        <span>@Model.ErrorMessage</span>
+                    </div>
+                }
+
+                <!-- Role selector — radio group, not dropdown -->
+                <div class="mb-4">
+                    <div class="form-label">VAI TRO</div>
+                    <div class="role-group">
+                        <label class="role-option admin">
+                            <input type="radio" name="RoleSelect" value="Admin" @(Model.Role == "Admin" ? "checked" : "") onchange="setRole('Admin')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-shield-halved"></i> Admin
+                            </span>
+                        </label>
+                        <label class="role-option faculty">
+                            <input type="radio" name="RoleSelect" value="Faculty" @(Model.Role == "Faculty" ? "checked" : "") onchange="setRole('Faculty')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-chalkboard-teacher"></i> Giang vien
+                            </span>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="RoleSelect" value="Student" @(Model.Role == "Student" ? "checked" : "") onchange="setRole('Student')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-graduation-cap"></i> Sinh vien
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <form asp-action="Login" asp-controller="Account" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Role" id="roleHidden" />
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label"></label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-user icon"></i>
+                            <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập"
+                                   autocomplete="username" autofocus id="usernameInput" />
+                        </div>
+                        <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label"></label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock icon"></i>
+                            <input asp-for="Password" class="form-control" placeholder="Nhập mật khẩu"
+                                   id="pwdInput" autocomplete="current-password" />
+                            <i class="fa-solid fa-eye-slash icon-right" id="togglePwd" onclick="togglePassword()" title="Hien/An mat khau"></i>
+                        </div>
+                        <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- CTA — single, no duplicate (Section 4.5) -->
+                    <button type="submit" id="loginBtn" class="btn btn-sims-primary w-100"
+                            style="font-size:0.9rem; padding:0.65rem 1rem !important; justify-content:center;">
+                        <i class="fa-solid fa-right-to-bracket fa-sm"></i> Đăng nhập
+                    </button>
+                </form>
+
+                <div class="text-center mt-3 fs-xs">
+                    Chưa có tài khoản?
+                    <a asp-action="Register" asp-controller="Account">Đăng ký tại đây</a>
+                </div>
+
+                <!-- Demo credentials — Geist Mono table (Section 4.6: no placeholder-as-label) -->
+                <div class="creds-hint mt-4">
+                    <div class="creds-hint-title">DEMO CREDENTIALS</div>
+                    <div class="creds-row">
+                        <span class="role-badge role-admin">Admin</span>
+                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">admin / admin123</span>
+                    </div>
+                    <div class="creds-row">
+                        <span class="role-badge role-faculty">Faculty</span>
+                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">giaovien / faculty123</span>
+                    </div>
+                    <div class="creds-row">
+                        <span class="role-badge role-student">Student</span>
+                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">sinhvien / student123</span>
+                    </div>
+                </div>
+            }
+
+            <div style="margin-top:2rem;font-size:0.7rem;color:var(--text-tertiary);text-align:center;font-family:'Geist Mono',monospace;">
+                SIMS v2.0 / 2024 Student Information Management System
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// Sync radio selection to hidden Role input
+function setRole(val) {
+    document.getElementById('roleHidden').value = val;
+    // Quick-fill demo credentials
+    const demos = { Admin: ['admin','admin123'], Faculty: ['giaovien','faculty123'], Student: ['sinhvien','student123'] };
+    if (demos[val]) {
+        document.getElementById('usernameInput').value = demos[val][0];
+        document.getElementById('pwdInput').value = demos[val][1];
+    }
+}
+// Init on load
+const checked = document.querySelector('input[name=RoleSelect]:checked');
+if (checked) { document.getElementById('roleHidden').value = checked.value; }
+
+function togglePassword() {
+    const input = document.getElementById('pwdInput');
+    const icon  = document.getElementById('togglePwd');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    }
+}
+
+// Lock countdown timer
+const cdEl = document.getElementById('countdown');
+if (cdEl) {
+    let secs = @Model.LockRemainingSeconds;
+    const tick = () => {
+        if (secs <= 0) { location.reload(); return; }
+        const m = Math.floor(secs/60);
+        const s = secs % 60;
+        cdEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+        secs--;
+        setTimeout(tick, 1000);
+    };
+    tick();
+}
+</script>
+}

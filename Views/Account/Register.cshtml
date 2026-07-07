@@ -1,0 +1,77 @@
+@model SIMS_WEB.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "_Layout";
+}
+
+<div class="login-page">
+    <div class="login-card" style="max-width:440px">
+        <div class="login-logo">
+            <div class="logo-mark"><i class="fa-solid fa-user-plus"></i></div>
+            <h1>Đăng ký tài khoản</h1>
+            <p>Tạo tài khoản mới để sử dụng hệ thống SIMS</p>
+        </div>
+
+        <form asp-action="Register" asp-controller="Account" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-user icon"></i>
+                    <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập" autofocus />
+                </div>
+                <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-envelope icon"></i>
+                    <input asp-for="Email" class="form-control" placeholder="email@univ.edu" />
+                </div>
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Role" class="form-label"></label>
+                <select asp-for="Role" class="form-select">
+                    <option value="Student">Sinh viên</option>
+                    <option value="Faculty">Giảng viên</option>
+                </select>
+                <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-lock icon"></i>
+                    <input asp-for="Password" class="form-control" placeholder="Tối thiểu 6 ký tự" />
+                </div>
+                <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-lock icon"></i>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
+                </div>
+                <span asp-validation-for="ConfirmPassword" class="invalid-feedback d-block"></span>
+            </div>
+
+            <button type="submit" class="btn btn-sims-primary w-100 mb-3" style="justify-content:center">
+                <i class="fa-solid fa-user-plus"></i> Đăng ký
+            </button>
+
+            <div class="text-center fs-xs text-muted-sims">
+                Đã có tài khoản?
+                <a asp-action="Login" asp-controller="Account">Đăng nhập ngay</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

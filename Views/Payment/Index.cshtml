@@ -1,0 +1,281 @@
+@model SIMS_WEB.Models.PaymentViewModel
+@{
+    ViewData["Title"] = "Thanh toan Hoc phi";
+    ViewData["ActivePage"] = "Payment";
+}
+
+<style>
+.payment-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1rem;
+    align-items: start;
+}
+@@media (max-width: 900px) { .payment-layout { grid-template-columns: 1fr; } }
+
+/* Strategy selector — icon tiles, not dropdown (Section 4.6) */
+.strategy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+.strategy-tile {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 0.875rem 0.5rem;
+    cursor: pointer;
+    transition: all 200ms;
+    background: var(--surface-2);
+    text-align: center;
+}
+.strategy-tile:hover { border-color: var(--accent-light); }
+.strategy-tile.active-blue   { border-color: var(--accent-light); background: var(--accent-ghost); box-shadow: 0 0 0 1px var(--accent-ring); }
+.strategy-tile.active-green  { border-color: #22c55e; background: rgba(22,163,74,0.08); box-shadow: 0 0 0 1px rgba(22,163,74,0.2); }
+.strategy-tile.active-purple { border-color: #a78bfa; background: rgba(124,58,237,0.08); box-shadow: 0 0 0 1px rgba(124,58,237,0.2); }
+
+.strategy-tile i   { font-size: 1.25rem; display: block; margin-bottom: 0.4rem; }
+.strategy-tile .st-name  { font-size: 0.72rem; font-weight: 700; }
+.strategy-tile .st-fee   { font-size: 0.65rem; color: var(--text-tertiary); font-family: 'Geist Mono', monospace; margin-top: 0.1rem; }
+
+/* Order summary — sticky panel -->  */
+.order-panel {
+    position: sticky;
+    top: 80px;
+}
+.order-line {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.825rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.order-line:last-of-type { border-bottom: none; }
+.order-total {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 0.75rem;
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--border);
+}
+</style>
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-credit-card fa-sm"></i>
+            Thanh toan Hoc phi
+        </h1>
+        <span class="pattern-badge pattern-strategy">Strategy Pattern</span>
+    </div>
+
+    @if (Model.IsSuccess)
+    {
+        <div class="sims-alert sims-alert-success mb-4">
+            <i class="fa-solid fa-circle-check fa-lg"></i>
+            <div>
+                <div style="font-weight:600;">Thanh toan thanh cong!</div>
+                <div class="fs-xs" style="margin-top:0.2rem;">@Model.Message</div>
+            </div>
+        </div>
+    }
+
+    <div class="payment-layout">
+        <!-- LEFT: Form -->
+        <div>
+            <form asp-action="Process" asp-controller="Payment" method="post" id="payForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Method" id="methodInput" value="@Model.Method" />
+
+                <!-- Strategy Pattern selector — 3 tiles, 3 options (exact cell count) -->
+                <div class="sims-card mb-3">
+                    <div class="sims-card-header">
+                        <i class="fa-solid fa-shuffle" style="color:#4ade80"></i>
+                        Chon phuong thuc thanh toan
+                        <span class="fs-xs text-muted-sims ms-auto font-mono">Strategy Pattern</span>
+                    </div>
+
+                    <div class="strategy-grid">
+                        <div class="strategy-tile @(Model.Method == "credit" ? "active-blue" : "")"
+                             id="tile-credit" onclick="selectMethod('credit')">
+                            <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
+                            <div class="st-name">The tin dung</div>
+                            <div class="st-fee">Phi 2.5%</div>
+                        </div>
+                        <div class="strategy-tile @(Model.Method == "bank" ? "active-green" : "")"
+                             id="tile-bank" onclick="selectMethod('bank')">
+                            <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
+                            <div class="st-name">Chuyen khoan</div>
+                            <div class="st-fee">Mien phi</div>
+                        </div>
+                        <div class="strategy-tile @(Model.Method == "ewallet" ? "active-purple" : "")"
+                             id="tile-ewallet" onclick="selectMethod('ewallet')">
+                            <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
+                            <div class="st-name">Vi dien tu</div>
+                            <div class="st-fee">Phi 1.0%</div>
+                        </div>
+                    </div>
+
+                    <!-- Strategy note — updates on selection -->
+                    <div id="strategyNote" class="sims-alert sims-alert-info" style="font-size:0.78rem;">
+                        <i class="fa-solid fa-code fa-xs"></i>
+                        <span id="strategyNoteText">CreditCardStrategy: tinh phi 2.5% tren tong hoc phi</span>
+                    </div>
+                </div>
+
+                <!-- Credit card form -->
+                <div id="form-credit" class="sims-card mb-3" style="display:@(Model.Method == "credit" ? "block" : "none")">
+                    <div class="sims-card-header">
+                        <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
+                        Thong tin the
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SO THE</label>
+                        <input name="CardNumber" class="form-control font-mono" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)" />
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div>
+                            <label class="form-label">NGAY HET HAN</label>
+                            <input name="CardExpiry" class="form-control font-mono" placeholder="MM/YY" maxlength="5" />
+                        </div>
+                        <div>
+                            <label class="form-label">CVV</label>
+                            <input name="CardCvv" class="form-control font-mono" placeholder="123" maxlength="3" type="password" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank transfer form -->
+                <div id="form-bank" class="sims-card mb-3" style="display:@(Model.Method == "bank" ? "block" : "none")">
+                    <div class="sims-card-header">
+                        <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
+                        Thong tin chuyen khoan
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">NGAN HANG</label>
+                        <select name="BankName" class="form-select">
+                            <option>Vietcombank</option><option>BIDV</option>
+                            <option>Agribank</option><option>Techcombank</option>
+                            <option>VPBank</option><option>MB Bank</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SO TAI KHOAN</label>
+                        <input name="AccountNumber" class="form-control font-mono" placeholder="0123456789" />
+                    </div>
+                    <!-- Bank info box — no placeholder-as-label (Section 4.6) -->
+                    <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;font-size:0.78rem;">
+                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">THONG TIN NHAN</div>
+                        <div style="color:var(--text-secondary);line-height:1.8;">
+                            <span class="text-muted-sims">Ngan hang:</span> <strong>Vietcombank</strong><br/>
+                            <span class="text-muted-sims">STK:</span> <strong class="font-mono">0123456789</strong><br/>
+                            <span class="text-muted-sims">Chu TK:</span> <strong>TRUONG DAI HOC ABC</strong><br/>
+                            <span class="text-muted-sims">ND:</span> <strong class="font-mono">HP + Ma SV</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- E-wallet form -->
+                <div id="form-ewallet" class="sims-card mb-3" style="display:@(Model.Method == "ewallet" ? "block" : "none")">
+                    <div class="sims-card-header">
+                        <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
+                        Vi dien tu
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">CHON VI</label>
+                        <select name="WalletType" class="form-select">
+                            <option>MoMo</option><option>ZaloPay</option>
+                            <option>VNPay</option><option>ShopeePay</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">SO DIEN THOAI / ID VI</label>
+                        <input name="WalletId" class="form-control font-mono" placeholder="0912 345 678" />
+                    </div>
+                </div>
+
+                <!-- Single CTA — no duplicate intent (Section 4.5) -->
+                <button type="submit" class="btn btn-sims-primary w-100" style="font-size:0.9rem;padding:0.65rem !important;justify-content:center;" id="payBtn">
+                    <i class="fa-solid fa-lock fa-xs"></i>
+                    Thanh toan <span id="btnAmount" class="font-mono">15,000,000 VND</span>
+                </button>
+                <div style="text-align:center;font-size:0.7rem;color:var(--text-tertiary);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
+                    SSL 256-bit encrypted
+                </div>
+            </form>
+        </div>
+
+        <!-- RIGHT: Order summary — sticky -->
+        <div class="order-panel">
+            <div class="sims-card">
+                <div class="sims-card-header">
+                    <i class="fa-solid fa-receipt" style="color:#fbbf24"></i>
+                    Hoa don
+                </div>
+                <div class="order-line">
+                    <span style="color:var(--text-tertiary)">Hoc phi hoc ky</span>
+                    <span class="font-mono" style="font-weight:600">15,000,000</span>
+                </div>
+                <div class="order-line">
+                    <span style="color:var(--text-tertiary)">Phi giao dich</span>
+                    <span id="feeDisplay" class="font-mono" style="color:#fbbf24">375,000 (2.5%)</span>
+                </div>
+                <div class="order-total">
+                    <span style="font-weight:700">Tong cong</span>
+                    <span id="totalDisplay" class="font-mono fw-800" style="font-size:1.1rem;color:var(--accent-light)">15,375,000 VND</span>
+                </div>
+
+                <!-- 3 strategy summaries in compact list — different layout from tile grid -->
+                <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border-subtle)">
+                    <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">3 CHIEN LUOC</div>
+                    <div style="display:flex;flex-direction:column;gap:0.3rem;font-size:0.75rem;">
+                        <div style="display:flex;justify-content:space-between;"><span style="color:var(--accent-light)">CreditCardStrategy</span><span class="font-mono text-muted-sims">+2.5%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#4ade80">BankTransferStrategy</span><span class="font-mono text-muted-sims">+0%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#a78bfa">EWalletStrategy</span><span class="font-mono text-muted-sims">+1.0%</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const BASE = 15000000;
+const strategies = {
+    credit:  { rate: 0.025, label: '2.5%',  tileClass: 'active-blue',   note: 'CreditCardStrategy: tinh phi 2.5% tren tong hoc phi' },
+    bank:    { rate: 0,     label: '0%',    tileClass: 'active-green',  note: 'BankTransferStrategy: mien phi giao dich' },
+    ewallet: { rate: 0.01,  label: '1.0%',  tileClass: 'active-purple', note: 'EWalletStrategy: tinh phi 1.0% tren tong hoc phi' },
+};
+let current = '@Model.Method' || 'credit';
+
+function fmt(n) { return n.toLocaleString('vi-VN'); }
+
+function selectMethod(method) {
+    current = method;
+    document.getElementById('methodInput').value = method;
+    // Tiles
+    Object.keys(strategies).forEach(k => {
+        document.getElementById('tile-' + k).className =
+            'strategy-tile' + (k === method ? ' ' + strategies[k].tileClass : '');
+    });
+    // Forms
+    ['credit','bank','ewallet'].forEach(k => {
+        document.getElementById('form-' + k).style.display = k === method ? 'block' : 'none';
+    });
+    // Totals
+    const s = strategies[method];
+    const fee = BASE * s.rate, total = BASE + fee;
+    document.getElementById('feeDisplay').textContent = fmt(fee) + ' (' + s.label + ')';
+    document.getElementById('totalDisplay').textContent = fmt(total) + ' VND';
+    document.getElementById('btnAmount').textContent = fmt(total) + ' VND';
+    document.getElementById('strategyNoteText').textContent = s.note;
+}
+
+function formatCard(input) {
+    let v = input.value.replace(/\D/g, '');
+    input.value = v.match(/.{1,4}/g)?.join(' ') || v;
+}
+
+// Init
+selectMethod(current);
+</script>
+}

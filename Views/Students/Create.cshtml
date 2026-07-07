@@ -1,0 +1,79 @@
+@model SIMS_WEB.Models.Student
+@{
+    bool isEdit = !string.IsNullOrEmpty(Model?.StudentId);
+    ViewData["Title"] = isEdit ? "Sua Sinh vien" : "Them Sinh vien";
+    ViewData["ActivePage"] = "Students";
+    var programs = new[] {
+        "Cong nghe Thong tin", "Ky thuat Phan mem", "Khoa hoc May tinh",
+        "Quan tri Kinh doanh", "Ky thuat Dien tu", "Toan Tin hoc"
+    };
+}
+
+<div class="sims-page" style="max-width:640px">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid @(isEdit ? "fa-pen" : "fa-user-plus") fa-sm"></i>
+            @(isEdit ? "Sua thong tin Sinh vien" : "Them Sinh vien moi")
+        </h1>
+        <a asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lai
+        </a>
+    </div>
+
+    <div class="sims-card">
+        <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label asp-for="StudentId" class="form-label"></label>
+                @if (isEdit) {
+                    <input asp-for="StudentId" class="form-control font-mono" readonly
+                           style="color:var(--text-tertiary);cursor:not-allowed" />
+                    <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.3rem;font-family:'Geist Mono',monospace;">
+                        <i class="fa-solid fa-lock fa-xs"></i> Ma sinh vien khong the thay doi
+                    </div>
+                } else {
+                    <input asp-for="StudentId" class="form-control font-mono" placeholder="VD: SV2024005" />
+                }
+                <span asp-validation-for="StudentId" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" placeholder="Ho va Ten day du" />
+                <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Program" class="form-label"></label>
+                <select asp-for="Program" class="form-select">
+                    <option value="">-- Chon chuong trinh --</option>
+                    @foreach (var p in programs)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+                <span asp-validation-for="Program" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="email@@univ.edu" />
+                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DateOfBirth" class="form-label"></label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-sims-primary">
+                    <i class="fa-solid fa-floppy-disk fa-xs"></i>
+                    @(isEdit ? "Luu thay doi" : "Them sinh vien")
+                </button>
+                <a asp-action="Index" class="btn btn-sims-outline">Huy</a>
+            </div>
+        </form>
+    </div>
+</div>

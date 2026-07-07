@@ -1,0 +1,45 @@
+@model SIMS_WEB.Models.Course
+@{
+    ViewData["Title"] = "Sua Khoa hoc";
+    ViewData["ActivePage"] = "Courses";
+}
+
+<div class="sims-page" style="max-width:640px">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-pen fa-sm"></i> Sua Khoa hoc
+        </h1>
+        <a asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lai
+        </a>
+    </div>
+    <div class="sims-card">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">MA KHOA HOC</label>
+                <input asp-for="Code" class="form-control font-mono" readonly style="color:var(--text-tertiary);cursor:not-allowed" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Capacity" class="form-label"></label>
+                <input asp-for="Capacity" type="number" class="form-control font-mono" min="1" max="500" />
+                <span asp-validation-for="Capacity" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="mb-4">
+                <label asp-for="Instructor" class="form-label"></label>
+                <input asp-for="Instructor" class="form-control" />
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-sims-success">
+                    <i class="fa-solid fa-floppy-disk fa-xs"></i> Luu thay doi
+                </button>
+                <a asp-action="Index" class="btn btn-sims-outline">Huy</a>
+            </div>
+        </form>
+    </div>
+</div>

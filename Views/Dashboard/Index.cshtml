@@ -1,0 +1,259 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    var role     = ViewBag.Role     as string ?? "Admin";
+    var username = ViewBag.Username as string ?? "";
+    int total_students = ViewBag.TotalStudents ?? 0;
+    int total_courses  = ViewBag.TotalCourses  ?? 0;
+    int total_enrolled = ViewBag.TotalEnrolled ?? 0;
+}
+
+<style>
+/* Bento grid layout — exact cell count = content count (Section 4.7) */
+.dash-bento {
+    display: grid;
+    gap: 1rem;
+}
+/* Admin bento: 4 stat cards + 4 quick access + 1 pattern legend = 9 items */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+.quick-grid {
+    display: grid;
+    /* 4 items → 4 cells, no empty cells */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+.pattern-grid {
+    display: grid;
+    /* 3 patterns → 3 cells, no empty cells */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+/* Image tile in bento — real visual (Section 4.9: bento background diversity) */
+.bento-image-cell {
+    grid-column: span 2;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    min-height: 160px;
+}
+.bento-image-cell img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.55;
+}
+.bento-image-cell .bento-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(9,9,11,0.8) 30%, transparent 100%);
+    display: flex; align-items: center;
+    padding: 1.5rem;
+}
+.bento-image-cell .bento-kpi {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: var(--text-primary);
+    line-height: 1;
+}
+.bento-image-cell .bento-kpi-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+@@media (max-width: 1024px) {
+    .stat-grid  { grid-template-columns: repeat(2, 1fr); }
+    .quick-grid { grid-template-columns: repeat(2, 1fr); }
+    .pattern-grid { grid-template-columns: repeat(1, 1fr); }
+    .bento-image-cell { grid-column: span 1; }
+}
+@@media (max-width: 640px) {
+    .stat-grid  { grid-template-columns: 1fr 1fr; }
+    .quick-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+
+<div class="sims-page">
+    <!-- Page header — no eyebrow (Section 4.7 eyebrow restraint) -->
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-house fa-sm"></i>
+            Dashboard
+        </h1>
+        <div class="d-flex align-items-center gap-2">
+            @{
+                var rc = role switch { "Admin" => "role-admin", "Faculty" => "role-faculty", _ => "role-student" };
+            }
+            <span class="role-badge @rc">@role</span>
+            <span class="fs-xs text-muted-sims font-mono">@username</span>
+        </div>
+    </div>
+
+    <div class="dash-bento">
+         
+        @if (role == "Admin")
+        {
+            <!-- STAT CARDS — 4 items, 4 cells (bento cell count rule) -->
+            <div class="stat-grid">
+                <div class="sims-stat-card">
+                    <div class="sims-stat-icon" style="background:var(--accent-ghost)">
+                        <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                    </div>
+                    <div>
+                        <div class="sims-stat-num" style="color:var(--accent-light)">@total_students</div>
+                        <div class="sims-stat-label">Sinh vien</div>
+                    </div>
+                </div>
+                <div class="sims-stat-card">
+                    <div class="sims-stat-icon" style="background:var(--success-muted)">
+                        <i class="fa-solid fa-book" style="color:#4ade80"></i>
+                    </div>
+                    <div>
+                        <div class="sims-stat-num text-success-sims">@total_courses</div>
+                        <div class="sims-stat-label">Khoa hoc</div>
+                    </div>
+                </div>
+                <div class="sims-stat-card">
+                    <div class="sims-stat-icon" style="background:rgba(124,58,237,0.1)">
+                        <i class="fa-solid fa-list-check" style="color:#a78bfa"></i>
+                    </div>
+                    <div>
+                        <div class="sims-stat-num" style="color:#a78bfa">@total_enrolled</div>
+                        <div class="sims-stat-label">Ghi danh</div>
+                    </div>
+                </div>
+                <div class="sims-stat-card">
+                    <div class="sims-stat-icon" style="background:var(--warning-muted)">
+                        <i class="fa-solid fa-layer-group" style="color:#fbbf24"></i>
+                    </div>
+                    <div>
+                        <div class="sims-stat-num text-warning-sims">3</div>
+                        <div class="sims-stat-label">Design Patterns</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK ACCESS GRID — 5 items -->
+            <div class="quick-grid" style="grid-template-columns: repeat(5, 1fr);">
+                <a asp-controller="Students" asp-action="Index" class="quick-card">
+                    <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                    <div class="qc-title">Sinh vien</div>
+                    <div class="qc-desc">Them, sua, xoa, import CSV</div>
+                </a>
+                <a asp-controller="Courses" asp-action="Index" class="quick-card">
+                    <i class="fa-solid fa-book" style="color:#4ade80"></i>
+                    <div class="qc-title">Khoa hoc</div>
+                    <div class="qc-desc">Quan ly chuong trinh hoc</div>
+                </a>
+                <a asp-controller="Enrollment" asp-action="Index" class="quick-card">
+                    <i class="fa-solid fa-list-check" style="color:#a78bfa"></i>
+                    <div class="qc-title">Ghi danh</div>
+                    <div class="qc-desc">Xep lop, ghi danh sinh vien</div>
+                </a>
+                <a asp-controller="Grades" asp-action="Index" class="quick-card">
+                    <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+                    <div class="qc-title">Diem so</div>
+                    <div class="qc-desc">Cap nhat va xem bang diem</div>
+                </a>
+                <a asp-controller="Account" asp-action="CreateUser" class="quick-card">
+                    <i class="fa-solid fa-user-gear" style="color:#60a5fa"></i>
+                    <div class="qc-title">Tai khoan</div>
+                    <div class="qc-desc">Tao tai khoan Admin / GV / SV</div>
+                </a>
+            </div>
+
+            <!-- PATTERN SECTION — different layout from above (Section 4.7 section-layout-repetition ban) -->
+            <!-- 3 items → 3 cells, no empty cells. Real visual variation in each cell. -->
+            <div class="pattern-grid">
+                <!-- Cell 1: image background (bento background diversity) -->
+                <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border-subtle);min-height:140px;background:var(--surface)">
+                    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,0.15),rgba(37,99,235,0.03))"></div>
+                    <div style="position:relative;padding:1.25rem;">
+                        <span class="pattern-badge pattern-facade mb-2 d-inline-flex">Facade Pattern</span>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Ghi danh tu dong</div>
+                        <div style="font-size:0.75rem;color:var(--text-tertiary);">AccountService + BillingService + NotificationService chay dong thoi khi ghi danh</div>
+                    </div>
+                </div>
+                <!-- Cell 2: accent gradient background -->
+                <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid rgba(217,119,6,0.2);min-height:140px;background:var(--warning-muted)">
+                    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(217,119,6,0.1),transparent)"></div>
+                    <div style="position:relative;padding:1.25rem;">
+                        <span class="pattern-badge pattern-observer mb-2 d-inline-flex">Observer Pattern</span>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Thong bao diem so</div>
+                        <div style="font-size:0.75rem;color:var(--text-tertiary);">Giang vien luu diem → Sinh vien nhan thong bao real-time</div>
+                    </div>
+                </div>
+                <!-- Cell 3: success gradient background -->
+                <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid rgba(22,163,74,0.2);min-height:140px;background:var(--success-muted)">
+                    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(22,163,74,0.1),transparent)"></div>
+                    <div style="position:relative;padding:1.25rem;">
+                        <span class="pattern-badge pattern-strategy mb-2 d-inline-flex">Strategy Pattern</span>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Thanh toan linh hoat</div>
+                        <div style="font-size:0.75rem;color:var(--text-tertiary);">Credit Card (2.5%) / Bank Transfer (0%) / E-Wallet (1%)</div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (role == "Faculty")
+        {
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <a asp-controller="Grades" asp-action="Index" class="quick-card" style="text-align:left;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                        <div style="width:40px;height:40px;background:var(--warning-muted);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+                        </div>
+                        <div>
+                            <div class="qc-title" style="text-align:left;">Cap nhat Diem so</div>
+                            <div class="qc-desc" style="text-align:left;">Xem danh sach va nhap diem</div>
+                        </div>
+                    </div>
+                    <span class="pattern-badge pattern-observer">Observer Pattern</span>
+                </a>
+                <!-- Image bento cell -->
+                <div class="bento-image-cell">
+                    <div class="bento-visual-fallback"></div>
+                    <div class="bento-overlay">
+                        <div>
+                            <div class="bento-kpi">24/7</div>
+                            <div class="bento-kpi-label">He thong hoat dong lien tuc</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (role == "Student")
+        {
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <a asp-controller="StudentDashboard" asp-action="Index" class="quick-card" style="text-align:left;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                        <div style="width:40px;height:40px;background:var(--accent-ghost);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-graduation-cap" style="color:var(--accent-light)"></i>
+                        </div>
+                        <div>
+                            <div class="qc-title" style="text-align:left;">Bang diem cua toi</div>
+                            <div class="qc-desc" style="text-align:left;">Xem diem va xep loai hoc ky</div>
+                        </div>
+                    </div>
+                    <span class="pattern-badge pattern-observer">Observer: nhan thong bao diem</span>
+                </a>
+                <a asp-controller="Payment" asp-action="Index" class="quick-card" style="text-align:left;">
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                        <div style="width:40px;height:40px;background:var(--success-muted);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-credit-card" style="color:#4ade80"></i>
+                        </div>
+                        <div>
+                            <div class="qc-title" style="text-align:left;">Thanh toan Hoc phi</div>
+                            <div class="qc-desc" style="text-align:left;">3 phuong thuc thanh toan</div>
+                        </div>
+                    </div>
+                    <span class="pattern-badge pattern-strategy">Strategy Pattern</span>
+                </a>
+            </div>
+        }
+
+    </div><!-- /.dash-bento -->
+</div>

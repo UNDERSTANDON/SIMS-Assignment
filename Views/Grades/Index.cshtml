@@ -1,0 +1,185 @@
+@model SIMS_WEB.Models.GradeViewModel
+@{
+    ViewData["Title"] = "Quan ly Diem so";
+    ViewData["ActivePage"] = "Grades";
+}
+
+<style>
+.grade-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+@@media (max-width: 900px) { .grade-grid { grid-template-columns: 1fr; } }
+
+.grade-letter {
+    width: 56px; height: 56px;
+    border-radius: var(--r-lg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Geist Mono', monospace;
+    font-size: 1.4rem; font-weight: 900;
+    flex-shrink: 0;
+}
+</style>
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-star fa-sm"></i>
+            Quan ly Diem so
+        </h1>
+        <span class="pattern-badge pattern-observer">Observer Pattern</span>
+    </div>
+
+    <div class="grade-grid">
+        <!-- LEFT: Form -->
+        <div>
+            <div class="sims-card">
+                <div class="sims-card-header">
+                    <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+                    Cap nhat Diem
+                </div>
+
+                <!-- Observer info — one alert max (Section 4.5: informational state) -->
+                <div class="sims-alert sims-alert-warning mb-3" style="font-size:0.78rem;">
+                    <i class="fa-solid fa-bolt fa-xs"></i>
+                    <span><strong>Observer:</strong> Khi luu diem, sinh vien nhan thong bao real-time tu dong</span>
+                </div>
+
+                @if (Model.Message != null)
+                {
+                    <div class="sims-alert @(Model.IsSuccess ? "sims-alert-success" : "sims-alert-danger") mb-3">
+                        <i class="fa-solid @(Model.IsSuccess ? "fa-bell" : "fa-circle-xmark") fa-sm"></i>
+                        <span>@Model.Message</span>
+                    </div>
+                }
+
+                <form asp-action="Save" asp-controller="Grades" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label asp-for="CourseCode" class="form-label"></label>
+                        <select asp-for="CourseCode" class="form-select">
+                            <option value="">-- Chon khoa hoc --</option>
+                            @foreach (var c in Model.Courses)
+                            {
+                                <option value="@c.Code">@c.Code - @c.Title</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="StudentId" class="form-label"></label>
+                        <select asp-for="StudentId" class="form-select">
+                            <option value="">-- Chon sinh vien --</option>
+                            @foreach (var s in Model.Students)
+                            {
+                                <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Score" class="form-label"></label>
+                        <input asp-for="Score" type="number" class="form-control font-mono"
+                               min="0" max="100" step="0.5" placeholder="0 - 100"
+                               oninput="previewGrade(this.value)" />
+                        <span asp-validation-for="Score" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- Grade preview — Section 4.5: tactile feedback -->
+                    <div id="gradePreview" style="display:none;margin-bottom:1rem;">
+                        <div style="display:flex;align-items:center;gap:0.75rem;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;">
+                            <div class="grade-letter" id="gradeLetterBox"></div>
+                            <div>
+                                <div id="gradeLabel" style="font-weight:700;font-size:0.875rem;"></div>
+                                <div id="gradeGPA" class="fs-xs text-muted-sims font-mono" style="margin-top:0.1rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-sims-warning w-100">
+                        <i class="fa-solid fa-floppy-disk fa-xs"></i> Luu diem va gui thong bao
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- RIGHT: Grade history -->
+        <div class="sims-card">
+            <div class="sims-card-header">
+                <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent-light)"></i>
+                Diem da cap nhat
+                <span class="sims-badge badge-warning ms-auto font-mono">@Model.RecentGrades.Count</span>
+            </div>
+
+            @if (!Model.RecentGrades.Any())
+            {
+                <div class="sims-empty py-3">
+                    <i class="fa-solid fa-chart-bar"></i>
+                    <div class="em-title">Chua co diem nao</div>
+                    <div class="em-sub">Dung form ben trai de cap nhat diem sinh vien.</div>
+                </div>
+            }
+            else
+            {
+                <div class="sims-table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sinh vien</th>
+                                <th>Khoa hoc</th>
+                                <th class="text-center">Diem</th>
+                                <th class="text-center">Xep loai</th>
+                                <th>Cap nhat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var g in Model.RecentGrades)
+                            {
+                                var student = Model.Students.FirstOrDefault(s => s.StudentId == g.StudentId);
+                                var scoreColor = g.Score >= 80 ? "#4ade80" : g.Score >= 65 ? "#fbbf24" : g.Score >= 50 ? "#a78bfa" : "#f87171";
+                                <tr>
+                                    <td style="font-size:0.875rem">@(student?.FullName ?? g.StudentId)</td>
+                                    <td><code class="font-mono" style="color:#a78bfa;font-size:0.75rem">@g.CourseCode</code></td>
+                                    <td class="text-center font-mono fw-800" style="color:@scoreColor;font-size:1.05rem">@g.Score</td>
+                                    <td class="text-center">
+                                        <span class="sims-badge @g.GradeBadgeClass">@g.GradeLabel</span>
+                                    </td>
+                                    <td class="fs-xs text-muted-sims font-mono">@g.UpdatedAt.ToString("dd/MM HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const grades = [
+    { min: 90, max: 100, label: 'A - Xuat sac',  gpa: '4.0',  color: '#4ade80', bg: 'rgba(22,163,74,0.12)' },
+    { min: 80, max: 89,  label: 'B - Kha',        gpa: '3.0',  color: '#60a5fa', bg: 'rgba(37,99,235,0.12)' },
+    { min: 65, max: 79,  label: 'C - Trung binh', gpa: '2.0',  color: '#fbbf24', bg: 'rgba(217,119,6,0.12)' },
+    { min: 50, max: 64,  label: 'D - Yeu',        gpa: '1.0',  color: '#a78bfa', bg: 'rgba(124,58,237,0.12)' },
+    { min: 0,  max: 49,  label: 'F - Khong dat',  gpa: '0.0',  color: '#f87171', bg: 'rgba(220,38,38,0.12)' },
+];
+
+function previewGrade(val) {
+    const score = parseFloat(val);
+    const preview = document.getElementById('gradePreview');
+    if (isNaN(score) || val === '') { preview.style.display = 'none'; return; }
+    const g = grades.find(x => score >= x.min && score <= x.max) || grades[4];
+    document.getElementById('gradeLetterBox').textContent = g.label[0];
+    document.getElementById('gradeLetterBox').style.background = g.bg;
+    document.getElementById('gradeLetterBox').style.color = g.color;
+    document.getElementById('gradeLabel').textContent = g.label;
+    document.getElementById('gradeLabel').style.color = g.color;
+    document.getElementById('gradeGPA').textContent = 'GPA: ' + g.gpa;
+    preview.style.display = 'block';
+}
+</script>
+}

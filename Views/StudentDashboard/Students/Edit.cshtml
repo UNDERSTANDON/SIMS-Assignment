@@ -1,0 +1,62 @@
+@model SIMS_WEB.Models.Student
+@{
+    ViewData["Title"] = "Sửa Sinh viên";
+    ViewData["ActivePage"] = "Students";
+    var programs = new[] {
+        "Công nghệ Thông tin", "Kỹ thuật Phần mềm", "Khoa học Máy tính",
+        "Quản trị Kinh doanh", "Kỹ thuật Điện tử", "Toán - Tin học"
+    };
+}
+
+<div class="sims-page" style="max-width:700px">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-pen"></i> Sửa thông tin Sinh viên
+        </h1>
+        <a asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+    <div class="sims-card">
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">MÃ SINH VIÊN</label>
+                <input asp-for="StudentId" class="form-control" readonly />
+                <div class="fs-xs text-muted-sims mt-1"><i class="fa-solid fa-lock fa-xs"></i> Không thể thay đổi</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" placeholder="Họ và Tên" />
+                <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Program" class="form-label"></label>
+                <select asp-for="Program" class="form-select">
+                    @foreach (var p in programs)
+                    {
+                        <option value="@p" selected="@(Model.Program == p ? "selected" : null)">@p</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="email@univ.edu" />
+            </div>
+            <div class="mb-4">
+                <label asp-for="DateOfBirth" class="form-label"></label>
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-sims-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu thay đổi
+                </button>
+                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
