@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.EnrollmentViewModel
 @{
-    ViewData["Title"] = "Ghi danh Xep lop";
+    ViewData["Title"] = "Ghi danh / Xếp lớp";
     ViewData["ActivePage"] = "Enrollment";
 }
 
@@ -20,7 +20,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-list-check fa-sm"></i>
-            Ghi danh / Xep lop
+            Ghi danh / Xếp lớp
         </h1>
         <span class="pattern-badge pattern-facade">Facade Pattern</span>
     </div>
@@ -31,7 +31,7 @@
             <div class="sims-card">
                 <div class="sims-card-header">
                     <i class="fa-solid fa-pen-to-square" style="color:var(--accent-light)"></i>
-                    Form Ghi danh
+                    Biểu mẫu ghi danh
                 </div>
 
                 @if (Model.Message != null)
@@ -48,7 +48,7 @@
                     <div class="mb-3">
                         <label asp-for="StudentId" class="form-label"></label>
                         <select asp-for="StudentId" class="form-select">
-                            <option value="">-- Chon sinh vien --</option>
+                        <option value="">-- Chọn sinh viên --</option>
                             @foreach (var s in Model.Students)
                             {
                                 <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
@@ -60,7 +60,7 @@
                     <div class="mb-3">
                         <label asp-for="CourseCode" class="form-label"></label>
                         <select asp-for="CourseCode" class="form-select" onchange="updateCapacity(this)">
-                            <option value="">-- Chon khoa hoc --</option>
+                            <option value="">-- Chọn khóa học --</option>
                             @foreach (var c in Model.Courses)
                             {
                                 <option value="@c.Code"
@@ -77,14 +77,14 @@
                     <!-- Capacity indicator — Section 4.5: loading/state feedback -->
                     <div id="capInfo" style="display:none;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;margin-bottom:1rem;">
                         <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.4rem;">
-                            <span style="color:var(--text-tertiary)">Si so hien tai</span>
+                            <span style="color:var(--text-tertiary)">Sĩ số hiện tại</span>
                             <span id="capText" class="font-mono" style="font-weight:600"></span>
                         </div>
                         <div class="sims-progress mb-2">
                             <div class="sims-progress-bar" id="capBar" style="width:0%"></div>
                         </div>
                         <div id="fullWarn" class="sims-alert sims-alert-danger" style="display:none;padding:0.5rem 0.65rem;font-size:0.75rem;">
-                            <i class="fa-solid fa-ban fa-xs"></i> Khoa hoc da day si so
+                            <i class="fa-solid fa-ban fa-xs"></i> Khóa học đã đầy sĩ số
                         </div>
                     </div>
 
@@ -103,21 +103,21 @@
                                 <div class="step-icon" style="background:var(--accent-ghost)"><i class="fa-solid fa-user-check fa-xs" style="color:var(--accent-light)"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">AccountService</div>
-                                    <div class="fs-xs text-muted-sims">Tao tai khoan sinh vien</div>
+                                    <div class="fs-xs text-muted-sims">Tạo tài khoản sinh viên</div>
                                 </div>
                             </div>
                             <div class="facade-step visible" style="transition-delay:0.15s">
                                 <div class="step-icon" style="background:var(--success-muted)"><i class="fa-solid fa-file-invoice-dollar fa-xs" style="color:#4ade80"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">BillingService</div>
-                                    <div class="fs-xs text-muted-sims">Khoi tao hoa don hoc phi</div>
+                                    <div class="fs-xs text-muted-sims">Khởi tạo hóa đơn học phí</div>
                                 </div>
                             </div>
                             <div class="facade-step visible" style="transition-delay:0.3s">
                                 <div class="step-icon" style="background:var(--warning-muted)"><i class="fa-solid fa-bell fa-xs" style="color:#fbbf24"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">NotificationService</div>
-                                    <div class="fs-xs text-muted-sims">Gui email xac nhan ghi danh</div>
+                                    <div class="fs-xs text-muted-sims">Gửi email xác nhận ghi danh</div>
                                 </div>
                             </div>
                         </div>
@@ -128,9 +128,9 @@
 
         <!-- RIGHT: Enrolled list -->
         <div class="sims-card">
-            <div class="sims-card-header">
+                <div class="sims-card-header">
                 <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
-                Danh sach da ghi danh
+                Danh sách đã ghi danh
                 <span class="sims-badge badge-primary ms-auto font-mono">@Model.EnrolledList.Count</span>
             </div>
 
@@ -138,8 +138,8 @@
             {
                 <div class="sims-empty py-3">
                     <i class="fa-solid fa-clipboard-list"></i>
-                    <div class="em-title">Chua co ghi danh nao</div>
-                    <div class="em-sub">Dung form ben trai de ghi danh sinh vien vao khoa hoc.</div>
+                    <div class="em-title">Chưa có ghi danh nào</div>
+                    <div class="em-sub">Dùng form bên trái để ghi danh sinh viên vào khóa học.</div>
                 </div>
             }
             else
@@ -148,9 +148,9 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Sinh vien</th>
-                                <th>Khoa hoc</th>
-                                <th>Thoi gian</th>
+                                <th>Sinh viên</th>
+                                <th>Khóa học</th>
+                                <th>Thời gian</th>
                             </tr>
                         </thead>
                         <tbody>

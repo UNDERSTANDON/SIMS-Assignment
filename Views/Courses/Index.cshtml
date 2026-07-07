@@ -1,6 +1,6 @@
-@model List<SIMS_WEB.Models.Course>
+﻿@model List<SIMS_WEB.Models.Course>
 @{
-    ViewData["Title"] = "Quan ly Khoa hoc";
+    ViewData["Title"] = "Quản lý Khóa học";
     ViewData["ActivePage"] = "Courses";
 }
 
@@ -8,21 +8,21 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-book fa-sm"></i>
-            Quan ly Khoa hoc
+            Qu?n lý Khóa học
             <span class="sims-badge badge-success ms-2 font-mono">@ViewBag.Total</span>
         </h1>
         <a asp-action="Create" class="btn btn-sims-success">
-            <i class="fa-solid fa-plus fa-xs"></i> Them khoa hoc
+            <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
         </a>
     </div>
-
+    
     @if (!Model.Any())
     {
         <div class="sims-card">
             <div class="sims-empty">
                 <i class="fa-solid fa-book-open"></i>
-                <div class="em-title">Chua co khoa hoc nao</div>
-                <div class="em-sub">Tao khoa hoc dau tien de bat dau.</div>
+                <div class="em-title">Chưa có khóa học nào</div>
+                <div class="em-sub">Tạo khóa học đầu tiên để bắt đầu.</div>
             </div>
         </div>
     }
@@ -32,12 +32,12 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Khoa hoc</th>
-                        <th>Ma mon</th>
-                        <th>Giang vien</th>
-                        <th>Si so</th>
-                        <th style="min-width:130px">Ti le dang ky</th>
-                        <th class="text-center">Thao tac</th>
+                        <th>Khóa học</th>
+                        <th>Mã môn</th>
+                        <th>Giảng viên</th>
+                        <th>Sỉ số</th>
+                        <th style="min-width:130px">Tỷ lệ đăng ký</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,7 +46,7 @@
                         var pct = c.CapacityPercent;
                         var barClass = pct >= 100 ? "danger" : pct >= 80 ? "warning" : "";
                         var statusBadge = c.IsFull ? "badge-danger" : pct >= 80 ? "badge-warning" : "badge-success";
-                        var statusText  = c.IsFull ? "Day" : pct >= 80 ? "Sap day" : "Con cho";
+                        var statusText  = c.IsFull ? "Đầy" : pct >= 80 ? "Sắp đầy" : "Còn chỗ";
                         <tr>
                             <td style="font-weight:600">@c.Title</td>
                             <td><code class="font-mono" style="color:#4ade80;font-size:0.8rem">@c.Code</code></td>
@@ -88,14 +88,14 @@
                 <div style="width:40px;height:40px;background:var(--warning-muted);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
                     <i class="fa-solid fa-triangle-exclamation" style="color:#fbbf24;font-size:1rem;"></i>
                 </div>
-                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Xac nhan xoa khoa hoc</div>
+                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Xác nh?n xóa khóa học</div>
                 <div id="deleteMsg" style="font-size:0.8rem;color:var(--text-tertiary);margin-bottom:1.25rem;"></div>
                 <div class="d-flex gap-2">
                     <form id="deleteForm" method="post" class="flex-grow-1">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sims-danger w-100">Xoa</button>
+                        <button type="submit" class="btn btn-sims-danger w-100">Xóa</button>
                     </form>
-                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Huy</button>
+                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Hủy</button>
                 </div>
             </div>
         </div>
@@ -106,8 +106,8 @@
 <script>
 function confirmDelete(id, title) {
     document.getElementById('deleteMsg').innerHTML =
-        `Xoa khoa hoc <strong style="color:var(--text-primary)">${title}</strong>?<br/>
-        <span style="color:#fbbf24;font-size:0.75rem;">Khong the xoa neu dang co sinh vien dang ky.</span>`;
+        `Xóa khóa học <strong style="color:var(--text-primary)">${title}</strong>?<br/>
+        <span style="color:#fbbf24;font-size:0.75rem;">Không thể xóa nếu đang có sinh viên đăng ký.</span>`;
     document.getElementById('deleteForm').action = '/Courses/Delete/' + id;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }

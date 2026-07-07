@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.LoginViewModel
 @{
-    ViewData["Title"] = "Dang nhap";
+    ViewData["Title"] = "Đăng nhập";
     Layout = "_Layout";
 }
 
@@ -160,7 +160,7 @@
                 {
                     <div class="sims-alert sims-alert-warning mb-3">
                         <i class="fa-solid fa-triangle-exclamation fa-sm"></i>
-                        <span>Con <strong>@(5 - Model.FailedAttempts) lần thử</strong> trước khi khóa tài khoản</span>
+                        <span>Còn <strong>@(5 - Model.FailedAttempts) lần thử</strong> trước khi khóa tài khoản</span>
                     </div>
                 }
                 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
@@ -172,8 +172,8 @@
                 }
 
                 <!-- Role selector — radio group, not dropdown -->
-                <div class="mb-4">
-                    <div class="form-label">VAI TRO</div>
+                    <div class="mb-4">
+                    <div class="form-label">Vai trò</div>
                     <div class="role-group">
                         <label class="role-option admin">
                             <input type="radio" name="RoleSelect" value="Admin" @(Model.Role == "Admin" ? "checked" : "") onchange="setRole('Admin')" />
@@ -184,13 +184,13 @@
                         <label class="role-option faculty">
                             <input type="radio" name="RoleSelect" value="Faculty" @(Model.Role == "Faculty" ? "checked" : "") onchange="setRole('Faculty')" />
                             <span class="role-label">
-                                <i class="fa-solid fa-chalkboard-teacher"></i> Giang vien
+                                <i class="fa-solid fa-chalkboard-teacher"></i> Giảng viên
                             </span>
                         </label>
                         <label class="role-option">
                             <input type="radio" name="RoleSelect" value="Student" @(Model.Role == "Student" ? "checked" : "") onchange="setRole('Student')" />
                             <span class="role-label">
-                                <i class="fa-solid fa-graduation-cap"></i> Sinh vien
+                                <i class="fa-solid fa-graduation-cap"></i> Sinh viên
                             </span>
                         </label>
                     </div>
@@ -218,7 +218,7 @@
                             <i class="fa-solid fa-lock icon"></i>
                             <input asp-for="Password" class="form-control" placeholder="Nhập mật khẩu"
                                    id="pwdInput" autocomplete="current-password" />
-                            <i class="fa-solid fa-eye-slash icon-right" id="togglePwd" onclick="togglePassword()" title="Hien/An mat khau"></i>
+                            <i class="fa-solid fa-eye-slash icon-right" id="togglePwd" onclick="togglePassword()" title="Hiện/Ẩn mật khẩu"></i>
                         </div>
                         <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
                     </div>
@@ -237,7 +237,7 @@
 
                 <!-- Demo credentials — Geist Mono table (Section 4.6: no placeholder-as-label) -->
                 <div class="creds-hint mt-4">
-                    <div class="creds-hint-title">DEMO CREDENTIALS</div>
+                    <div class="creds-hint-title">Thông tin demo</div>
                     <div class="creds-row">
                         <span class="role-badge role-admin">Admin</span>
                         <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">admin / admin123</span>

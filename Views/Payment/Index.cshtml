@@ -62,7 +62,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-credit-card fa-sm"></i>
-            Thanh toan Hoc phi
+            Thanh toán Học phí
         </h1>
         <span class="pattern-badge pattern-strategy">Strategy Pattern</span>
     </div>
@@ -89,7 +89,7 @@
                 <div class="sims-card mb-3">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-shuffle" style="color:#4ade80"></i>
-                        Chon phuong thuc thanh toan
+                        Chọn phương thức thanh toán
                         <span class="fs-xs text-muted-sims ms-auto font-mono">Strategy Pattern</span>
                     </div>
 
@@ -97,27 +97,27 @@
                         <div class="strategy-tile @(Model.Method == "credit" ? "active-blue" : "")"
                              id="tile-credit" onclick="selectMethod('credit')">
                             <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
-                            <div class="st-name">The tin dung</div>
-                            <div class="st-fee">Phi 2.5%</div>
+                            <div class="st-name">Thẻ tín dụng</div>
+                            <div class="st-fee">Phí 2.5%</div>
                         </div>
                         <div class="strategy-tile @(Model.Method == "bank" ? "active-green" : "")"
                              id="tile-bank" onclick="selectMethod('bank')">
                             <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
-                            <div class="st-name">Chuyen khoan</div>
-                            <div class="st-fee">Mien phi</div>
+                            <div class="st-name">Chuyển khoản</div>
+                            <div class="st-fee">Miễn phí</div>
                         </div>
                         <div class="strategy-tile @(Model.Method == "ewallet" ? "active-purple" : "")"
                              id="tile-ewallet" onclick="selectMethod('ewallet')">
                             <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
-                            <div class="st-name">Vi dien tu</div>
-                            <div class="st-fee">Phi 1.0%</div>
+                            <div class="st-name">Ví điện tử</div>
+                            <div class="st-fee">Phí 1.0%</div>
                         </div>
                     </div>
 
                     <!-- Strategy note — updates on selection -->
                     <div id="strategyNote" class="sims-alert sims-alert-info" style="font-size:0.78rem;">
                         <i class="fa-solid fa-code fa-xs"></i>
-                        <span id="strategyNoteText">CreditCardStrategy: tinh phi 2.5% tren tong hoc phi</span>
+                        <span id="strategyNoteText">Thẻ tín dụng: tính phí 2.5% trên tổng học phí</span>
                     </div>
                 </div>
 
@@ -125,15 +125,15 @@
                 <div id="form-credit" class="sims-card mb-3" style="display:@(Model.Method == "credit" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
-                        Thong tin the
+                        Thông tin thẻ
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">SO THE</label>
+                        <label class="form-label">SỐ THẺ</label>
                         <input name="CardNumber" class="form-control font-mono" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)" />
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                         <div>
-                            <label class="form-label">NGAY HET HAN</label>
+                            <label class="form-label">NGÀY HẾT HẠN</label>
                             <input name="CardExpiry" class="form-control font-mono" placeholder="MM/YY" maxlength="5" />
                         </div>
                         <div>
@@ -147,10 +147,10 @@
                 <div id="form-bank" class="sims-card mb-3" style="display:@(Model.Method == "bank" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
-                        Thong tin chuyen khoan
+                        Thông tin chuyển khoản
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">NGAN HANG</label>
+                        <label class="form-label">NGÂN HÀNG</label>
                         <select name="BankName" class="form-select">
                             <option>Vietcombank</option><option>BIDV</option>
                             <option>Agribank</option><option>Techcombank</option>
@@ -158,17 +158,17 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">SO TAI KHOAN</label>
+                        <label class="form-label">SỐ TÀI KHOẢN</label>
                         <input name="AccountNumber" class="form-control font-mono" placeholder="0123456789" />
                     </div>
                     <!-- Bank info box — no placeholder-as-label (Section 4.6) -->
                     <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;font-size:0.78rem;">
-                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">THONG TIN NHAN</div>
+                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">THÔNG TIN NHẬN</div>
                         <div style="color:var(--text-secondary);line-height:1.8;">
                             <span class="text-muted-sims">Ngan hang:</span> <strong>Vietcombank</strong><br/>
                             <span class="text-muted-sims">STK:</span> <strong class="font-mono">0123456789</strong><br/>
-                            <span class="text-muted-sims">Chu TK:</span> <strong>TRUONG DAI HOC ABC</strong><br/>
-                            <span class="text-muted-sims">ND:</span> <strong class="font-mono">HP + Ma SV</strong>
+                            <span class="text-muted-sims">Chủ TK:</span> <strong>TRƯỜNG ĐẠI HỌC ABC</strong><br/>
+                            <span class="text-muted-sims">ND:</span> <strong class="font-mono">HP + Mã SV</strong>
                         </div>
                     </div>
                 </div>
@@ -177,17 +177,17 @@
                 <div id="form-ewallet" class="sims-card mb-3" style="display:@(Model.Method == "ewallet" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
-                        Vi dien tu
+                        Ví điện tử
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">CHON VI</label>
+                        <label class="form-label">CHỌN VÍ</label>
                         <select name="WalletType" class="form-select">
                             <option>MoMo</option><option>ZaloPay</option>
                             <option>VNPay</option><option>ShopeePay</option>
                         </select>
                     </div>
                     <div>
-                        <label class="form-label">SO DIEN THOAI / ID VI</label>
+                        <label class="form-label">SỐ ĐIỆN THOẠI / ID VÍ</label>
                         <input name="WalletId" class="form-control font-mono" placeholder="0912 345 678" />
                     </div>
                 </div>
@@ -195,7 +195,7 @@
                 <!-- Single CTA — no duplicate intent (Section 4.5) -->
                 <button type="submit" class="btn btn-sims-primary w-100" style="font-size:0.9rem;padding:0.65rem !important;justify-content:center;" id="payBtn">
                     <i class="fa-solid fa-lock fa-xs"></i>
-                    Thanh toan <span id="btnAmount" class="font-mono">15,000,000 VND</span>
+                    Thanh toán <span id="btnAmount" class="font-mono">15,000,000 VND</span>
                 </button>
                 <div style="text-align:center;font-size:0.7rem;color:var(--text-tertiary);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
                     SSL 256-bit encrypted
@@ -205,31 +205,31 @@
 
         <!-- RIGHT: Order summary — sticky -->
         <div class="order-panel">
-            <div class="sims-card">
+                <div class="sims-card">
                 <div class="sims-card-header">
                     <i class="fa-solid fa-receipt" style="color:#fbbf24"></i>
-                    Hoa don
+                    Hoá đơn
                 </div>
                 <div class="order-line">
-                    <span style="color:var(--text-tertiary)">Hoc phi hoc ky</span>
+                    <span style="color:var(--text-tertiary)">Học phí học kỳ</span>
                     <span class="font-mono" style="font-weight:600">15,000,000</span>
                 </div>
                 <div class="order-line">
-                    <span style="color:var(--text-tertiary)">Phi giao dich</span>
+                    <span style="color:var(--text-tertiary)">Phí giao dịch</span>
                     <span id="feeDisplay" class="font-mono" style="color:#fbbf24">375,000 (2.5%)</span>
                 </div>
                 <div class="order-total">
-                    <span style="font-weight:700">Tong cong</span>
+                    <span style="font-weight:700">Tổng cộng</span>
                     <span id="totalDisplay" class="font-mono fw-800" style="font-size:1.1rem;color:var(--accent-light)">15,375,000 VND</span>
                 </div>
 
                 <!-- 3 strategy summaries in compact list — different layout from tile grid -->
                 <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border-subtle)">
-                    <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">3 CHIEN LUOC</div>
+                    <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">3 CHIẾN LƯỢC</div>
                     <div style="display:flex;flex-direction:column;gap:0.3rem;font-size:0.75rem;">
-                        <div style="display:flex;justify-content:space-between;"><span style="color:var(--accent-light)">CreditCardStrategy</span><span class="font-mono text-muted-sims">+2.5%</span></div>
-                        <div style="display:flex;justify-content:space-between;"><span style="color:#4ade80">BankTransferStrategy</span><span class="font-mono text-muted-sims">+0%</span></div>
-                        <div style="display:flex;justify-content:space-between;"><span style="color:#a78bfa">EWalletStrategy</span><span class="font-mono text-muted-sims">+1.0%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:var(--accent-light)">Chiến lược Thẻ</span><span class="font-mono text-muted-sims">+2.5%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#4ade80">Chiến lược Chuyển khoản</span><span class="font-mono text-muted-sims">+0%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#a78bfa">Chiến lược Ví</span><span class="font-mono text-muted-sims">+1.0%</span></div>
                     </div>
                 </div>
             </div>
@@ -241,9 +241,9 @@
 <script>
 const BASE = 15000000;
 const strategies = {
-    credit:  { rate: 0.025, label: '2.5%',  tileClass: 'active-blue',   note: 'CreditCardStrategy: tinh phi 2.5% tren tong hoc phi' },
-    bank:    { rate: 0,     label: '0%',    tileClass: 'active-green',  note: 'BankTransferStrategy: mien phi giao dich' },
-    ewallet: { rate: 0.01,  label: '1.0%',  tileClass: 'active-purple', note: 'EWalletStrategy: tinh phi 1.0% tren tong hoc phi' },
+    credit:  { rate: 0.025, label: '2.5%',  tileClass: 'active-blue',   note: 'Thẻ tín dụng: tính phí 2.5% trên tổng học phí' },
+    bank:    { rate: 0,     label: '0%',    tileClass: 'active-green',  note: 'Chuyển khoản: miễn phí giao dịch' },
+    ewallet: { rate: 0.01,  label: '1.0%',  tileClass: 'active-purple', note: 'Ví điện tử: tính phí 1.0% trên tổng học phí' },
 };
 let current = '@Model.Method' || 'credit';
 

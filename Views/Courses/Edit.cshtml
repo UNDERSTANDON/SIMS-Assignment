@@ -1,23 +1,23 @@
-@model SIMS_WEB.Models.Course
+﻿@model SIMS_WEB.Models.Course
 @{
-    ViewData["Title"] = "Sua Khoa hoc";
+    ViewData["Title"] = "Sửa Khóa học";
     ViewData["ActivePage"] = "Courses";
 }
 
 <div class="sims-page" style="max-width:640px">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
-            <i class="fa-solid fa-pen fa-sm"></i> Sua Khoa hoc
+            <i class="fa-solid fa-pen fa-sm"></i> Sửa Khóa học
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lai
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
         </a>
     </div>
     <div class="sims-card">
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
-                <label class="form-label">MA KHOA HOC</label>
+                <label class="form-label">MÃ KHÓA HỌC</label>
                 <input asp-for="Code" class="form-control font-mono" readonly style="color:var(--text-tertiary);cursor:not-allowed" />
             </div>
             <div class="mb-3">
@@ -36,9 +36,9 @@
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-sims-success">
-                    <i class="fa-solid fa-floppy-disk fa-xs"></i> Luu thay doi
+                    <i class="fa-solid fa-floppy-disk fa-xs"></i> Lưu thay đổi
                 </button>
-                <a asp-action="Index" class="btn btn-sims-outline">Huy</a>
+                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
             </div>
         </form>
     </div>

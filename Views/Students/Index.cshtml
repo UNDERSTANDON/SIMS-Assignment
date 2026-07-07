@@ -1,6 +1,6 @@
 @model List<SIMS_WEB.Models.Student>
 @{
-    ViewData["Title"] = "Quan ly Sinh vien";
+    ViewData["Title"] = "Quản lý Sinh viên";
     ViewData["ActivePage"] = "Students";
 }
 
@@ -28,10 +28,10 @@
         </h1>
         <div class="d-flex gap-2">
             <a asp-action="Create" class="btn btn-sims-primary">
-                <i class="fa-solid fa-plus fa-xs"></i> Them sinh vien
+                <i class="fa-solid fa-plus fa-xs"></i> Thêm sinh viên
             </a>
             <button class="btn btn-sims-outline" onclick="toggleImport()" id="importToggleBtn">
-                <i class="fa-solid fa-file-csv fa-xs"></i> Import CSV
+                <i class="fa-solid fa-file-csv fa-xs"></i> Nhập CSV
             </button>
         </div>
     </div>
@@ -40,7 +40,7 @@
     <div id="importPanel" class="sims-card mb-4" style="display:none">
         <div class="sims-card-header">
             <i class="fa-solid fa-cloud-arrow-up" style="color:#4ade80"></i>
-            Import danh sach tu file CSV
+            Nhập danh sách từ file CSV
         </div>
         <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
@@ -50,9 +50,9 @@
                  ondragleave="this.classList.remove('drag-over')"
                  ondrop="handleDrop(event)">
                 <i class="fa-solid fa-cloud-arrow-up mb-2 d-block"></i>
-                <div style="font-weight:600;font-size:0.875rem;">Keo tha file CSV vao day</div>
+                <div style="font-weight:600;font-size:0.875rem;">Kéo thả file CSV vào đây</div>
                 <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:0.25rem;">
-                    hoac <span style="color:var(--accent-light)">chon file tu may tinh</span>
+                    hoặc <span style="color:var(--accent-light)">chọn file từ máy tính</span>
                 </div>
                 <div style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
                     Format: MaSV, HoTen, ChuongTrinh, Email
@@ -64,11 +64,11 @@
             <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.65rem 0.875rem;margin-bottom:1rem;font-size:0.75rem;font-family:'Geist Mono',monospace;color:var(--text-tertiary)">
                 SV2024005,Nguyen Thi E,Cong nghe Thong tin,e.nt@@univ.edu
             </div>
-            <div class="d-flex gap-2">
+                <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-sims-success">
-                    <i class="fa-solid fa-upload fa-xs"></i> Upload va Import
+                    <i class="fa-solid fa-upload fa-xs"></i> Tải lên & Nhập
                 </button>
-                <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Huy</button>
+                <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Hủy</button>
             </div>
         </form>
     </div>
@@ -80,14 +80,14 @@
                 <i class="fa-solid fa-magnifying-glass fa-xs"></i>
             </span>
             <input type="text" name="search" value="@ViewBag.Search"
-                   class="form-control" placeholder="Tim theo ten, ma sinh vien..." />
+                   class="form-control" placeholder="Tìm theo tên, mã sinh viên..." />
             @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
             {
                 <a asp-action="Index" class="btn btn-sims-outline px-2">
                     <i class="fa-solid fa-xmark fa-xs"></i>
                 </a>
             }
-            <button class="btn btn-sims-outline" type="submit">Tim</button>
+            <button class="btn btn-sims-outline" type="submit">Tìm</button>
         </div>
     </form>
 
@@ -96,17 +96,17 @@
     {
         <!-- Empty state — Section 4.5: beautiful empty state -->
         <div class="sims-card">
-            <div class="sims-empty">
+        <div class="sims-empty">
                 <i class="fa-solid fa-users-slash"></i>
-                <div class="em-title">Khong tim thay sinh vien</div>
+                <div class="em-title">Không tìm thấy sinh viên</div>
                 <div class="em-sub">
                     @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
                     {
-                        <span>Khong co ket qua cho "<strong>@ViewBag.Search</strong>". Thu xoa bo loc tim kiem.</span>
+                        <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
                     }
                     else
                     {
-                        <span>Chua co sinh vien nao. Them sinh vien dau tien hoac import tu CSV.</span>
+                        <span>Chưa có sinh viên nào. Thêm sinh viên đầu tiên hoặc nhập từ CSV.</span>
                     }
                 </div>
             </div>
@@ -118,11 +118,11 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Sinh vien</th>
-                        <th>Ma SV</th>
-                        <th>Chuong trinh</th>
+                        <th>Sinh viên</th>
+                        <th>Mã SV</th>
+                        <th>Chương trình</th>
                         <th>Email</th>
-                        <th class="text-center">Thao tac</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -160,7 +160,7 @@
             </table>
         </div>
         <div class="mt-2 fs-xs text-muted-sims font-mono">
-            Hien thi @Model.Count / @ViewBag.Total sinh vien
+            Hiển thị @Model.Count / @ViewBag.Total sinh viên
         </div>
     }
 </div>
@@ -173,14 +173,14 @@
                 <div style="width:40px;height:40px;background:var(--danger-muted);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
                     <i class="fa-solid fa-trash" style="color:#f87171;font-size:1rem;"></i>
                 </div>
-                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Xac nhan xoa</div>
+                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Xác nhận xóa</div>
                 <div id="deleteMsg" style="font-size:0.8rem;color:var(--text-tertiary);margin-bottom:1.25rem;"></div>
                 <div class="d-flex gap-2">
                     <form id="deleteForm" method="post" class="flex-grow-1">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sims-danger w-100">Xoa</button>
+                        <button type="submit" class="btn btn-sims-danger w-100">Xóa</button>
                     </form>
-                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Huy</button>
+                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Hủy</button>
                 </div>
             </div>
         </div>
@@ -208,7 +208,7 @@ function handleDrop(e) {
     }
 }
 function confirmDelete(id, name) {
-    document.getElementById('deleteMsg').innerHTML = `Xoa sinh vien <strong style="color:var(--text-primary)">${name}</strong>? Hanh dong nay khong the hoan tac.`;
+    document.getElementById('deleteMsg').innerHTML = `Xóa sinh viên <strong style="color:var(--text-primary)">${name}</strong>? Hành động này không thể hoàn tác.`;
     document.getElementById('deleteForm').action = '/Students/Delete/' + id;
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }

@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.GradeViewModel
 @{
-    ViewData["Title"] = "Quan ly Diem so";
+    ViewData["Title"] = "Quản lý Điểm số";
     ViewData["ActivePage"] = "Grades";
 }
 
@@ -27,7 +27,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-star fa-sm"></i>
-            Quan ly Diem so
+            Quản lý Điểm số
         </h1>
         <span class="pattern-badge pattern-observer">Observer Pattern</span>
     </div>
@@ -37,14 +37,14 @@
         <div>
             <div class="sims-card">
                 <div class="sims-card-header">
-                    <i class="fa-solid fa-star" style="color:#fbbf24"></i>
-                    Cap nhat Diem
+                <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+                    Cập nhật điểm
                 </div>
 
                 <!-- Observer info — one alert max (Section 4.5: informational state) -->
                 <div class="sims-alert sims-alert-warning mb-3" style="font-size:0.78rem;">
                     <i class="fa-solid fa-bolt fa-xs"></i>
-                    <span><strong>Observer:</strong> Khi luu diem, sinh vien nhan thong bao real-time tu dong</span>
+                    <span><strong>Observer:</strong> Khi lưu điểm, sinh viên nhận thông báo real-time tự động</span>
                 </div>
 
                 @if (Model.Message != null)
@@ -61,7 +61,7 @@
                     <div class="mb-3">
                         <label asp-for="CourseCode" class="form-label"></label>
                         <select asp-for="CourseCode" class="form-select">
-                            <option value="">-- Chon khoa hoc --</option>
+                        <option value="">-- Chọn khóa học --</option>
                             @foreach (var c in Model.Courses)
                             {
                                 <option value="@c.Code">@c.Code - @c.Title</option>
@@ -72,7 +72,7 @@
                     <div class="mb-3">
                         <label asp-for="StudentId" class="form-label"></label>
                         <select asp-for="StudentId" class="form-select">
-                            <option value="">-- Chon sinh vien --</option>
+                        <option value="">-- Chọn sinh viên --</option>
                             @foreach (var s in Model.Students)
                             {
                                 <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
@@ -100,7 +100,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-sims-warning w-100">
-                        <i class="fa-solid fa-floppy-disk fa-xs"></i> Luu diem va gui thong bao
+                        <i class="fa-solid fa-floppy-disk fa-xs"></i> Lưu điểm và gửi thông báo
                     </button>
                 </form>
             </div>
@@ -108,9 +108,9 @@
 
         <!-- RIGHT: Grade history -->
         <div class="sims-card">
-            <div class="sims-card-header">
+                <div class="sims-card-header">
                 <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent-light)"></i>
-                Diem da cap nhat
+                Điểm đã cập nhật
                 <span class="sims-badge badge-warning ms-auto font-mono">@Model.RecentGrades.Count</span>
             </div>
 
@@ -118,8 +118,8 @@
             {
                 <div class="sims-empty py-3">
                     <i class="fa-solid fa-chart-bar"></i>
-                    <div class="em-title">Chua co diem nao</div>
-                    <div class="em-sub">Dung form ben trai de cap nhat diem sinh vien.</div>
+                    <div class="em-title">Chưa có điểm nào</div>
+                    <div class="em-sub">Dùng form bên trái để cập nhật điểm sinh viên.</div>
                 </div>
             }
             else
@@ -128,11 +128,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Sinh vien</th>
-                                <th>Khoa hoc</th>
-                                <th class="text-center">Diem</th>
-                                <th class="text-center">Xep loai</th>
-                                <th>Cap nhat</th>
+                                <th>Sinh viên</th>
+                                <th>Khóa học</th>
+                                <th class="text-center">Điểm</th>
+                                <th class="text-center">Xếp loại</th>
+                                <th>Cập nhật</th>
                             </tr>
                         </thead>
                         <tbody>

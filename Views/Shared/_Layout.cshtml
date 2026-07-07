@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] — SIMS</title>
-    <meta name="description" content="He thong Quan ly Sinh vien — Student Information Management System" />
+    <meta name="description" content="Hệ thống Quản lý Sinh viên — Student Information Management System" />
 
     <!-- Bootstrap 5.3 (Section 2.A: "Fast local-business / agency MVP") -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -28,10 +28,10 @@
     <nav class="sims-navbar navbar navbar-expand-lg" style="height:60px">
         <div class="container-fluid gap-3">
             <!-- Brand -->
-            <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
+                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
                 <span class="brand-dot"></span>
                 SIMS
-                <span>/ Quan ly Sinh vien</span>
+                <span>/ Quản lý Sinh viên</span>
             </a>
 
             <button class="navbar-toggler border-0 p-1" type="button"
@@ -50,19 +50,19 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Dashboard" ? "active" : "")"
                                asp-controller="Dashboard" asp-action="Index">
-                                <i class="fa-solid fa-house fa-xs"></i> Dashboard
+                                <i class="fa-solid fa-house fa-xs"></i> Bảng điều khiển
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Students" ? "active" : "")"
                                asp-controller="Students" asp-action="Index">
-                                <i class="fa-solid fa-users fa-xs"></i> Sinh vien
+                                <i class="fa-solid fa-users fa-xs"></i> Sinh viên
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Courses" ? "active" : "")"
                                asp-controller="Courses" asp-action="Index">
-                                <i class="fa-solid fa-book fa-xs"></i> Khoa hoc
+                                <i class="fa-solid fa-book fa-xs"></i> Khóa học
                             </a>
                         </li>
                         <li class="nav-item">
@@ -74,13 +74,13 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Grades" ? "active" : "")"
                                asp-controller="Grades" asp-action="Index">
-                                <i class="fa-solid fa-star fa-xs"></i> Diem so
+                                <i class="fa-solid fa-star fa-xs"></i> Điểm số
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "CreateUser" ? "active" : "")"
                                asp-controller="Account" asp-action="CreateUser">
-                                <i class="fa-solid fa-user-gear fa-xs"></i> Tao tai khoan
+                                <i class="fa-solid fa-user-gear fa-xs"></i> Tạo tài khoản
                             </a>
                         </li>
                     }
@@ -91,7 +91,7 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Grades" ? "active" : "")"
                                asp-controller="Grades" asp-action="Index">
-                                <i class="fa-solid fa-star fa-xs"></i> Cap nhat Diem
+                                <i class="fa-solid fa-star fa-xs"></i> Cập nhật điểm
                             </a>
                         </li>
                     }
@@ -102,13 +102,13 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "StudentDashboard" ? "active" : "")"
                                asp-controller="StudentDashboard" asp-action="Index">
-                                <i class="fa-solid fa-graduation-cap fa-xs"></i> Bang diem
+                                <i class="fa-solid fa-graduation-cap fa-xs"></i> Bảng điểm
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Payment" ? "active" : "")"
                                asp-controller="Payment" asp-action="Index">
-                                <i class="fa-solid fa-credit-card fa-xs"></i> Hoc phi
+                                <i class="fa-solid fa-credit-card fa-xs"></i> Học phí
                             </a>
                         </li>
                     }
@@ -127,7 +127,7 @@
                     <span class="font-mono fs-xs text-muted-sims">@username</span>
                     <a asp-controller="Account" asp-action="Logout"
                        class="btn btn-sims-outline btn-sm py-1">
-                        <i class="fa-solid fa-arrow-right-from-bracket fa-xs"></i> Thoat
+                        <i class="fa-solid fa-arrow-right-from-bracket fa-xs"></i> Thoát
                     </a>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Bang diem cua toi";
+    ViewData["Title"] = "Bảng điểm của tôi";
     ViewData["ActivePage"] = "StudentDashboard";
     var grades  = ViewBag.Grades  as List<SIMS_WEB.Models.GradeRecord> ?? new();
     var courses = ViewBag.Courses as List<SIMS_WEB.Models.Course>      ?? new();
@@ -22,7 +22,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-graduation-cap fa-sm"></i>
-            Bang diem cua toi
+            Bảng điểm của tôi
         </h1>
         <span class="pattern-badge pattern-observer">Observer Pattern</span>
     </div>
@@ -31,8 +31,8 @@
     <div id="notifPanel" class="sims-alert sims-alert-warning mb-3" style="display:none">
         <i class="fa-solid fa-bell fa-sm"></i>
         <div>
-            <strong>Observer:</strong> Co diem moi vua duoc cap nhat.
-            <a href="/StudentDashboard/Index" style="color:#fbbf24;margin-left:0.5rem">Tai lai trang</a>
+            <strong>Observer:</strong> Có điểm mới vừa được cập nhật.
+            <a href="/StudentDashboard/Index" style="color:#fbbf24;margin-left:0.5rem">Tải lại trang</a>
         </div>
     </div>
 
@@ -57,7 +57,7 @@
                 </div>
                 <div>
                     <div class="sims-stat-num" style="color:var(--accent-light)">@grades.Count</div>
-                    <div class="sims-stat-label">Mon co diem</div>
+                    <div class="sims-stat-label">Môn có điểm</div>
                 </div>
             </div>
             <div class="sims-stat-card">
@@ -66,7 +66,7 @@
                 </div>
                 <div>
                     <div class="sims-stat-num font-mono" style="color:@gpaColor">@avg.ToString("F1")</div>
-                    <div class="sims-stat-label">Diem trung binh</div>
+                    <div class="sims-stat-label">Điểm trung bình</div>
                 </div>
             </div>
             <div class="sims-stat-card">
@@ -75,7 +75,7 @@
                 </div>
                 <div>
                     <div class="sims-stat-num" style="color:#a78bfa">@grades.Count(g => g.Score >= 80)</div>
-                    <div class="sims-stat-label">Mon dat loai Kha tro len</div>
+                    <div class="sims-stat-label">Môn đạt loại Khá trở lên</div>
                 </div>
             </div>
         </div>
@@ -85,15 +85,15 @@
     <div class="sims-card">
         <div class="sims-card-header">
             <i class="fa-solid fa-chart-bar" style="color:#fbbf24"></i>
-            Diem tung mon hoc
+            Điểm từng môn học
         </div>
 
         @if (!grades.Any())
         {
             <div class="sims-empty py-4">
                 <i class="fa-solid fa-chart-bar"></i>
-                <div class="em-title">Chua co diem nao</div>
-                <div class="em-sub">Giang vien se cap nhat diem va ban nhan thong bao tu dong qua Observer Pattern.</div>
+                <div class="em-title">Chưa có điểm nào</div>
+                <div class="em-sub">Giảng viên sẽ cập nhật điểm và bạn nhận thông báo tự động qua Observer Pattern.</div>
             </div>
         }
         else
@@ -102,11 +102,11 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Mon hoc</th>
-                            <th class="text-center">Diem</th>
-                            <th class="text-center">Xep loai</th>
-                            <th style="min-width:140px">Thanh tich</th>
-                            <th>Ngay cap nhat</th>
+                            <th>Môn học</th>
+                            <th class="text-center">Điểm</th>
+                            <th class="text-center">Xếp loại</th>
+                            <th style="min-width:140px">Thành tích</th>
+                            <th>Ngày cập nhật</th>
                         </tr>
                     </thead>
                     <tbody>
