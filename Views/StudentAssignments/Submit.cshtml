@@ -1,0 +1,32 @@
+@model SIMS_WEB.Controllers.SubmitViewModel
+@{
+    ViewData["Title"] = "N?p bài";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">N?p bài: @Model.Assignment.Title</h1>
+    </div>
+
+    <div class="sims-card p-3">
+        <form asp-action="Submit" method="post">
+            <input type="hidden" name="assignmentId" value="@Model.Assignment.Id" />
+            <div class="mb-3">
+                <label class="form-label">Sinh viên</label>
+                <select name="studentId" class="form-select">
+                    <option value="">-- Ch?n sinh viên --</option>
+                    @foreach(var s in Model.Students)
+                    {
+                        <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">N?i dung / liên k?t</label>
+                <textarea name="content" class="form-control" rows="6"></textarea>
+            </div>
+            <button class="btn btn-sims-primary">N?p bài</button>
+            <a asp-action="Index" class="btn btn-sims-outline ms-2">H?y</a>
+        </form>
+    </div>
+</div>

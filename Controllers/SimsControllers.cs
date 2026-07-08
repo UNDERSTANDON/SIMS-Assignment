@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
+using SIMS_WEB.Storage;
 
 namespace SIMS_WEB.Controllers
 {
@@ -50,6 +51,8 @@ namespace SIMS_WEB.Controllers
                 return View(model);
             }
             Store.Students.Add(model);
+            // persist
+            ModelFilePersistence.SaveStudents(Store.Students);
             TempData["Success"] = $"Đã thêm sinh viên {model.FullName} thành công!";
             return RedirectToAction("Index");
         }
@@ -74,6 +77,8 @@ namespace SIMS_WEB.Controllers
                 existing.Email = model.Email;
                 existing.DateOfBirth = model.DateOfBirth;
             }
+            // persist
+            ModelFilePersistence.SaveStudents(Store.Students);
             TempData["Success"] = "Cập nhật sinh viên thành công!";
             return RedirectToAction("Index");
         }
@@ -81,9 +86,18 @@ namespace SIMS_WEB.Controllers
         [HttpPost]
         public IActionResult Delete(string id)
         {
-            var student = Store.Students.FirstOrDefault(s => s.StudentId == id);
-            if (student != null) Store.Students.Remove(student);
-            TempData["Success"] = "Đã xóa sinh viên thành công!";
+            var removed = Store.RemoveStudent(id);
+            if (removed)
+            {
+                // persist students and courses because enrollments changed course counts
+                ModelFilePersistence.SaveStudents(Store.Students);
+                ModelFilePersistence.SaveCourses(Store.Courses);
+                TempData["Success"] = "Đã xóa sinh viên thành công!";
+            }
+            else
+            {
+                TempData["Error"] = "Không tìm thấy sinh viên để xóa";
+            }
             return RedirectToAction("Index");
         }
 
@@ -117,6 +131,8 @@ namespace SIMS_WEB.Controllers
                     count++;
                 }
             }
+            // persist
+            ModelFilePersistence.SaveStudents(Store.Students);
             TempData["Success"] = $"Import thành công {count} sinh viên từ CSV!";
             return RedirectToAction("Index");
         }
@@ -146,6 +162,8 @@ namespace SIMS_WEB.Controllers
                 return View(model);
             }
             Store.Courses.Add(model);
+            // persist
+            ModelFilePersistence.SaveCourses(Store.Courses);
             TempData["Success"] = $"Đã thêm khóa học {model.Title} thành công!";
             return RedirectToAction("Index");
         }
@@ -169,6 +187,8 @@ namespace SIMS_WEB.Controllers
                 existing.Capacity = model.Capacity;
                 existing.Instructor = model.Instructor;
             }
+            // persist
+            ModelFilePersistence.SaveCourses(Store.Courses);
             TempData["Success"] = "Cập nhật khóa học thành công!";
             return RedirectToAction("Index");
         }
@@ -182,9 +202,18 @@ namespace SIMS_WEB.Controllers
                 TempData["Error"] = "Không thể xóa khóa học đang có sinh viên đăng ký!";
                 return RedirectToAction("Index");
             }
-            var course = Store.Courses.FirstOrDefault(c => c.Code == id);
-            if (course != null) Store.Courses.Remove(course);
-            TempData["Success"] = "Đã xóa khóa học thành công!";
+            var removed = Store.RemoveCourse(id);
+            if (removed)
+            {
+                ModelFilePersistence.SaveCourses(Store.Courses);
+                // also persist students in case enrollments were removed
+                ModelFilePersistence.SaveStudents(Store.Students);
+                TempData["Success"] = "Đã xóa khóa học thành công!";
+            }
+            else
+            {
+                TempData["Error"] = "Không tìm thấy khóa học để xóa";
+            }
             return RedirectToAction("Index");
         }
     }

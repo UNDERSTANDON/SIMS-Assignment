@@ -1,0 +1,71 @@
+﻿@model SIMS_WEB.Controllers.LecturerCourseViewModel
+@{
+    ViewData["Title"] = "Quản lý khóa học";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">Quản lý: @Model.Course.Title (<code>@Model.Course.Code</code>)</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="sims-card mb-3 p-3">
+                <h5>Tài liệu</h5>
+                <ul>
+                    @foreach(var m in Model.Materials)
+                    {
+                        <li>
+                            <strong>@m.Title</strong> <span class="text-muted">@m.UploadDate.ToString("g")</span>
+                            @if(!string.IsNullOrEmpty(m.FilePath)) { <a href="/@m.FilePath" class="ms-2">Tải xuống</a> }
+                            <div class="text-muted">@m.Description</div>
+                        </li>
+                    }
+                </ul>
+
+                <form asp-action="AddMaterial" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="courseId" value="@Model.Course.Code" />
+                    <div class="mb-2">
+                        <input name="title" class="form-control" placeholder="Tiêu đề" />
+                    </div>
+                    <div class="mb-2">
+                        <input name="description" class="form-control" placeholder="Mô tả (tuỳ chọn)" />
+                    </div>
+                    <div class="mb-2">
+                        <input type="file" name="file" class="form-control" />
+                    </div>
+                    <button class="btn btn-sims-primary">Thêm tài liệu</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="sims-card mb-3 p-3">
+                <h5>Bài tập</h5>
+                <ul>
+                    @foreach(var a in Model.Assignments)
+                    {
+                        <li>
+                            <strong>@a.Title</strong> <span class="text-muted">Hạn: @a.DueDate.ToString("g")</span>
+                            <div class="text-muted">@a.Description</div>
+                        </li>
+                    }
+                </ul>
+
+                <form asp-action="AddAssignment" method="post">
+                    <input type="hidden" name="courseCode" value="@Model.Course.Code" />
+                    <div class="mb-2">
+                        <input name="title" class="form-control" placeholder="Tiêu đề bài tập" />
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="description" class="form-control" placeholder="Mô tả"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <input type="datetime-local" name="dueDate" class="form-control" />
+                    </div>
+                    <button class="btn btn-sims-primary">Tạo bài tập</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

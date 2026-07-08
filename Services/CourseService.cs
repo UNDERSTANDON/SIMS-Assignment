@@ -71,5 +71,36 @@ namespace SIMS_Assignment.Services
         {
             _CSF.DeleteSubmission(studentId, assignmentTitle);
         }
+
+        // Enrollment (roll-call) — delegate to facade and persist change
+        public (bool success, string message) EnrollStudent(string studentId, string courseCode)
+        {
+            var result = _CSF.EnrollStudent(studentId, courseCode);
+            if (result.success)
+            {
+                // persist course counts to storage CSV if available
+                try
+                {
+                    // ModelFilePersistence is in SIMS_WEB.Storage
+                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(SIMS_WEB.Models.SimsDataStore.Instance.Courses);
+                }
+                catch { }
+            }
+            return result;
+        }
+
+        public bool UnenrollStudent(string studentId, string courseCode)
+        {
+            var ok = _CSF.UnenrollStudent(studentId, courseCode);
+            if (ok)
+            {
+                try
+                {
+                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(SIMS_WEB.Models.SimsDataStore.Instance.Courses);
+                }
+                catch { }
+            }
+            return ok;
+        }
     }
 }

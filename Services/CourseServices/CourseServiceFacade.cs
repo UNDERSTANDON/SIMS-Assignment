@@ -57,5 +57,23 @@ namespace SIMS_Assignment.Services.CourseServices
         {
             _submissionHandler.DeleteSubmission(studentId, assignmentTitle);
         }
+
+        // Enrollment
+        public (bool success, string message) EnrollStudent(string studentId, string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            return store.Enroll(studentId, courseCode);
+        }
+
+        public bool UnenrollStudent(string studentId, string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            var enrollment = store.Enrollments.FirstOrDefault(e => e.StudentId == studentId && e.CourseCode == courseCode);
+            if (enrollment == null) return false;
+            store.Enrollments.Remove(enrollment);
+            var course = store.Courses.FirstOrDefault(c => c.Code == courseCode);
+            if (course != null && course.EnrolledCount > 0) course.EnrolledCount--;
+            return true;
+        }
     }
 }

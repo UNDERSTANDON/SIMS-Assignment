@@ -20,5 +20,9 @@ namespace SIMS_Assignment.Services.CourseServices
         void AddSubmission(Submission submission);
         void EditSubmission(Submission submission);
         void DeleteSubmission(string studentId, string assignmentTitle);
+
+        // Enrollment / roll-call
+        (bool success, string message) EnrollStudent(string studentId, string courseCode);
+        bool UnenrollStudent(string studentId, string courseCode);
     }
 }

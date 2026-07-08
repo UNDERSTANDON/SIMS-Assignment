@@ -1,0 +1,60 @@
+﻿@model SIMS_WEB.Controllers.StudentCourseDetailsViewModel
+@{
+    ViewData["Title"] = "Khóa học";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">@Model.Course.Title <small class="ms-2"><code>@Model.Course.Code</code></small></h1>
+    </div>
+
+    @if (!Model.IsEnrolled)
+    {
+        <div class="sims-card p-4 text-center">
+            <h4>Bạn chưa ghi danh vào khóa học này</h4>
+            <p class="text-muted">Để truy cập tài liệu và bài tập, hãy ghi danh vào khóa học.</p>
+            <form asp-action="Enroll" method="post">
+                <button class="btn btn-sims-primary btn-lg">Ghi danh ngay</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="sims-card p-3 mb-3">
+                    <h5>Tài liệu</h5>
+                    @if (!Model.Materials.Any()) { <div class="text-muted">Chưa có tài liệu</div> }
+                    <ul>
+                        @foreach(var m in Model.Materials)
+                        {
+                            <li>
+                                <strong>@m.Title</strong> <small class="text-muted">@m.UploadDate.ToString("g")</small>
+                                <div class="text-muted">@m.Description</div>
+                                @if(!string.IsNullOrEmpty(m.FilePath)) { <a href="/@m.FilePath">Tải xuống</a> }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="sims-card p-3 mb-3">
+                    <h5>Bài tập</h5>
+                    @if (!Model.Assignments.Any()) { <div class="text-muted">Chưa có bài tập</div> }
+                    <ul>
+                        @foreach(var a in Model.Assignments)
+                        {
+                            <li>
+                                <strong>@a.Title</strong>
+                                <div class="text-muted">Hạn: @a.DueDate.ToString("g")</div>
+                                <div class="mt-1">
+                                    <a asp-controller="StudentAssignments" asp-action="Submit" asp-route-assignmentId="@a.Id" asp-route-courseCode="@Model.Course.Code" class="btn btn-sims-outline btn-sm">Nộp bài</a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>

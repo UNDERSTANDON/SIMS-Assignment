@@ -25,5 +25,8 @@ namespace SIMS_Assignment.Services.CourseServices
                 _materials.Remove(materialToRemove);
             }
         }
+
+        // Read access
+        public List<Material> GetAll() => _materials;
     }
 }

@@ -89,5 +89,50 @@ namespace SIMS_WEB.Models
                 NotifyGradeUpdated(record);
             }
         }
+
+        // ============ Removal helpers (clean-up related data) ============
+        public bool RemoveStudent(string studentId)
+        {
+            var student = Students.FirstOrDefault(s => s.StudentId == studentId);
+            if (student == null) return false;
+
+            // Remove student record
+            Students.Remove(student);
+
+            // Remove enrollments and decrement course counts
+            var enrolls = Enrollments.Where(e => e.StudentId == studentId).ToList();
+            foreach (var e in enrolls)
+            {
+                var course = Courses.FirstOrDefault(c => c.Code == e.CourseCode);
+                if (course != null && course.EnrolledCount > 0)
+                    course.EnrolledCount--;
+                Enrollments.Remove(e);
+            }
+
+            // Remove grades for the student
+            Grades.RemoveAll(g => g.StudentId == studentId);
+
+            return true;
+        }
+
+        public bool RemoveCourse(string courseCode)
+        {
+            var course = Courses.FirstOrDefault(c => c.Code == courseCode);
+            if (course == null) return false;
+
+            // Remove enrollments for the course
+            var enrolls = Enrollments.Where(e => e.CourseCode == courseCode).ToList();
+            foreach (var e in enrolls)
+            {
+                Enrollments.Remove(e);
+            }
+
+            // Remove grades associated with the course
+            Grades.RemoveAll(g => g.CourseCode == courseCode);
+
+            // Finally remove the course
+            Courses.Remove(course);
+            return true;
+        }
     }
 }

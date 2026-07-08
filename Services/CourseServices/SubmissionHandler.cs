@@ -23,5 +23,9 @@ namespace SIMS_Assignment.Services.CourseServices
                 _submissions.Remove(submissionToRemove);
             }
         }
+
+        // Read access
+        public List<Submission> GetAll() => _submissions;
+        public List<Submission> GetByAssignment(string assignmentTitle) => _submissions.Where(s => s.AssignmentTitle == assignmentTitle).ToList();
     }
 }

@@ -26,5 +26,8 @@ namespace SIMS_Assignment.Services.CourseServices
                 _assignments.Remove(assignmentToRemove);
             }
         }
+
+        // Read access for controllers/views
+        public List<Assignment> GetAll() => _assignments;
     }
 }

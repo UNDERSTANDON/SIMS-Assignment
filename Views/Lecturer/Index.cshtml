@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Giảng viên - Khóa học";
+}
+
+<h2>Khóa học</h2>
+<div class="sims-table-wrap">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tên</th>
+                <th>Mã</th>
+                <th>Giảng viên</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var c in Model)
+            {
+                <tr>
+                    <td>@c.Title</td>
+                    <td><code>@c.Code</code></td>
+                    <td>@c.Instructor</td>
+                    <td>
+                        <a class="btn btn-sims-outline btn-sm" asp-action="Manage" asp-route-id="@c.Code">Quản lý</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

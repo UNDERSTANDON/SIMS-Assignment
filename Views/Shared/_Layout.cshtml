@@ -94,6 +94,12 @@
                                 <i class="fa-solid fa-star fa-xs"></i> Cập nhật điểm
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "FacultyCourses" ? "active" : "")"
+                               asp-controller="Lecturer" asp-action="Index">
+                                <i class="fa-solid fa-book fa-xs"></i> Khóa học
+                            </a>
+                        </li>
                     }
 
                     @* STUDENT *@
@@ -103,6 +109,12 @@
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "StudentDashboard" ? "active" : "")"
                                asp-controller="StudentDashboard" asp-action="Index">
                                 <i class="fa-solid fa-graduation-cap fa-xs"></i> Bảng điểm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "StudentCourses" ? "active" : "")"
+                               asp-controller="StudentCourses" asp-action="Index">
+                                <i class="fa-solid fa-book fa-xs"></i> Khóa học
                             </a>
                         </li>
                         <li class="nav-item">

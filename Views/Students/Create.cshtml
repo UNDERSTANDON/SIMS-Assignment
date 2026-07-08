@@ -1,11 +1,11 @@
-@model SIMS_WEB.Models.Student
+﻿@model SIMS_WEB.Models.Student
 @{
     bool isEdit = !string.IsNullOrEmpty(Model?.StudentId);
-    ViewData["Title"] = isEdit ? "S?a Sinh vi�n" : "Th�m Sinh vi�n";
+    ViewData["Title"] = isEdit ? "Sửa Sinh viên" : "Thêm Sinh viên";
     ViewData["ActivePage"] = "Students";
     var programs = new[] {
-        "C�ng ngh? Th�ng tin", "K? thu?t Ph?n m?m", "Khoa h?c M�y t�nh",
-        "Qu?n tr? Kinh doanh", "K? thu?t ?i?n t?", "To�n Tin h?c"
+        "Công nghệ Thông tin", "Kỹ thuật Phần mềm", "Khoa học Máy tính",
+        "Quản trị Kinh doanh", "Kỹ thuật Điện tử", "Toán Tin học"
     };
 }
 
@@ -13,10 +13,10 @@
     <div class="sims-page-header">
             <h1 class="sims-page-title">
             <i class="fa-solid @(isEdit ? "fa-pen" : "fa-user-plus") fa-sm"></i>
-            @(isEdit ? "S?a th�ng tin Sinh vi�n" : "Th�m sinh vi�n m?i")
+            @(isEdit ? "Sửa thông tin Sinh viên" : "Thêm sinh viên mới")
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lai
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
         </a>
     </div>
 
@@ -30,7 +30,7 @@
                     <input asp-for="StudentId" class="form-control font-mono" readonly
                            style="color:var(--text-tertiary);cursor:not-allowed" />
                     <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.3rem;font-family:'Geist Mono',monospace;">
-                        <i class="fa-solid fa-lock fa-xs"></i> M� sinh vi�n kh�ng th? thay ??i
+                        <i class="fa-solid fa-lock fa-xs"></i> Mã sinh viên không th? thay ??i
                     </div>
                 } else {
                     <input asp-for="StudentId" class="form-control font-mono" placeholder="VD: SV2024005" />
@@ -40,14 +40,14 @@
 
             <div class="mb-3">
                 <label asp-for="FullName" class="form-label"></label>
-                <input asp-for="FullName" class="form-control" placeholder="H? v� T�n ??y ??" />
+                <input asp-for="FullName" class="form-control" placeholder="Họ và Tên đầy đủ" />
                 <span asp-validation-for="FullName" class="invalid-feedback d-block"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Program" class="form-label"></label>
                 <select asp-for="Program" class="form-select">
-                    <option value="">-- Ch?n ch??ng tr�nh --</option>
+                    <option value="">-- Chọn chương trình --</option>
                     @foreach (var p in programs)
                     {
                         <option value="@p">@p</option>
@@ -70,9 +70,9 @@
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-sims-primary">
                     <i class="fa-solid fa-floppy-disk fa-xs"></i>
-                    @(isEdit ? "L?u thay ??i" : "Th�m sinh vi�n")
+                    @(isEdit ? "Lưu thay đổi" : "Thêm sinh viên")
                 </button>
-                <a asp-action="Index" class="btn btn-sims-outline">H?y</a>
+                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
             </div>
         </form>
     </div>
