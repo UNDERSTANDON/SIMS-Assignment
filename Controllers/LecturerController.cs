@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_Assignment.Services.CourseServices;
@@ -162,19 +162,21 @@ namespace SIMS_WEB.Controllers
 
                 // Get the file mapping with original filename
                 var fileMapping = _materials.GetFileMapping(materialId);
-                if (fileMapping == null)
-                    return NotFound("Thông tin tệp không tìm thấy");
 
                 // Build the full file path
+                if (string.IsNullOrWhiteSpace(material.FilePath))
+                    return BadRequest("Tài liệu này không có tệp đính kèm");
+
                 var filePath = Path.Combine(_env.ContentRootPath, material.FilePath);
                 if (!System.IO.File.Exists(filePath))
                     return NotFound("Tệp không tìm thấy trên máy chủ");
 
                 // Read the file and return it with the original filename
                 var fileBytes = System.IO.File.ReadAllBytes(filePath);
-                var fileName = fileMapping.OriginalFileName;
+                var fileName = fileMapping?.OriginalFileName
+                    ?? material.OriginalFileName
+                    ?? Path.GetFileName(material.FilePath);
                 var contentType = GetContentType(fileName);
-
                 return File(fileBytes, contentType, fileName);
             }
             catch (Exception ex)

@@ -86,17 +86,28 @@ namespace SIMS_WEB.Controllers
             // Handle file upload if provided
             if (file != null && file.Length > 0)
             {
+                const long maxSubmissionFileSize = 10 * 1024 * 1024;
+                var originalFileName = Path.GetFileName(file.FileName);
+                var extension = Path.GetExtension(originalFileName);
+                var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".txt", ".zip" };
+
+                if (file.Length > maxSubmissionFileSize ||
+                    !allowedExtensions.Any(e => string.Equals(e, extension, StringComparison.OrdinalIgnoreCase)))
+                {
+                    TempData["Error"] = "Tệp tải lên không hợp lệ hoặc vượt quá dung lượng cho phép.";
+                    return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
+                }
+
                 try
                 {
                     var storage = Path.Combine(_env.ContentRootPath, "DataStorage", "Submissions");
                     if (!Directory.Exists(storage)) Directory.CreateDirectory(storage);
-                    var fileName = submission.Id + Path.GetExtension(file.FileName);
+                    var fileName = submission.Id + extension;
                     var filePath = Path.Combine(storage, fileName);
                     await using var fs = new FileStream(filePath, FileMode.Create);
                     await file.CopyToAsync(fs);
                     submission.FilePath = Path.Combine("DataStorage", "Submissions", fileName);
-                    submission.OriginalFileName = file.FileName;
-                    Console.WriteLine($"Saved uploaded submission file to {filePath}");
+                    submission.OriginalFileName = originalFileName;                    Console.WriteLine($"Saved uploaded submission file to {filePath}");
                 }
                 catch (Exception ex)
                 {

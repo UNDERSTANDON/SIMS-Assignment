@@ -1,5 +1,5 @@
-using SIMS_Assignment.Models.CourseRelatedModels;
 using System.Text.Json;
+using SIMS_Assignment.Models.CourseRelatedModels;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
@@ -7,17 +7,20 @@ namespace SIMS_Assignment.Services.CourseServices
     {
         // Basic CRUD for material
         private readonly List<Material> _materials = new();
-        private readonly string _fileMappingPath = Path.Combine(AppContext.BaseDirectory, "DataStorage", "file_mappings.json");
+        private readonly string _fileMappingPath;
         private readonly string _storagePath;
         private readonly object _fileLock = new();
 
-        public MaterialHandler()
+        public MaterialHandler(IWebHostEnvironment env)
         {
-            var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
-            if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+            var dataDir = Path.Combine(env.ContentRootPath, "DataStorage");
+            if (!Directory.Exists(dataDir))
+                Directory.CreateDirectory(dataDir);
+            _fileMappingPath = Path.Combine(dataDir, "file_mappings.json");
             _storagePath = Path.Combine(dataDir, "materials.json");
             LoadFromDisk();
         }
+
         public void AddMaterial(Material material)
         {
             _materials.Add(material);
@@ -27,8 +30,11 @@ namespace SIMS_Assignment.Services.CourseServices
         public void EditMaterial(Material material)
         {
             DeleteMaterial(material.Id);
-            _materials.Add(material);
-            SaveToDisk();
+            lock (_fileLock)
+            {
+                _materials.Add(material);
+                SaveToDisk();
+            }
         }
 
         public void DeleteMaterial(string materialId)
@@ -42,28 +48,44 @@ namespace SIMS_Assignment.Services.CourseServices
         }
 
         // Read access
-        public List<Material> GetAll() => _materials;
+        public List<Material> GetAll()
+        {
+            lock (_fileLock)
+            {
+                return _materials.ToList();
+            }
+        }
 
         // File mapping methods
-        public void SaveFileMapping(string materialId, string originalFileName, string hashedFileName, string courseId)
+        public void SaveFileMapping(
+            string materialId,
+            string originalFileName,
+            string hashedFileName,
+            string courseId
+        )
         {
             try
             {
-                var mappings = LoadFileMappings();
-                var newMapping = new FileMapping
+                lock (_fileLock)
                 {
-                    MaterialId = materialId,
-                    OriginalFileName = originalFileName,
-                    HashedFileName = hashedFileName,
-                    CourseId = courseId,
-                    UploadDate = DateTime.Now
-                };
-                mappings.Add(newMapping);
-                SaveFileMappingsToJson(mappings);
+                    var mappings = LoadFileMappings();
+                    mappings.Add(
+                        new FileMapping
+                        {
+                            MaterialId = materialId,
+                            OriginalFileName = originalFileName,
+                            HashedFileName = hashedFileName,
+                            CourseId = courseId,
+                            UploadDate = DateTime.Now,
+                        }
+                    );
+                    SaveFileMappingsToJson(mappings);
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving file mapping: {ex.Message}");
+                throw; // Re-throw the exception to be handled by the caller
             }
         }
 
@@ -103,11 +125,12 @@ namespace SIMS_Assignment.Services.CourseServices
             try
             {
                 var json = File.ReadAllText(_fileMappingPath);
-                return JsonSerializer.Deserialize<List<FileMapping>>(json) ?? new List<FileMapping>();
+                return JsonSerializer.Deserialize<List<FileMapping>>(json)
+                    ?? new List<FileMapping>();
             }
-            catch
+            catch (Exception ex)
             {
-                return new List<FileMapping>();
+                throw new InvalidOperationException("Failed to load file mappings; refusing to overwrite existing mappings.", ex);
             }
         }
 
@@ -152,7 +175,8 @@ namespace SIMS_Assignment.Services.CourseServices
             {
                 lock (_fileLock)
                 {
-                    if (!File.Exists(_storagePath)) return;
+                    if (!File.Exists(_storagePath))
+                        return;
                     var json = File.ReadAllText(_storagePath);
                     var list = JsonSerializer.Deserialize<List<Material>>(json);
                     if (list != null)
