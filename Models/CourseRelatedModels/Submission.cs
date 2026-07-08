@@ -9,6 +9,7 @@
         public string Content { get; set; } = string.Empty;
         // Optional uploaded file path relative to content root
         public string? FilePath { get; set; }
+        public string? OriginalFileName { get; set; }
         // Grading
         public double? Grade { get; set; }
         public string? GradedBy { get; set; }

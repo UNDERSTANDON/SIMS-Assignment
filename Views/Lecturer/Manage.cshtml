@@ -17,7 +17,7 @@
                     {
                         <li>
                             <strong>@m.Title</strong> <span class="text-muted">@m.UploadDate.ToString("g")</span>
-                            @if(!string.IsNullOrEmpty(m.FilePath)) { <a href="/@m.FilePath" class="ms-2">Tải xuống</a> }
+                            @if(!string.IsNullOrEmpty(m.FilePath)) { <a asp-action="DownloadMaterial" asp-route-materialId="@m.Id" class="ms-2">Tải xuống</a> }
                             <div class="text-muted">@m.Description</div>
                         </li>
                     }
