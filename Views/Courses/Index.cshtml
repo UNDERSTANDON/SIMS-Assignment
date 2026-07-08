@@ -105,11 +105,16 @@
 @section Scripts {
 <script>
 function confirmDelete(id, title) {
+    const modalEl = document.getElementById('deleteModal');
+    // ensure modal is attached to document.body so Bootstrap backdrop/z-index behave correctly
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
     document.getElementById('deleteMsg').innerHTML =
         `Xóa khóa học <strong style="color:var(--text-primary)">${title}</strong>?<br/>
         <span style="color:#fbbf24;font-size:0.75rem;">Không thể xóa nếu đang có sinh viên đăng ký.</span>`;
     document.getElementById('deleteForm').action = '/Courses/Delete/' + id;
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    new bootstrap.Modal(modalEl).show();
 }
 </script>
 }

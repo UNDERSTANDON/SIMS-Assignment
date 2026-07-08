@@ -21,7 +21,72 @@ namespace SIMS_Assignment.Storage
         }
 
         private string UsersPath => Path.Combine(_dataDir, "users.csv");
-        private string CoursesPath => Path.Combine(_dataDir, "courses.csv");
+        // Use a separate file for assignment/course storage to avoid clashing with UI CSV format
+        private string CoursesPath => Path.Combine(_dataDir, "assignment_courses.csv");
+
+        public Task<List<User>> GetAllUsersAsync()
+        {
+            lock (_lock)
+            {
+                var result = new List<User>();
+                if (!File.Exists(UsersPath)) return Task.FromResult(result);
+                foreach (var line in File.ReadAllLines(UsersPath, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 4) continue;
+                    var id = int.TryParse(parts[0], out var iid) ? iid : 0;
+                    var uname = parts[1].Trim();
+                    var role = parts[2].Trim();
+                    var pwd = parts[3].Trim();
+
+                    User? user = role switch
+                    {
+                        "Admin" => new Admin { Id = id, Name = uname, Role = role, PasswordHash = pwd },
+                        "Faculty" or "Lecturer" => new Lecturer { Id = id, Name = uname, Role = role, PasswordHash = pwd },
+                        "Student" => new Student { Id = id, Name = uname, Role = role, PasswordHash = pwd },
+                        _ => null
+                    };
+
+                    if (user != null) result.Add(user);
+                }
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<List<Course>> GetAllCoursesAsync()
+        {
+            lock (_lock)
+            {
+                var result = new List<Course>();
+                if (!File.Exists(CoursesPath)) return Task.FromResult(result);
+                foreach (var line in File.ReadAllLines(CoursesPath, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 1) continue;
+                    var id = Unescape(parts[0]);
+                    var name = parts.Length > 1 ? Unescape(parts[1]) : string.Empty;
+                    var credits = parts.Length > 2 && int.TryParse(parts[2], out var cr) ? cr : 0;
+                    var lecturer = parts.Length > 3 && int.TryParse(parts[3], out var lid) ? lid : 0;
+                    var enrolled = new List<int>();
+                    if (parts.Length > 4)
+                    {
+                        var en = Unescape(parts[4]);
+                        if (!string.IsNullOrEmpty(en))
+                        {
+                            var toks = en.Split(';');
+                            foreach (var t in toks)
+                            {
+                                if (int.TryParse(t, out var ii)) enrolled.Add(ii);
+                            }
+                        }
+                    }
+                    result.Add(new Course { CourseId = id, CourseName = name, Credits = credits, LecturerId = lecturer, EnrolledStudentIds = enrolled });
+                }
+                return Task.FromResult(result);
+            }
+        }
 
         public Task<User> GetUserByNameAsync(string name)
         {
@@ -153,6 +218,12 @@ namespace SIMS_Assignment.Storage
         {
             if (s == null) return string.Empty;
             return s.Replace('\n', ' ').Replace('\r', ' ').Replace(',', ';');
+        }
+
+        private static string Unescape(string s)
+        {
+            if (s == null) return string.Empty;
+            return s.Replace(';', ',');
         }
     }
 }

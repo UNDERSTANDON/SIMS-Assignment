@@ -19,6 +19,23 @@ namespace SIMS_WEB.Controllers
             _assignments = assignments;
         }
 
+        public IActionResult Submissions(string assignmentId)
+        {
+            var assignment = _assignments.GetAll().FirstOrDefault(a => a.Id == assignmentId);
+            if (assignment == null) return NotFound();
+            var subsField = typeof(SubmissionHandler).GetField("_submissions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            List<Submission> all = new();
+            if (subsField != null)
+            {
+                var sh = HttpContext.RequestServices.GetService(typeof(SubmissionHandler)) as SubmissionHandler;
+                if (sh != null)
+                {
+                    all = sh.GetByAssignment(assignment.Title);
+                }
+            }
+            return View("Submissions", all);
+        }
+
         public IActionResult Index()
         {
             // For now show all courses; in future filter by lecturer identity

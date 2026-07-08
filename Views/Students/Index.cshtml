@@ -208,9 +208,14 @@ function handleDrop(e) {
     }
 }
 function confirmDelete(id, name) {
+    const modalEl = document.getElementById('deleteModal');
+    // ensure modal is attached to document.body so Bootstrap backdrop/z-index behave correctly
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
     document.getElementById('deleteMsg').innerHTML = `Xóa sinh viên <strong style="color:var(--text-primary)">${name}</strong>? Hành động này không thể hoàn tác.`;
     document.getElementById('deleteForm').action = '/Students/Delete/' + id;
-    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    new bootstrap.Modal(modalEl).show();
 }
 </script>
 }

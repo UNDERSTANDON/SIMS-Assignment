@@ -2,12 +2,37 @@ using Microsoft.AspNetCore.Mvc;
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_WEB.Storage;
+using SIMS_Assignment.Abstract;
+using SIMS_Assignment.Services;
+
+// Helper mapper for converting web course model to assignment course model
+internal static class CourseMapper
+{
+    public static SIMS_Assignment.Models.Course ToAssignment(SIMS_WEB.Models.Course c)
+    {
+        return new SIMS_Assignment.Models.Course
+        {
+            CourseId = c.Code,
+            CourseName = c.Title,
+            Credits = c.Capacity,
+            LecturerId = 0,
+            EnrolledStudentIds = new List<int>()
+        };
+    }
+}
 
 namespace SIMS_WEB.Controllers
 {
     [RequireLogin(AllowedRoles = new[] { "Admin" })]
     public class DashboardController : Controller
     {
+        private readonly IDataStorage _storage;
+
+        public DashboardController(IDataStorage storage)
+        {
+            _storage = storage;
+        }
+
         public IActionResult Index()
         {
             var role = HttpContext.Session.GetString("Role") ?? "Admin";
@@ -26,72 +51,65 @@ namespace SIMS_WEB.Controllers
     public class StudentsController : Controller
     {
         private SimsDataStore Store => SimsDataStore.Instance;
+        private readonly IStudentManager _students;
 
-        public IActionResult Index(string? search)
+        public StudentsController(IStudentManager students)
         {
-            var list = Store.Students.AsEnumerable();
+            _students = students;
+        }
+
+        public async Task<IActionResult> Index(string? search)
+        {
+            var list = await _students.GetAllAsync();
             if (!string.IsNullOrWhiteSpace(search))
                 list = list.Where(s => s.FullName.Contains(search, StringComparison.OrdinalIgnoreCase)
-                                    || s.StudentId.Contains(search, StringComparison.OrdinalIgnoreCase));
+                                    || s.StudentId.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
             ViewBag.Search = search;
-            ViewBag.Total = Store.Students.Count;
-            return View(list.ToList());
+            ViewBag.Total = list.Count;
+            return View(list);
         }
 
         [HttpGet]
         public IActionResult Create() => View(new Student());
 
         [HttpPost]
-        public IActionResult Create(Student model)
+        public async Task<IActionResult> Create(Student model)
         {
             if (!ModelState.IsValid) return View(model);
-            if (Store.Students.Any(s => s.StudentId == model.StudentId))
+            var ok = await _students.CreateAsync(model);
+            if (!ok)
             {
                 ModelState.AddModelError("StudentId", "Mã sinh viên đã tồn tại trong hệ thống");
                 return View(model);
             }
-            Store.Students.Add(model);
-            // persist
-            ModelFilePersistence.SaveStudents(Store.Students);
             TempData["Success"] = $"Đã thêm sinh viên {model.FullName} thành công!";
             return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public IActionResult Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var student = Store.Students.FirstOrDefault(s => s.StudentId == id);
+            var student = await _students.GetByIdAsync(id);
             if (student == null) return NotFound();
             return View(student);
         }
 
         [HttpPost]
-        public IActionResult Edit(Student model)
+        public async Task<IActionResult> Edit(Student model)
         {
             if (!ModelState.IsValid) return View(model);
-            var existing = Store.Students.FirstOrDefault(s => s.StudentId == model.StudentId);
-            if (existing != null)
-            {
-                existing.FullName = model.FullName;
-                existing.Program = model.Program;
-                existing.Email = model.Email;
-                existing.DateOfBirth = model.DateOfBirth;
-            }
-            // persist
-            ModelFilePersistence.SaveStudents(Store.Students);
+            var ok = await _students.UpdateAsync(model);
+            if (!ok) return NotFound();
             TempData["Success"] = "Cập nhật sinh viên thành công!";
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            var removed = Store.RemoveStudent(id);
+            var removed = await _students.DeleteAsync(id);
             if (removed)
             {
-                // persist students and courses because enrollments changed course counts
-                ModelFilePersistence.SaveStudents(Store.Students);
-                ModelFilePersistence.SaveCourses(Store.Courses);
                 TempData["Success"] = "Đã xóa sinh viên thành công!";
             }
             else
@@ -102,37 +120,14 @@ namespace SIMS_WEB.Controllers
         }
 
         [HttpPost]
-        public IActionResult ImportCsv(IFormFile? csvFile)
+        public async Task<IActionResult> ImportCsv(IFormFile? csvFile)
         {
             if (csvFile == null || csvFile.Length == 0)
             {
                 TempData["Error"] = "Vui lòng chọn file CSV hợp lệ";
                 return RedirectToAction("Index");
             }
-            int count = 0;
-            using var reader = new System.IO.StreamReader(csvFile.OpenReadStream());
-            string? line;
-            bool isHeader = true;
-            while ((line = reader.ReadLine()) != null)
-            {
-                if (isHeader) { isHeader = false; continue; }
-                var parts = line.Split(',');
-                if (parts.Length < 3) continue;
-                var s = new Student
-                {
-                    StudentId = parts[0].Trim(),
-                    FullName = parts[1].Trim(),
-                    Program = parts[2].Trim(),
-                    Email = parts.Length > 3 ? parts[3].Trim() : ""
-                };
-                if (!Store.Students.Any(x => x.StudentId == s.StudentId))
-                {
-                    Store.Students.Add(s);
-                    count++;
-                }
-            }
-            // persist
-            ModelFilePersistence.SaveStudents(Store.Students);
+            var count = await _students.ImportFromStreamAsync(csvFile.OpenReadStream());
             TempData["Success"] = $"Import thành công {count} sinh viên từ CSV!";
             return RedirectToAction("Index");
         }
@@ -141,73 +136,61 @@ namespace SIMS_WEB.Controllers
     [RequireLogin(AllowedRoles = new[] { "Admin" })]
     public class CoursesController : Controller
     {
-        private SimsDataStore Store => SimsDataStore.Instance;
+        private readonly ICourseManager _courses;
 
-        public IActionResult Index()
+        public CoursesController(ICourseManager courses)
         {
-            ViewBag.Total = Store.Courses.Count;
-            return View(Store.Courses);
+            _courses = courses;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var list = await _courses.GetAllAsync();
+            ViewBag.Total = list.Count;
+            return View(list);
         }
 
         [HttpGet]
         public IActionResult Create() => View(new Course());
 
         [HttpPost]
-        public IActionResult Create(Course model)
+        public async Task<IActionResult> Create(Course model)
         {
             if (!ModelState.IsValid) return View(model);
-            if (Store.Courses.Any(c => c.Code == model.Code))
+            var ok = await _courses.CreateAsync(model);
+            if (!ok)
             {
                 ModelState.AddModelError("Code", "Mã khóa học đã tồn tại");
                 return View(model);
             }
-            Store.Courses.Add(model);
-            // persist
-            ModelFilePersistence.SaveCourses(Store.Courses);
             TempData["Success"] = $"Đã thêm khóa học {model.Title} thành công!";
             return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public IActionResult Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var course = Store.Courses.FirstOrDefault(c => c.Code == id);
+            var course = await _courses.GetByCodeAsync(id);
             if (course == null) return NotFound();
             return View(course);
         }
 
         [HttpPost]
-        public IActionResult Edit(Course model)
+        public async Task<IActionResult> Edit(Course model)
         {
             if (!ModelState.IsValid) return View(model);
-            var existing = Store.Courses.FirstOrDefault(c => c.Code == model.Code);
-            if (existing != null)
-            {
-                existing.Title = model.Title;
-                existing.Capacity = model.Capacity;
-                existing.Instructor = model.Instructor;
-            }
-            // persist
-            ModelFilePersistence.SaveCourses(Store.Courses);
+            var ok = await _courses.UpdateAsync(model);
+            if (!ok) return NotFound();
             TempData["Success"] = "Cập nhật khóa học thành công!";
             return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            bool hasStudents = Store.Enrollments.Any(e => e.CourseCode == id);
-            if (hasStudents)
-            {
-                TempData["Error"] = "Không thể xóa khóa học đang có sinh viên đăng ký!";
-                return RedirectToAction("Index");
-            }
-            var removed = Store.RemoveCourse(id);
+            var removed = await _courses.DeleteAsync(id);
             if (removed)
             {
-                ModelFilePersistence.SaveCourses(Store.Courses);
-                // also persist students in case enrollments were removed
-                ModelFilePersistence.SaveStudents(Store.Students);
                 TempData["Success"] = "Đã xóa khóa học thành công!";
             }
             else
@@ -221,29 +204,37 @@ namespace SIMS_WEB.Controllers
     [RequireLogin(AllowedRoles = new[] { "Admin" })]
     public class EnrollmentController : Controller
     {
-        public IActionResult Index()
+        private readonly IEnrollmentManager _enrollments;
+
+        public EnrollmentController(IEnrollmentManager enrollments)
+        {
+            _enrollments = enrollments;
+        }
+
+        public async Task<IActionResult> Index()
         {
             var store = SimsDataStore.Instance;
             var vm = new EnrollmentViewModel
             {
                 Students = store.Students,
                 Courses = store.Courses,
-                EnrolledList = store.Enrollments
+                EnrolledList = await _enrollments.GetEnrollmentsAsync()
             };
             return View(vm);
         }
 
         [HttpPost]
-        public IActionResult Enroll(EnrollmentViewModel model)
+        public async Task<IActionResult> Enroll(EnrollmentViewModel model)
         {
-            var store = SimsDataStore.Instance;
-            var (success, message) = store.Enroll(model.StudentId, model.CourseCode);
-            model.Students = store.Students;
-            model.Courses = store.Courses;
-            model.EnrolledList = store.Enrollments;
-            model.Message = message;
-            model.IsSuccess = success;
-            return View("Index", model);
+            var (success, message) = await _enrollments.EnrollAsync(model.StudentId, model.CourseCode);
+            TempData["Message"] = message;
+            if (success)
+                TempData["Success"] = message;
+            else
+                TempData["Error"] = message;
+
+            // Redirect to Index so the page re-fetches fresh data from storage/managers
+            return RedirectToAction(nameof(Index));
         }
     }
 

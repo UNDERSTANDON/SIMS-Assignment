@@ -23,37 +23,45 @@ namespace SIMS_WEB.Models
 
         private SimsDataStore()
         {
-            // Seed demo students
-            Students.AddRange(new[]
+            // Try to load students and courses from the CSV-backed DataStorage on startup.
+            try
             {
-                new Student { StudentId = "SV2024001", FullName = "Nguyễn Văn An",    Program = "Công nghệ Thông tin",  Email = "an.nv@univ.edu" },
-                new Student { StudentId = "SV2024002", FullName = "Trần Thị Bình",   Program = "Kỹ thuật Phần mềm",   Email = "binh.tt@univ.edu" },
-                new Student { StudentId = "SV2024003", FullName = "Lê Hoàng Cường",  Program = "Khoa học Máy tính",    Email = "cuong.lh@univ.edu" },
-                new Student { StudentId = "SV2024004", FullName = "Phạm Thị Dung",   Program = "Quản trị Kinh doanh",  Email = "dung.pt@univ.edu" },
-            });
+                SIMS_WEB.Storage.ModelFilePersistence.EnsureDataDir();
+                var loadedStudents = SIMS_WEB.Storage.ModelFilePersistence.LoadStudents();
+                if (loadedStudents != null && loadedStudents.Any())
+                {
+                    Students.AddRange(loadedStudents);
+                }
+                var loadedCourses = SIMS_WEB.Storage.ModelFilePersistence.LoadCourses();
+                if (loadedCourses != null && loadedCourses.Any())
+                {
+                    Courses.AddRange(loadedCourses);
+                }
+            }
+            catch { }
 
-            // Seed demo courses
-            Courses.AddRange(new[]
+            // If CSVs were absent or empty, fall back to embedded demo data
+            if (!Students.Any())
             {
-                new Course { Code = "CS101", Title = "Lập trình Căn bản",     Capacity = 40, EnrolledCount = 12, Instructor = "GV. Nguyễn" },
-                new Course { Code = "CS202", Title = "Cấu trúc Dữ liệu",     Capacity = 35, EnrolledCount = 28, Instructor = "GV. Trần" },
-                new Course { Code = "BA301", Title = "Quản trị Kinh doanh",   Capacity = 50, EnrolledCount = 45, Instructor = "GV. Lê" },
-                new Course { Code = "SE401", Title = "Kỹ nghệ Phần mềm",     Capacity = 30, EnrolledCount = 5,  Instructor = "GV. Phạm" },
-            });
+                Students.AddRange(new[]
+                {
+                    new Student { StudentId = "SV2024001", FullName = "Nguyễn Văn An",    Program = "Công nghệ Thông tin",  Email = "an.nv@univ.edu" },
+                    new Student { StudentId = "SV2024002", FullName = "Trần Thị Bình",   Program = "Kỹ thuật Phần mềm",   Email = "binh.tt@univ.edu" },
+                    new Student { StudentId = "SV2024003", FullName = "Lê Hoàng Cường",  Program = "Khoa học Máy tính",    Email = "cuong.lh@univ.edu" },
+                    new Student { StudentId = "SV2024004", FullName = "Phạm Thị Dung",   Program = "Quản trị Kinh doanh",  Email = "dung.pt@univ.edu" },
+                });
+            }
 
-            Enrollments.AddRange(new[]
+            if (!Courses.Any())
             {
-                new Enrollment { StudentId = "SV2024001", CourseCode = "CS101" },
-                new Enrollment { StudentId = "SV2024001", CourseCode = "CS202" },
-                new Enrollment { StudentId = "SV2024002", CourseCode = "CS101" },
-            });
-
-            Grades.AddRange(new[]
-            {
-                new GradeRecord { StudentId = "SV2024001", CourseCode = "CS101", Score = 85 },
-                new GradeRecord { StudentId = "SV2024001", CourseCode = "CS202", Score = 78 },
-                new GradeRecord { StudentId = "SV2024002", CourseCode = "CS101", Score = 92 },
-            });
+                Courses.AddRange(new[]
+                {
+                    new Course { Code = "CS101", Title = "Lập trình Căn bản",     Capacity = 40, EnrolledCount = 12, Instructor = "GV. Nguyễn" },
+                    new Course { Code = "CS202", Title = "Cấu trúc Dữ liệu",     Capacity = 35, EnrolledCount = 28, Instructor = "GV. Trần" },
+                    new Course { Code = "BA301", Title = "Quản trị Kinh doanh",   Capacity = 50, EnrolledCount = 45, Instructor = "GV. Lê" },
+                    new Course { Code = "SE401", Title = "Kỹ nghệ Phần mềm",     Capacity = 30, EnrolledCount = 5,  Instructor = "GV. Phạm" },
+                });
+            }
         }
 
         // ============ Facade Pattern helpers ============

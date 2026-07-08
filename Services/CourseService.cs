@@ -81,8 +81,22 @@ namespace SIMS_Assignment.Services
                 // persist course counts to storage CSV if available
                 try
                 {
-                    // ModelFilePersistence is in SIMS_WEB.Storage
-                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(SIMS_WEB.Models.SimsDataStore.Instance.Courses);
+                    var storeCourses = SIMS_WEB.Models.SimsDataStore.Instance.Courses;
+                    // save web-model CSV files
+                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(storeCourses);
+                    // also persist each course into IDataStorage (CSV engine) by mapping models
+                    foreach (var c in storeCourses)
+                    {
+                        var a = new SIMS_Assignment.Models.Course
+                        {
+                            CourseId = c.Code,
+                            CourseName = c.Title,
+                            Credits = c.Capacity,
+                            LecturerId = 0,
+                            EnrolledStudentIds = new List<int>()
+                        };
+                        _storage.SaveCourseAsync(a).GetAwaiter().GetResult();
+                    }
                 }
                 catch { }
             }
@@ -96,7 +110,20 @@ namespace SIMS_Assignment.Services
             {
                 try
                 {
-                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(SIMS_WEB.Models.SimsDataStore.Instance.Courses);
+                    var storeCourses = SIMS_WEB.Models.SimsDataStore.Instance.Courses;
+                    SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(storeCourses);
+                    foreach (var c in storeCourses)
+                    {
+                        var a = new SIMS_Assignment.Models.Course
+                        {
+                            CourseId = c.Code,
+                            CourseName = c.Title,
+                            Credits = c.Capacity,
+                            LecturerId = 0,
+                            EnrolledStudentIds = new List<int>()
+                        };
+                        _storage.SaveCourseAsync(a).GetAwaiter().GetResult();
+                    }
                 }
                 catch { }
             }

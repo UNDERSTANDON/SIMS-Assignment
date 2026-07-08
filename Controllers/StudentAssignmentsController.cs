@@ -3,6 +3,7 @@ using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_Assignment.Services.CourseServices;
 using SIMS_Assignment.Models.CourseRelatedModels;
+using Microsoft.AspNetCore.Http;
 
 namespace SIMS_WEB.Controllers
 {

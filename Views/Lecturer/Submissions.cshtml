@@ -1,0 +1,47 @@
+@model List<SIMS_Assignment.Models.CourseRelatedModels.Submission>
+@{
+    ViewData["Title"] = "Submissions";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">Danh sách n?p bài</h1>
+    </div>
+
+    <div class="sims-card p-3">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>SV</th>
+                    <th>Tiêu ??</th>
+                    <th>Ngày n?p</th>
+                    <th>File</th>
+                    <th>?i?m</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var s in Model)
+                {
+                    <tr>
+                        <td>@s.StudentId</td>
+                        <td>@s.AssignmentTitle</td>
+                        <td>@s.SubmissionDate.ToString("g")</td>
+                        <td>@(string.IsNullOrEmpty(s.FilePath) ? "-" : $"<a href=\"/@s.FilePath\">T?i xu?ng</a>")</td>
+                        <td>@(s.Grade.HasValue ? s.Grade.ToString() : "-")</td>
+                        <td>
+                            <form asp-action="Grade" method="post" class="d-inline">
+                                <input type="hidden" name="submissionId" value="@s.Id" />
+                                <input type="number" name="grade" min="0" max="100" step="0.1" class="form-control d-inline w-25" placeholder="?i?m" />
+                                <input type="text" name="feedback" class="form-control d-inline w-50 ms-2" placeholder="Ghi chú" />
+                                <button class="btn btn-sims-primary ms-2">Ghi ?i?m</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <a asp-action="Index" class="btn btn-sims-outline">Quay l?i</a>
+    </div>
+</div>
