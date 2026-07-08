@@ -5,7 +5,6 @@ using SIMS_Assignment.Services.CourseServices;
 using SIMS_Assignment.Models.CourseRelatedModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using System.IO;
 
 namespace SIMS_WEB.Controllers
@@ -109,6 +108,11 @@ namespace SIMS_WEB.Controllers
                     await using var fs = new FileStream(filePath, FileMode.Create);
                     await file.CopyToAsync(fs);
                     mat.FilePath = Path.Combine("DataStorage", "Materials", fileName);
+                    mat.OriginalFileName = file.FileName;
+                    Console.WriteLine($"Saved uploaded file to {filePath}");
+
+                    // Save file mapping to JSON for retrieval
+                    _materials.SaveFileMapping(mat.Id, file.FileName, fileName, courseId);
                 }
                 catch (Exception ex)
                 {
@@ -145,6 +149,96 @@ namespace SIMS_WEB.Controllers
             _assignments.AddAssignment(a);
             TempData["Success"] = "Đã tạo bài tập thành công";
             return RedirectToAction("Manage", new { id = courseCode });
+        }
+
+        public IActionResult DownloadMaterial(string materialId)
+        {
+            try
+            {
+                // Get the material from the handler
+                var material = _materials.GetAll().FirstOrDefault(m => m.Id == materialId);
+                if (material == null)
+                    return NotFound("Tài liệu không tìm thấy");
+
+                // Get the file mapping with original filename
+                var fileMapping = _materials.GetFileMapping(materialId);
+                if (fileMapping == null)
+                    return NotFound("Thông tin tệp không tìm thấy");
+
+                // Build the full file path
+                var filePath = Path.Combine(_env.ContentRootPath, material.FilePath);
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound("Tệp không tìm thấy trên máy chủ");
+
+                // Read the file and return it with the original filename
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                var fileName = fileMapping.OriginalFileName;
+                var contentType = GetContentType(fileName);
+
+                return File(fileBytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error downloading material: {ex.Message}");
+                return StatusCode(500, "Lỗi tải tệp");
+            }
+        }
+
+        private string GetContentType(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".xls" => "application/vnd.ms-excel",
+                ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".txt" => "text/plain",
+                ".zip" => "application/zip",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                _ => "application/octet-stream"
+            };
+        }
+
+        public IActionResult DownloadSubmission(string submissionId)
+        {
+            try
+            {
+                // Get the SubmissionHandler from dependency injection
+                var submissionHandler = HttpContext.RequestServices.GetService(typeof(SubmissionHandler)) as SubmissionHandler;
+                if (submissionHandler == null)
+                    return StatusCode(500, "Không thể tải dịch vụ xử lý bài nộp");
+
+                // Get the submission
+                var submission = submissionHandler.GetById(submissionId);
+                if (submission == null)
+                    return NotFound("Bài nộp không tìm thấy");
+
+                if (string.IsNullOrEmpty(submission.FilePath))
+                    return BadRequest("Bài nộp này không có tệp đính kèm");
+
+                // Build the full file path
+                var filePath = Path.Combine(_env.ContentRootPath, submission.FilePath);
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound("Tệp không tìm thấy trên máy chủ");
+
+                // Read the file and return it with the original filename
+                var fileBytes = System.IO.File.ReadAllBytes(filePath);
+                var fileName = submission.OriginalFileName ?? Path.GetFileName(submission.FilePath);
+                var contentType = GetContentType(fileName);
+
+                return File(fileBytes, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error downloading submission: {ex.Message}");
+                return StatusCode(500, "Lỗi tải tệp");
+            }
         }
     }
 
