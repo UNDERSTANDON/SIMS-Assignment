@@ -5,6 +5,46 @@ using SIMS_Assignment.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ensure chosen ports are available; if not, pick free ports to avoid hard crash when default ports are in use.
+static bool PortAvailable(int port)
+{
+    try
+    {
+        var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, port);
+        listener.Start();
+        listener.Stop();
+        return true;
+    }
+    catch { return false; }
+}
+
+static int GetFreePort()
+{
+    var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+    listener.Start();
+    var port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+    listener.Stop();
+    return port;
+}
+
+// Default ports used by the templates; if they are busy, select alternatives and instruct Kestrel to use them.
+int desiredHttp = 5126;
+int desiredHttps = 7235;
+if (!PortAvailable(desiredHttp))
+{
+    var alt = GetFreePort();
+    Console.WriteLine($"Port {desiredHttp} is in use, falling back to {alt} for HTTP.");
+    desiredHttp = alt;
+}
+if (!PortAvailable(desiredHttps))
+{
+    var alt = GetFreePort();
+    Console.WriteLine($"Port {desiredHttps} is in use, falling back to {alt} for HTTPS.");
+    desiredHttps = alt;
+}
+
+builder.WebHost.UseUrls($"http://127.0.0.1:{desiredHttp}", $"https://127.0.0.1:{desiredHttps}");
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 // Register CSV-backed storage and password hasher
@@ -45,6 +85,61 @@ catch (Exception ex)
     Console.WriteLine($"Startup data initialization failed: {ex}");
 }
 
+// Global exception handlers to capture unexpected crashes during runtime
+void LogUnhandled(Exception? ex, string? source = null)
+{
+    try
+    {
+        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+        var path = Path.Combine(dataDir, "last_error.txt");
+        var text = $"[{DateTime.Now:O}] Unhandled ({source})\n{ex}\n\n";
+        File.AppendAllText(path, text);
+        Console.WriteLine(text);
+    }
+    catch { }
+}
+
+AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+{
+    LogUnhandled(e.ExceptionObject as Exception, "AppDomain.UnhandledException");
+};
+
+// First-chance exceptions are raised when the runtime first encounters an exception.
+// Recording them helps diagnose crashes that may be swallowed or escalate to native failures.
+AppDomain.CurrentDomain.FirstChanceException += (s, e) =>
+{
+    try
+    {
+        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+        var path = Path.Combine(dataDir, "first_chance.txt");
+        var text = $"[{DateTime.Now:O}] FirstChance: {e.Exception}\n\n";
+        File.AppendAllText(path, text);
+    }
+    catch { }
+};
+
+// Log when the process is exiting so we can see abrupt terminations that don't raise managed exceptions
+AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+{
+    try
+    {
+        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+        var path = Path.Combine(dataDir, "process_exit_log.txt");
+        var text = $"[{DateTime.Now:O}] ProcessExit. Environment: OS={Environment.OSVersion}, PID={Environment.ProcessId}\n";
+        File.AppendAllText(path, text);
+    }
+    catch { }
+};
+
+TaskScheduler.UnobservedTaskException += (s, e) =>
+{
+    LogUnhandled(e.Exception, "TaskScheduler.UnobservedTaskException");
+    e.SetObserved();
+};
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -53,6 +148,45 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+// Log every incoming request to help determine whether browser requests reach the server
+app.Use(async (context, next) =>
+{
+    try
+    {
+        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
+        var path = Path.Combine(dataDir, "request_log.txt");
+        var info = $"[{DateTime.Now:O}] {context.Request.Method} {context.Request.Path} Content-Length:{context.Request.ContentLength} Remote:{context.Connection.RemoteIpAddress}\n";
+        File.AppendAllText(path, info);
+    }
+    catch { }
+    await next();
+});
+// Exception-catching middleware placed early in the pipeline to capture errors that occur
+// during request processing (including model binding) so they don't terminate the process
+// before controller breakpoints are hit. This will log the exception via the existing
+// LogUnhandled helper and return a 500 response.
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        try
+        {
+            LogUnhandled(ex, "Middleware.UnhandledException");
+        }
+        catch { }
+        // Ensure we don't rethrow; return a 500 page to the client.
+        if (!context.Response.HasStarted)
+        {
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsync("An internal error occurred. The error has been logged.");
+        }
+    }
+});
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
@@ -61,4 +195,17 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    LogUnhandled(ex, "App.Run");
+    // keep console open for debugging when running from VS
+    Console.ReadKey();
+    throw;
+}
+
+public partial class Program { }
+

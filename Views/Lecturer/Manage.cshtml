@@ -23,7 +23,7 @@
                     }
                 </ul>
 
-                <form asp-action="AddMaterial" method="post" enctype="multipart/form-data">
+                <form asp-controller="Lecturer" asp-action="AddMaterial" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="courseId" value="@Model.Course.Code" />
                     <div class="mb-2">
                         <input name="title" class="form-control" placeholder="Tiêu đề" />
@@ -51,7 +51,7 @@
                     }
                 </ul>
 
-                <form asp-action="AddAssignment" method="post">
+                <form asp-controller="Lecturer" asp-action="AddAssignment" method="post">
                     <input type="hidden" name="courseCode" value="@Model.Course.Code" />
                     <div class="mb-2">
                         <input name="title" class="form-control" placeholder="Tiêu đề bài tập" />

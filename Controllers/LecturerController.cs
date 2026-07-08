@@ -1,8 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_Assignment.Services.CourseServices;
 using SIMS_Assignment.Models.CourseRelatedModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace SIMS_WEB.Controllers
 {
@@ -12,11 +16,13 @@ namespace SIMS_WEB.Controllers
         private readonly SimsDataStore _store = SimsDataStore.Instance;
         private readonly MaterialHandler _materials;
         private readonly AssignmentHandler _assignments;
+        private readonly IWebHostEnvironment _env;
 
-        public LecturerController(MaterialHandler materials, AssignmentHandler assignments)
+        public LecturerController(MaterialHandler materials, AssignmentHandler assignments, IWebHostEnvironment env)
         {
             _materials = materials;
             _assignments = assignments;
+            _env = env;
         }
 
         public IActionResult Submissions(string assignmentId)
@@ -39,7 +45,7 @@ namespace SIMS_WEB.Controllers
         public IActionResult Index()
         {
             // For now show all courses; in future filter by lecturer identity
-            ViewBag.Username = HttpContext.Session.GetString("Username") ?? "Gi?ng vi�n";
+            ViewBag.Username = HttpContext.Session.GetString("Username") ?? "Giảng viên";
             ViewData["ActivePage"] = "FacultyCourses";
             return View(_store.Courses);
         }
@@ -51,7 +57,8 @@ namespace SIMS_WEB.Controllers
             var vm = new LecturerCourseViewModel
             {
                 Course = course,
-                Materials = _materials.GetType().GetField("_materials", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance) == null ? new List<Material>() : null
+                Materials = _materials.GetType().GetField("_materials", System.Reflection.BindingFlags.NonPublic | 
+                System.Reflection.BindingFlags.Instance) == null ? new List<Material>() : null
             };
             // Since MaterialHandler keeps private list, we'll expose materials via reflection for this demo
             var field = typeof(MaterialHandler).GetField("_materials", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -72,11 +79,11 @@ namespace SIMS_WEB.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddMaterial(string courseId, string title, string description, IFormFile? file)
+        public async Task<IActionResult> AddMaterial(string courseId, string title, string description, IFormFile? file)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
-                TempData["Error"] = "Ti�u ?? kh�ng ???c ?? tr?ng";
+                TempData["Error"] = "Tiêu đề không được để trống";
                 return RedirectToAction("Manage", new { id = courseId });
             }
 
@@ -91,17 +98,31 @@ namespace SIMS_WEB.Controllers
 
             if (file != null && file.Length > 0)
             {
-                var storage = Path.Combine(AppContext.BaseDirectory, "DataStorage", "Materials");
-                if (!Directory.Exists(storage)) Directory.CreateDirectory(storage);
-                var fileName = mat.Id + Path.GetExtension(file.FileName);
-                var filePath = Path.Combine(storage, fileName);
-                using var fs = new FileStream(filePath, FileMode.Create);
-                file.CopyTo(fs);
-                mat.FilePath = Path.Combine("DataStorage", "Materials", fileName);
+                try
+                {
+                    // Use the content root path provided by the host environment so the app writes
+                    // files relative to the application's folder and not to a runtime-specific base.
+                    var storage = Path.Combine(_env.ContentRootPath, "DataStorage", "Materials");
+                    if (!Directory.Exists(storage)) Directory.CreateDirectory(storage);
+                    var fileName = mat.Id + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(storage, fileName);
+                    await using var fs = new FileStream(filePath, FileMode.Create);
+                    await file.CopyToAsync(fs);
+                    mat.FilePath = Path.Combine("DataStorage", "Materials", fileName);
+                }
+                catch (Exception ex)
+                {
+                    // Prevent an unhandled exception from taking down the process. Surface a friendly
+                    // error message to the user and log the exception to console (startup logging will
+                    // also capture it via the AppDomain handlers in Program.cs).
+                    Console.WriteLine($"Failed to save uploaded file: {ex}");
+                    TempData["Error"] = "Không thể lưu tệp được tải lên. Vui lòng thử lại hoặc liên hệ quản trị.";
+                    return RedirectToAction("Manage", new { id = courseId });
+                }
             }
 
             _materials.AddMaterial(mat);
-            TempData["Success"] = "?� th�m t�i li?u th�nh c�ng";
+            TempData["Success"] = "Đã thêm tài liệu thành công";
             return RedirectToAction("Manage", new { id = courseId });
         }
 
@@ -110,7 +131,7 @@ namespace SIMS_WEB.Controllers
         {
             if (string.IsNullOrWhiteSpace(title))
             {
-                TempData["Error"] = "Ti�u ?? kh�ng ???c ?? tr?ng";
+                TempData["Error"] = "Tiêu đề không được để trống";
                 return RedirectToAction("Manage", new { id = courseCode });
             }
             var a = new Assignment
@@ -122,7 +143,7 @@ namespace SIMS_WEB.Controllers
                 CourseCode = courseCode
             };
             _assignments.AddAssignment(a);
-            TempData["Success"] = "?� t?o b�i t?p th�nh c�ng";
+            TempData["Success"] = "Đã tạo bài tập thành công";
             return RedirectToAction("Manage", new { id = courseCode });
         }
     }
