@@ -1,0 +1,51 @@
+@model CourseEnrollmentsViewModel
+@{
+    ViewData["Title"] = "Sinh viên đã đăng ký";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">Sinh viên: @Model.Course.Title (<code>@Model.Course.Code</code>)</h1>
+    </div>
+
+    <div class="sims-card p-3">
+        <div class="mb-3">
+            <h5>Tổng số sinh viên đã đăng ký: <strong>@Model.EnrollmentCount / @Model.Course.Capacity</strong></h5>
+            <p class="text-muted">Sức chứa: @Model.Course.CapacityPercent%</p>
+        </div>
+
+        @if (Model.EnrolledStudents.Any())
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>MSSV</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Chương trình đào tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.EnrolledStudents.OrderBy(s => s.StudentId))
+                    {
+                        <tr>
+                            <td><code>@student.StudentId</code></td>
+                            <td>@student.FullName</td>
+                            <td>@student.Email</td>
+                            <td>@student.Program</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                Chưa có sinh viên nào đăng ký khóa học này.
+            </div>
+        }
+
+        <a asp-action="Index" class="btn btn-sims-outline mt-3">Quay lại</a>
+    </div>
+</div>

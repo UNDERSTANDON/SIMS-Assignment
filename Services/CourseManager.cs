@@ -120,11 +120,8 @@ namespace SIMS_Assignment.Services
                     catch { }
                     try
                     {
-                        // remove from IDataStorage by saving remaining courses
-                        foreach (var c in store.Courses)
-                        {
-                            _storage.SaveCourseAsync(ToAssignmentCourse(c)).GetAwaiter().GetResult();
-                        }
+                        // remove from IDataStorage permanent storage and keep file in sync
+                        _storage.DeleteCourseAsync(code).GetAwaiter().GetResult();
                     }
                     catch { }
                 }

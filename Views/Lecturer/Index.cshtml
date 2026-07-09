@@ -22,6 +22,7 @@
                     <td>@c.Instructor</td>
                     <td>
                         <a class="btn btn-sims-outline btn-sm" asp-action="Manage" asp-route-id="@c.Code">Quản lý</a>
+                        <a class="btn btn-sims-primary btn-sm ms-2" asp-action="Enrollments" asp-route-courseCode="@c.Code">Sinh viên (@c.EnrolledCount)</a>
                     </td>
                 </tr>
             }

@@ -78,5 +78,45 @@ namespace SIMS_Assignment.Services
                 return Task.FromResult(true);
             }
         }
+
+        public Task<List<Enrollment>> GetEnrollmentsByCourseAsync(string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            var enrollments = store.Enrollments
+                .Where(e => e.CourseCode == courseCode && e.IsEnrolled)
+                .ToList();
+            return Task.FromResult(enrollments);
+        }
+
+        public Task<List<Student>> GetEnrolledStudentsByCourseAsync(string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            var enrolledStudentIds = store.Enrollments
+                .Where(e => e.CourseCode == courseCode && e.IsEnrolled)
+                .Select(e => e.StudentId)
+                .ToHashSet();
+
+            var students = store.Students
+                .Where(s => enrolledStudentIds.Contains(s.StudentId))
+                .ToList();
+
+            return Task.FromResult(students);
+        }
+
+        public Task<int> GetEnrollmentCountAsync(string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            var count = store.Enrollments
+                .Count(e => e.CourseCode == courseCode && e.IsEnrolled);
+            return Task.FromResult(count);
+        }
+
+        public Task<bool> IsStudentEnrolledAsync(string studentId, string courseCode)
+        {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            var isEnrolled = store.Enrollments
+                .Any(e => e.StudentId == studentId && e.CourseCode == courseCode && e.IsEnrolled);
+            return Task.FromResult(isEnrolled);
+        }
     }
 }

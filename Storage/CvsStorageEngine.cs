@@ -154,6 +154,27 @@ namespace SIMS_Assignment.Storage
             }
         }
 
+        public Task<bool> DeleteCourseAsync(string courseId)
+        {
+            lock (_lock)
+            {
+                if (!File.Exists(CoursesPath)) return Task.FromResult(false);
+
+                var lines = File.ReadAllLines(CoursesPath, Encoding.UTF8).ToList();
+                var remaining = lines.Where(line =>
+                {
+                    if (string.IsNullOrWhiteSpace(line)) return false;
+                    var parts = line.Split(',');
+                    return parts.Length == 0 || parts[0] != courseId;
+                }).ToList();
+
+                if (remaining.Count == lines.Count) return Task.FromResult(false);
+
+                File.WriteAllLines(CoursesPath, remaining, Encoding.UTF8);
+                return Task.FromResult(true);
+            }
+        }
+
         public Task<bool> SaveUserAsync(User user)
         {
             lock (_lock)

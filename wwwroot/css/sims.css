@@ -161,6 +161,15 @@ body::before {
   gap: 0;
 }
 
+/* Preserve Bootstrap collapse behavior for mobile / collapsed nav state */
+.sims-navbar .navbar-collapse.collapse:not(.show) {
+  display: none !important;
+}
+
+.sims-navbar .navbar-collapse.collapse.show {
+  display: flex !important;
+}
+
 .sims-navbar .nav-link {
   color: var(--text-tertiary) !important;
   font-size: 0.8rem !important;

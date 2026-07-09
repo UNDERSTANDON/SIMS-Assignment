@@ -44,6 +44,13 @@ namespace SIMS_WEB.Models
         public string StudentId { get; set; } = "";
         public string CourseCode { get; set; } = "";
         public DateTime EnrolledAt { get; set; } = DateTime.Now;
+        public bool IsEnrolled { get; set; } = true;
+    }
+
+    public static class EnrollmentHelper
+    {
+        public static bool IsStudentEnrolled(IEnumerable<Enrollment> enrollments, string studentId, string courseCode)
+            => enrollments.Any(e => e.StudentId == studentId && e.CourseCode == courseCode && e.IsEnrolled);
     }
 
     public class GradeRecord

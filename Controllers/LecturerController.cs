@@ -2,6 +2,7 @@
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_Assignment.Services.CourseServices;
+using SIMS_Assignment.Services;
 using SIMS_Assignment.Models.CourseRelatedModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
@@ -15,12 +16,14 @@ namespace SIMS_WEB.Controllers
         private readonly SimsDataStore _store = SimsDataStore.Instance;
         private readonly MaterialHandler _materials;
         private readonly AssignmentHandler _assignments;
+        private readonly IEnrollmentManager _enrollmentManager;
         private readonly IWebHostEnvironment _env;
 
-        public LecturerController(MaterialHandler materials, AssignmentHandler assignments, IWebHostEnvironment env)
+        public LecturerController(MaterialHandler materials, AssignmentHandler assignments, IEnrollmentManager enrollmentManager, IWebHostEnvironment env)
         {
             _materials = materials;
             _assignments = assignments;
+            _enrollmentManager = enrollmentManager;
             _env = env;
         }
 
@@ -47,6 +50,25 @@ namespace SIMS_WEB.Controllers
             ViewBag.Username = HttpContext.Session.GetString("Username") ?? "Giảng viên";
             ViewData["ActivePage"] = "FacultyCourses";
             return View(_store.Courses);
+        }
+
+        public async Task<IActionResult> Enrollments(string courseCode)
+        {
+            var course = _store.Courses.FirstOrDefault(c => c.Code == courseCode);
+            if (course == null) return NotFound();
+
+            var enrolledStudents = await _enrollmentManager.GetEnrolledStudentsByCourseAsync(courseCode);
+            var enrollmentCount = await _enrollmentManager.GetEnrollmentCountAsync(courseCode);
+
+            var vm = new CourseEnrollmentsViewModel
+            {
+                Course = course,
+                EnrolledStudents = enrolledStudents,
+                EnrollmentCount = enrollmentCount
+            };
+
+            ViewData["ActivePage"] = "FacultyCourses";
+            return View(vm);
         }
 
         public IActionResult Manage(string id)
@@ -250,5 +272,13 @@ namespace SIMS_WEB.Controllers
         public SIMS_WEB.Models.Course Course { get; set; } = new SIMS_WEB.Models.Course();
         public List<Material> Materials { get; set; } = new();
         public List<Assignment> Assignments { get; set; } = new();
+    }
+
+    // ViewModel for the course enrollments page
+    public class CourseEnrollmentsViewModel
+    {
+        public SIMS_WEB.Models.Course Course { get; set; } = new SIMS_WEB.Models.Course();
+        public List<Student> EnrolledStudents { get; set; } = new();
+        public int EnrollmentCount { get; set; }
     }
 }

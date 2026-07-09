@@ -1,4 +1,4 @@
-﻿@model List<SIMS_WEB.Models.Course>
+@model List<SIMS_WEB.Models.Course>
 @{
     ViewData["Title"] = "Quản lý Khóa học";
     ViewData["ActivePage"] = "Courses";
@@ -63,8 +63,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
-                                    <a asp-action="Edit" asp-route-id="@c.Code"
-                                       class="btn btn-sims-outline btn-sm py-1 px-2">
+                                    <a asp-action="Edit" asp-route-id="@c.Code" class="btn btn-sims-outline btn-sm py-1 px-2">
                                         <i class="fa-solid fa-pen fa-xs"></i>
                                     </a>
                                     <button class="btn btn-sims-danger btn-sm py-1 px-2"

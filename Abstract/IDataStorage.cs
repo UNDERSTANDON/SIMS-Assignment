@@ -7,6 +7,7 @@ namespace SIMS_Assignment.Abstract
         Task<bool> SaveUserAsync(User user);
         Task<User> GetUserByNameAsync(string name);
         Task<bool> SaveCourseAsync(Course course);
+        Task<bool> DeleteCourseAsync(string courseId);
         Task<List<Course>> GetAllCoursesAsync();
         Task<List<User>> GetAllUsersAsync();
     }
