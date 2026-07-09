@@ -2,8 +2,14 @@ using SIMS_Assignment.Abstract;
 using SIMS_Assignment.Authentication.SecurityHasher;
 using SIMS_Assignment.Storage;
 using SIMS_Assignment.Services;
+using SIMS_WEB.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Unify all DataStorage paths to use the project root (ContentRootPath) so data
+// files are not duplicated in bin/Debug/net9.0/DataStorage.
+var dataStoragePath = Path.Combine(builder.Environment.ContentRootPath, "DataStorage");
+ModelFilePersistence.DataDir = dataStoragePath;
 
 // Ensure chosen ports are available; if not, pick free ports to avoid hard crash when default ports are in use.
 static bool PortAvailable(int port)
@@ -48,10 +54,9 @@ builder.WebHost.UseUrls($"http://127.0.0.1:{desiredHttp}", $"https://127.0.0.1:{
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 // Register CSV-backed storage and password hasher
-// Store CSV files under the application base directory in a `DataStorage` folder
-// (use AppContext.BaseDirectory so the startup initializer and storage engine use the same path)
+// Store CSV files under the content root in a `DataStorage` folder
 builder.Services.AddSingleton<IDataStorage>(sp =>
-    new CvsStorageEngine(Path.Combine(AppContext.BaseDirectory, "DataStorage")));
+    new CvsStorageEngine(dataStoragePath));
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 // Course-related handlers for materials, assignments, submissions
 builder.Services.AddSingleton<SIMS_Assignment.Services.CourseServices.MaterialHandler>();
@@ -90,7 +95,7 @@ void LogUnhandled(Exception? ex, string? source = null)
 {
     try
     {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        var dataDir = dataStoragePath;
         if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
         var path = Path.Combine(dataDir, "last_error.txt");
         var text = $"[{DateTime.Now:O}] Unhandled ({source})\n{ex}\n\n";
@@ -111,7 +116,7 @@ AppDomain.CurrentDomain.FirstChanceException += (s, e) =>
 {
     try
     {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        var dataDir = dataStoragePath;
         if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
         var path = Path.Combine(dataDir, "first_chance.txt");
         var text = $"[{DateTime.Now:O}] FirstChance: {e.Exception}\n\n";
@@ -125,7 +130,7 @@ AppDomain.CurrentDomain.ProcessExit += (s, e) =>
 {
     try
     {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        var dataDir = dataStoragePath;
         if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
         var path = Path.Combine(dataDir, "process_exit_log.txt");
         var text = $"[{DateTime.Now:O}] ProcessExit. Environment: OS={Environment.OSVersion}, PID={Environment.ProcessId}\n";
@@ -153,7 +158,7 @@ app.Use(async (context, next) =>
 {
     try
     {
-        var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        var dataDir = dataStoragePath;
         if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
         var path = Path.Combine(dataDir, "request_log.txt");
         var info = $"[{DateTime.Now:O}] {context.Request.Method} {context.Request.Path} Content-Length:{context.Request.ContentLength} Remote:{context.Connection.RemoteIpAddress}\n";

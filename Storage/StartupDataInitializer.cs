@@ -4,7 +4,7 @@ namespace SIMS_WEB.Storage
 {
     public class StartupDataInitializer
     {
-        private readonly string _dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        private string _dataDir => SIMS_WEB.Storage.ModelFilePersistence.DataDir;
         public void Initialize()
         {
             ModelFilePersistence.EnsureDataDir();

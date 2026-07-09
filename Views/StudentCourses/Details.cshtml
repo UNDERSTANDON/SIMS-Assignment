@@ -1,4 +1,4 @@
-﻿@model SIMS_WEB.Controllers.StudentCourseDetailsViewModel
+@model SIMS_WEB.Controllers.StudentCourseDetailsViewModel
 @{
     ViewData["Title"] = "Khóa học";
 }
@@ -13,7 +13,7 @@
         <div class="sims-card p-4 text-center">
             <h4>Bạn chưa ghi danh vào khóa học này</h4>
             <p class="text-muted">Để truy cập tài liệu và bài tập, hãy ghi danh vào khóa học.</p>
-            <form asp-action="Enroll" method="post">
+            <form asp-action="Enroll" asp-route-id="@Model.Course.Code" method="post">
                 <button class="btn btn-sims-primary btn-lg">Ghi danh ngay</button>
             </form>
         </div>

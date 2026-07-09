@@ -1,4 +1,4 @@
-﻿@model SIMS_WEB.Controllers.SubmitViewModel
+@model SIMS_WEB.Controllers.SubmitViewModel
 @{
     ViewData["Title"] = "Nộp bài";
 }
@@ -9,7 +9,7 @@
     </div>
 
     <div class="sims-card p-3">
-        <form asp-action="Submit" method="post">
+        <form asp-action="Submit" method="post" enctype="multipart/form-data">
             <input type="hidden" name="assignmentId" value="@Model.Assignment.Id" />
             <div class="mb-3">
                 <label class="form-label">Sinh viên</label>

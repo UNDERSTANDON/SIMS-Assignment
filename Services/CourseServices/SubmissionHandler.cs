@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using SIMS_Assignment.Models.CourseRelatedModels;
+using Microsoft.AspNetCore.Hosting;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
@@ -10,9 +11,9 @@ namespace SIMS_Assignment.Services.CourseServices
         private readonly string _storagePath;
         private readonly object _fileLock = new();
 
-        public SubmissionHandler()
+        public SubmissionHandler(IWebHostEnvironment env)
         {
-            var dataDir = Path.Combine(AppContext.BaseDirectory, "DataStorage");
+            var dataDir = Path.Combine(env.ContentRootPath, "DataStorage");
             if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
             _storagePath = Path.Combine(dataDir, "submissions.json");
             LoadFromDisk();
