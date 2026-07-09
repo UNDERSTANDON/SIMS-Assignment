@@ -11,8 +11,8 @@ namespace SIMS_Assignment.Services.CourseServices
         public CourseServiceFacade(IWebHostEnvironment env)
         {
             _materialHandler = new MaterialHandler(env);
-            _assignmentHandler = new AssignmentHandler();
-            _submissionHandler = new SubmissionHandler();
+            _assignmentHandler = new AssignmentHandler(env);
+            _submissionHandler = new SubmissionHandler(env);
         }
         public void AddMaterials(Material material)
         {

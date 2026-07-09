@@ -1,19 +1,19 @@
 @model SIMS_WEB.Controllers.StudentAssignmentsViewModel
 @{
-    ViewData["Title"] = "B�i t?p - Sinh vi�n";
+    ViewData["Title"] = "Bài tập - Sinh viên";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
-        <h1 class="sims-page-title">B�i t?p ?� ???c giao</h1>
+        <h1 class="sims-page-title">Bài tập đã được giao</h1>
     </div>
 
     <div class="sims-card p-3 mb-3">
         <form method="get" class="row gy-2 gx-2 align-items-end">
             <div class="col-md-4">
-                <label class="form-label">Sinh vi�n</label>
+                <label class="form-label">Sinh viên</label>
                 <select name="studentId" class="form-select">
-                    <option value="">-- Ch?n sinh vi�n --</option>
+                    <option value="">-- Chọn sinh viên --</option>
                     @foreach(var s in Model.Students)
                     {
                         if (s.StudentId == Model.StudentId)
@@ -28,7 +28,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button class="btn btn-sims-primary">L?c</button>
+                <button class="btn btn-sims-primary">Lọc</button>
             </div>
         </form>
     </div>
@@ -36,7 +36,7 @@
     <div class="sims-card p-3">
         @if (!Model.Assignments.Any())
         {
-            <div>Kh�ng c� b�i t?p n�o. Ch?n sinh vi�n ?? th?y c�c b�i t?p ?� giao.</div>
+            <div>Không có bài tập nào. Chọn sinh viên để thấy các bài tập đã giao.</div>
         }
         else
         {
@@ -46,9 +46,9 @@
                     var course = Model.Courses.FirstOrDefault(c => c.Code == a.CourseCode);
                     <li class="mb-2">
                         <strong>@a.Title</strong> <span class="text-muted">(@course?.Title ?? a.CourseCode)</span>
-                        <div class="text-muted">H?n n?p: @a.DueDate.ToString("g")</div>
+                        <div class="text-muted">Hạn nộp: @a.DueDate.ToString("g")</div>
                         <div class="mt-1">
-                            <a asp-action="Submit" asp-route-courseCode="@a.CourseCode" asp-route-assignmentId="@a.Id" class="btn btn-sims-outline btn-sm">N?p b�i</a>
+                            <a asp-action="Submit" asp-route-courseCode="@a.CourseCode" asp-route-assignmentId="@a.Id" class="btn btn-sims-outline btn-sm">Nộp bài</a>
                         </div>
                     </li>
                 }

@@ -6,7 +6,12 @@ namespace SIMS_WEB.Storage
 {
     public static class ModelFilePersistence
     {
-        private static string DataDir => Path.Combine(AppContext.BaseDirectory, "DataStorage");
+        private static string? _dataDir;
+        public static string DataDir
+        {
+            get => _dataDir ?? Path.Combine(AppContext.BaseDirectory, "DataStorage");
+            set => _dataDir = value;
+        }
 
         public static void EnsureDataDir()
         {
