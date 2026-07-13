@@ -325,8 +325,28 @@ body::before {
   font-size: 0.875rem;
 }
 
+.table thead th:first-child,
+.table tbody td:first-child {
+  color: var(--text-primary) !important;
+}
+
+.table tbody td:first-child a,
+.table tbody td:first-child button {
+  color: inherit !important;
+}
+
 .table tbody tr:last-child td { border-bottom: none !important; }
 .table tbody tr:hover { background: rgba(255,255,255,0.015); }
+
+/* Fix: ensure table rows don't force a light background and
+   make first column text readable in dark mode */
+.sims-table-wrap .table { background: transparent !important; }
+.sims-table-wrap .table tbody td { background: transparent !important; }
+.table tbody td:first-child,
+.table tbody td:first-child * {
+  color: var(--text-primary) !important;
+  opacity: 1 !important;
+}
 
 /* ===== FORM ELEMENTS ===== */
 .form-control, .form-select {
