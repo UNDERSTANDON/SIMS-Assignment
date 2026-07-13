@@ -5,6 +5,19 @@ namespace SIMS_WEB.Controllers
 {
     public class AccountController : Controller
     {
+        private static string NormalizeRole(string? role)
+        {
+            if (string.IsNullOrWhiteSpace(role)) return string.Empty;
+
+            return role.Trim().ToLowerInvariant() switch
+            {
+                "admin" => "Admin",
+                "faculty" or "lecturer" => "Faculty",
+                "student" => "Student",
+                _ => role.Trim()
+            };
+        }
+
         // In-memory demo users — stub only for UI demo
         private static readonly Dictionary<string, (string password, string role, string email)> _users = new()
         {
@@ -33,15 +46,17 @@ namespace SIMS_WEB.Controllers
 
 
 
+            var normalizedRole = NormalizeRole(model.Role);
+
             if (_users.TryGetValue(key, out var user) &&
                 user.password == model.Password &&
-                user.role == model.Role)
+                user.role == normalizedRole)
             {
                 store.FailedAttempts.Remove(key);
                 HttpContext.Session.SetString("Username", model.Username);
-                HttpContext.Session.SetString("Role", model.Role);
+                HttpContext.Session.SetString("Role", normalizedRole);
 
-                return model.Role switch
+                return normalizedRole switch
                 {
                     "Admin"   => RedirectToAction("Index", "Dashboard"),
                     "Faculty" => RedirectToAction("Index", "Grades"),
@@ -83,7 +98,8 @@ namespace SIMS_WEB.Controllers
                 return View(model);
             }
 
-            _users[key] = (model.Password, model.Role, model.Email);
+            var normalizedRole = NormalizeRole(model.Role);
+            _users[key] = (model.Password, normalizedRole, model.Email);
             TempData["Success"] = $"Đăng ký thành công! Bạn có thể đăng nhập với tài khoản {model.Username}.";
             return RedirectToAction("Login");
         }
@@ -112,9 +128,10 @@ namespace SIMS_WEB.Controllers
                 return View(model);
             }
 
-            _users[key] = (model.Password, model.Role, model.Email);
+            var normalizedRole = NormalizeRole(model.Role);
+            _users[key] = (model.Password, normalizedRole, model.Email);
             model.IsSuccess = true;
-            model.Message = $"Đã tạo tài khoản {model.Username} ({model.Role}) thành công!";
+            model.Message = $"Đã tạo tài khoản {model.Username} ({normalizedRole}) thành công!";
             ModelState.Clear();
             return View(new CreateUserViewModel { Message = model.Message, IsSuccess = true });
         }

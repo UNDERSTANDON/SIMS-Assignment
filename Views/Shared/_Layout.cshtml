@@ -17,7 +17,14 @@
 <body>
 
 @{
-    var role      = Context.Session.GetString("Role")     ?? "";
+    var rawRole   = (Context.Session.GetString("Role") ?? "").Trim();
+    var role      = rawRole.ToLowerInvariant() switch
+    {
+        "admin" => "Admin",
+        "faculty" or "lecturer" => "Faculty",
+        "student" => "Student",
+        _ => rawRole
+    };
     var username  = Context.Session.GetString("Username") ?? "";
     var loggedIn  = !string.IsNullOrEmpty(role);
 }

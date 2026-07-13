@@ -161,9 +161,18 @@ body::before {
   gap: 0;
 }
 
-/* Preserve Bootstrap collapse behavior for mobile / collapsed nav state */
-.sims-navbar .navbar-collapse.collapse:not(.show) {
-  display: none !important;
+/* Preserve Bootstrap collapse behavior on small screens */
+@media (max-width: 991.98px) {
+  .sims-navbar.navbar-expand-lg .navbar-collapse.collapse:not(.show) {
+    display: none !important;
+  }
+}
+
+/* Force expanded desktop navbar visibility at lg+ breakpoints */
+@media (min-width: 992px) {
+  .sims-navbar.navbar-expand-lg .navbar-collapse.collapse {
+    display: flex !important;
+  }
 }
 
 .sims-navbar .navbar-collapse.collapse.show {
