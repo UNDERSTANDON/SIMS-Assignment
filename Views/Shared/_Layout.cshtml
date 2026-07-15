@@ -35,10 +35,17 @@
     <nav class="sims-navbar navbar navbar-expand-lg" style="height:60px">
         <div class="container-fluid gap-3">
             <!-- Brand -->
-                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
+            @{
+                var logoUrl = role switch {
+                    "Admin"   => Url.Action("Index", "Dashboard"),
+                    "Faculty" => Url.Action("Index", "Lecturer"),
+                    "Student" => Url.Action("Index", "StudentCourses"),
+                    _         => "#"
+                };
+            }
+            <a class="navbar-brand" href="@logoUrl">
                 <span class="brand-dot"></span>
                 SIMS
-                <span>/ Quản lý Sinh viên</span>
             </a>
 
             <button class="navbar-toggler border-0 p-1" type="button"
@@ -63,7 +70,7 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Students" ? "active" : "")"
                                asp-controller="Students" asp-action="Index">
-                                <i class="fa-solid fa-users fa-xs"></i> Sinh viên
+                                <i class="fa-solid fa-user-group fa-xs"></i> Người dùng
                             </a>
                         </li>
                         <li class="nav-item">
@@ -107,6 +114,18 @@
                                 <i class="fa-solid fa-book fa-xs"></i> Khóa học
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "CreateCourse" ? "active" : "")"
+                               asp-controller="Lecturer" asp-action="CreateCourse">
+                                <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Profile" ? "active" : "")"
+                               asp-controller="Lecturer" asp-action="Profile">
+                                <i class="fa-solid fa-user fa-xs"></i> Thông tin cá nhân
+                            </a>
+                        </li>
                     }
 
                     @* STUDENT *@
@@ -130,6 +149,12 @@
                                 <i class="fa-solid fa-credit-card fa-xs"></i> Học phí
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "StudentProfile" ? "active" : "")"
+                               asp-controller="StudentDashboard" asp-action="Profile">
+                                <i class="fa-solid fa-user fa-xs"></i> Thông tin cá nhân
+                            </a>
+                        </li>
                     }
                 </ul>
 
@@ -141,6 +166,19 @@
                             "Faculty" => "role-faculty",
                             _         => "role-student"
                         };
+                    }
+                    @{
+                        var avatarFile = "/img/avatars/" + username + ".png";
+                        var avatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", username + ".png");
+                        var hasAvatar = System.IO.File.Exists(avatarPath);
+                    }
+                    @if (hasAvatar)
+                    {
+                        <img src="@avatarFile" alt="Avatar" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);" />
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-circle-user fa-lg" style="color: var(--text-tertiary);"></i>
                     }
                     <span class="role-badge @rc">@role</span>
                     <span class="font-mono fs-xs text-muted-sims">@username</span>

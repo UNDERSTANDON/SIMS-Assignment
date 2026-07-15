@@ -22,7 +22,12 @@
             <i class="fa-solid fa-list-check fa-sm"></i>
             Ghi danh / Xếp lớp
         </h1>
-        <span class="pattern-badge pattern-facade">Facade Pattern</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="pattern-badge pattern-facade">Facade Pattern</span>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sims-outline">
+                <i class="fa-solid fa-arrow-left fa-xs"></i> Bảng điều khiển
+            </a>
+        </div>
     </div>
 
     <div class="enroll-grid">
@@ -128,57 +133,214 @@
 
         <!-- RIGHT: Enrolled list -->
         <div class="sims-card">
-                <div class="sims-card-header">
-                <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
-                Danh sách đã ghi danh
-                <span class="sims-badge badge-primary ms-auto font-mono">@Model.EnrolledList.Count</span>
+            <div class="sims-card-header" style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:0.5rem;">
+                <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                    <span>Danh sách ghi danh</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-sims-outline btn-sm active" id="btnViewStudent" onclick="switchEnrollView('student')">Lọc theo sinh viên</button>
+                        <button type="button" class="btn btn-sims-outline btn-sm" id="btnViewCourse" onclick="switchEnrollView('course')">Lọc theo khóa học</button>
+                    </div>
+                    <span class="sims-badge badge-primary font-mono" id="enrollCountBadge">@Model.EnrolledList.Count</span>
+                </div>
             </div>
 
-            @if (!Model.EnrolledList.Any())
-            {
-                <div class="sims-empty py-3">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    <div class="em-title">Chưa có ghi danh nào</div>
-                    <div class="em-sub">Dùng form bên trái để ghi danh sinh viên vào khóa học.</div>
+            <!-- Search wrapper for Student filter -->
+            <div class="mb-3" id="studentSearchWrapper" style="padding: 1rem 1rem 0 1rem;">
+                <div class="input-group">
+                    <span class="input-group-text bg-card-sims"><i class="fa-solid fa-magnifying-glass fa-xs"></i></span>
+                    <input type="text" id="studentSearchInput" placeholder="Nhập họ tên hoặc mã số sinh viên..." class="form-control" oninput="filterStudentTable()" />
                 </div>
-            }
-            else
-            {
-                <div class="sims-table-wrap">
-                    <table class="table">
+                <div id="studentSearchEmpty" class="text-muted-sims fs-xs mt-2" style="display:none; font-style:italic;">
+                    Không tìm thấy sinh viên phù hợp.
+                </div>
+            </div>
+
+            <!-- Search wrapper for Course filter -->
+            <div class="mb-3" id="courseSearchWrapper" style="display:none; padding: 1rem 1rem 0 1rem;">
+                <div class="input-group">
+                    <span class="input-group-text bg-card-sims"><i class="fa-solid fa-magnifying-glass fa-xs"></i></span>
+                    <input type="text" id="courseSearchInput" placeholder="Nhập tên hoặc mã khóa học..." class="form-control" oninput="filterCourseTable()" />
+                </div>
+                <div id="courseSearchEmpty" class="text-muted-sims fs-xs mt-2" style="display:none; font-style:italic;">
+                    Không tìm thấy khóa học phù hợp.
+                </div>
+            </div>
+
+            <!-- VIEW 2: Grouped by Student -->
+            <div class="sims-table-wrap" id="enrollStudentView" style="display:none;">
+                @if (!Model.EnrolledList.Any())
+                {
+                    <div class="sims-empty py-3" style="border:none;">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <div class="em-title">Chưa có ghi danh nào</div>
+                        <div class="em-sub">Dùng form bên trái để ghi danh sinh viên vào khóa học.</div>
+                    </div>
+                }
+                else
+                {
+                    <table class="table" id="studentTable" style="display:none;">
                         <thead>
                             <tr>
-                                <th>Sinh viên</th>
+                                <th>Học sinh</th>
                                 <th>Khóa học</th>
-                                <th>Thời gian</th>
+                                <th>Giảng viên</th>
+                                <th>Điểm số</th>
+                                <th>Kết quả</th>
+                                <th class="text-center" style="width:70px">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var e in Model.EnrolledList)
+                            @{
+                                var studentGroups = Model.EnrolledList.GroupBy(e => e.StudentId).ToList();
+                                var grades = ViewBag.Grades as List<SIMS_WEB.Models.GradeRecord> ?? new();
+                            }
+                            @foreach (var g in studentGroups)
                             {
-                                var student = Model.Students.FirstOrDefault(s => s.StudentId == e.StudentId);
-                                var course  = Model.Courses.FirstOrDefault(c => c.Code == e.CourseCode);
-                                var init = student?.FullName?.Split(' ').Where(x => x.Length > 0).TakeLast(2).Select(x => x[0]) ?? new[] {'?'};
-                                <tr>
+                                var student = Model.Students.FirstOrDefault(s => s.StudentId == g.Key);
+                                var studentName = student?.FullName ?? g.Key;
+                                var init = studentName.Split(' ').Where(x => x.Length > 0).TakeLast(2).Select(x => x[0]);
+                                <tr id="row-@g.Key" style="display:none;">
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-ghost);border:1px solid var(--accent-ring);display:inline-flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:0.62rem;font-weight:700;color:var(--accent-light);flex-shrink:0;">
                                                 @(string.Join("", init).ToUpper())
                                             </div>
-                                            <span style="font-size:0.85rem">@(student?.FullName ?? e.StudentId)</span>
+                                            <div>
+                                                <div style="font-size:0.85rem;font-weight:600">@studentName</div>
+                                                <div class="fs-xs text-muted-sims" style="font-size:0.72rem;margin-top:0.1rem">@g.Key</div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <code class="font-mono" style="color:#a78bfa;font-size:0.75rem">@e.CourseCode</code>
-                                        <span class="fs-xs text-muted-sims ms-1">@course?.Title</span>
+                                        <select class="form-select form-select-sm" style="max-width:160px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;"
+                                                onchange="onStudentCourseChange('@g.Key', this)">
+                                            @foreach (var e in g)
+                                            {
+                                                var course = Model.Courses.FirstOrDefault(c => c.Code == e.CourseCode);
+                                                var grade = grades.FirstOrDefault(gr => gr.StudentId == g.Key && gr.CourseCode == e.CourseCode);
+                                                var scoreText = grade != null ? grade.Score.ToString("F1") : "null";
+                                                var passStatus = grade != null ? (grade.Score >= 50 ? "Pass" : "Fail") : "null";
+                                                <option value="@e.CourseCode" data-grade="@scoreText" data-pass="@passStatus" data-instructor="@(course?.Instructor ?? "null")">
+                                                    @e.CourseCode - @(course?.Title ?? "")
+                                                </option>
+                                            }
+                                        </select>
                                     </td>
-                                    <td class="fs-xs text-muted-sims font-mono">@e.EnrolledAt.ToString("dd/MM HH:mm")</td>
+                                    <td>
+                                        <span class="instructor-val" id="instructor-@g.Key" style="font-size:0.8rem;color:var(--text-secondary);">null</span>
+                                    </td>
+                                    <td>
+                                        <span class="font-mono grade-val" id="grade-@g.Key" style="font-size:0.8rem;font-weight:600;">null</span>
+                                    </td>
+                                    <td>
+                                        <span class="sims-badge pass-val" id="pass-@g.Key">null</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-action="Unenroll" asp-controller="Enrollment" method="post" onsubmit="return confirm('Hủy ghi danh sinh viên ' + '@studentName' + ' khỏi lớp ' + document.getElementById('unenroll-course-' + '@g.Key').value + '?');" style="display:inline-block">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="studentId" value="@g.Key" />
+                                            <input type="hidden" id="unenroll-course-@g.Key" name="courseCode" value="" />
+                                            <button type="submit" class="btn btn-sims-danger btn-sm py-1 px-2" title="Hủy ghi danh">
+                                                <i class="fa-solid fa-trash fa-xs"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
-                </div>
-            }
+                }
+            </div>
+
+            <!-- VIEW 3: Grouped by Course -->
+            <div class="sims-table-wrap" id="enrollCourseView" style="display:none;">
+                @if (!Model.Courses.Any())
+                {
+                    <div class="sims-empty py-3" style="border:none;">
+                        <i class="fa-solid fa-book"></i>
+                        <div class="em-title">Chưa có khóa học nào</div>
+                        <div class="em-sub">Tạo khóa học trước khi thực hiện ghi danh.</div>
+                    </div>
+                }
+                else
+                {
+                    <table class="table" id="courseTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Khóa học</th>
+                                <th>Giảng viên</th>
+                                <th>Sinh viên đăng ký</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model.Courses)
+                            {
+                                var enrolledInCourse = Model.EnrolledList.Where(e => e.CourseCode == c.Code).ToList();
+                                var instructorList = c.Instructor?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                                        .Select(i => i.Trim()).ToList() ?? new List<string>();
+                                <tr style="display:none;">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div style="width:28px;height:28px;border-radius:50%;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);display:inline-flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:0.62rem;font-weight:700;color:#a78bfa;flex-shrink:0;">
+                                                <i class="fa-solid fa-book fa-xs"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-size:0.85rem;font-weight:600">@c.Title</div>
+                                                <div class="fs-xs text-muted-sims font-mono" style="font-size:0.72rem;margin-top:0.1rem">@c.Code</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (instructorList.Count == 0 || (instructorList.Count == 1 && string.IsNullOrEmpty(instructorList[0])))
+                                        {
+                                            <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-secondary);font-size:0.75rem;cursor:not-allowed;" disabled>
+                                                <option>null</option>
+                                            </select>
+                                        }
+                                        else if (instructorList.Count == 1)
+                                        {
+                                            <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
+                                                <option>@instructorList[0]</option>
+                                                <option disabled style="color:var(--text-muted);font-style:italic;">null</option>
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
+                                                @foreach (var inst in instructorList)
+                                                {
+                                                    <option>@inst</option>
+                                                }
+                                            </select>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (enrolledInCourse.Count == 0)
+                                        {
+                                            <select class="form-select form-select-sm" style="max-width:220px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-secondary);font-size:0.75rem;cursor:not-allowed;" disabled>
+                                                <option>null</option>
+                                            </select>
+                                        }
+                                        else
+                                        {
+                                            <select class="form-select form-select-sm" style="max-width:220px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
+                                                @foreach (var ec in enrolledInCourse)
+                                                {
+                                                    var st = Model.Students.FirstOrDefault(s => s.StudentId == ec.StudentId);
+                                                    <option>@(st?.FullName ?? ec.StudentId) (@ec.StudentId)</option>
+                                                }
+                                            </select>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -199,5 +361,164 @@ function updateCapacity(sel) {
     document.getElementById('fullWarn').style.display = full ? 'flex' : 'none';
     info.style.display = 'block';
 }
+
+function onStudentCourseChange(studentId, selectEl) {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const grade = opt.dataset.grade;
+    const pass = opt.dataset.pass;
+    const instructor = opt.dataset.instructor;
+    const courseCode = selectEl.value;
+
+    // Update instructor
+    const instEl = document.getElementById('instructor-' + studentId);
+    if (instEl) {
+        if (instructor === 'null' || !instructor) {
+            instEl.textContent = 'null';
+            instEl.style.color = 'var(--text-secondary)';
+            instEl.style.fontStyle = 'italic';
+        } else {
+            instEl.textContent = instructor;
+            instEl.style.color = 'var(--text-primary)';
+            instEl.style.fontStyle = 'normal';
+        }
+    }
+
+    // Update grade
+    const gradeEl = document.getElementById('grade-' + studentId);
+    if (gradeEl) {
+        if (grade === 'null') {
+            gradeEl.textContent = 'null';
+            gradeEl.style.color = 'var(--text-secondary)';
+            gradeEl.style.fontStyle = 'italic';
+        } else {
+            gradeEl.textContent = grade;
+            gradeEl.style.color = 'var(--text-primary)';
+            gradeEl.style.fontStyle = 'normal';
+        }
+    }
+
+    // Update pass status badge
+    const passEl = document.getElementById('pass-' + studentId);
+    if (passEl) {
+        passEl.className = 'sims-badge';
+        if (pass === 'null') {
+            passEl.textContent = 'null';
+            passEl.classList.add('badge-secondary');
+        } else if (pass === 'Pass') {
+            passEl.textContent = 'Pass';
+            passEl.classList.add('badge-success');
+        } else {
+            passEl.textContent = 'Fail';
+            passEl.classList.add('badge-danger');
+        }
+    }
+
+    // Update hidden form courseCode value
+    const hiddenInput = document.getElementById('unenroll-course-' + studentId);
+    if (hiddenInput) {
+        hiddenInput.value = courseCode;
+    }
+}
+
+function filterStudentTable() {
+    const query = document.getElementById('studentSearchInput').value.toLowerCase().trim();
+    const table = document.getElementById('studentTable');
+    const rows = table.querySelectorAll('tbody tr');
+    let hasVisibleRow = false;
+
+    rows.forEach(row => {
+        const text = row.querySelector('td:first-child').textContent.toLowerCase();
+        if (query === "") {
+            row.style.display = 'none';
+        } else if (text.includes(query)) {
+            row.style.display = '';
+            hasVisibleRow = true;
+            // Also trigger course change event for this visible row to set default displays
+            const selectEl = row.querySelector('select');
+            if (selectEl) {
+                const studentId = row.id.replace('row-', '');
+                onStudentCourseChange(studentId, selectEl);
+            }
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    table.style.display = (query !== "" && hasVisibleRow) ? '' : 'none';
+    
+    const emptyEl = document.getElementById('studentSearchEmpty');
+    if (query !== "" && !hasVisibleRow) {
+        emptyEl.style.display = 'block';
+    } else {
+        emptyEl.style.display = 'none';
+    }
+}
+
+function filterCourseTable() {
+    const query = document.getElementById('courseSearchInput').value.toLowerCase().trim();
+    const table = document.getElementById('courseTable');
+    const rows = table.querySelectorAll('tbody tr');
+    let hasVisibleRow = false;
+
+    rows.forEach(row => {
+        const text = row.querySelector('td:first-child').textContent.toLowerCase();
+        if (query === "") {
+            row.style.display = 'none';
+        } else if (text.includes(query)) {
+            row.style.display = '';
+            hasVisibleRow = true;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    table.style.display = (query !== "" && hasVisibleRow) ? '' : 'none';
+    
+    const emptyEl = document.getElementById('courseSearchEmpty');
+    if (query !== "" && !hasVisibleRow) {
+        emptyEl.style.display = 'block';
+    } else {
+        emptyEl.style.display = 'none';
+    }
+}
+
+function switchEnrollView(view) {
+    const studentWrapper = document.getElementById('studentSearchWrapper');
+    const courseWrapper = document.getElementById('courseSearchWrapper');
+    const studentView = document.getElementById('enrollStudentView');
+    const courseView = document.getElementById('enrollCourseView');
+    
+    const btnStudent = document.getElementById('btnViewStudent');
+    const btnCourse = document.getElementById('btnViewCourse');
+
+    if (view === 'student') {
+        studentWrapper.style.display = 'block';
+        courseWrapper.style.display = 'none';
+        studentView.style.display = 'block';
+        courseView.style.display = 'none';
+        
+        btnStudent.classList.add('active');
+        btnCourse.classList.remove('active');
+        
+        // Refresh filtering based on input
+        filterStudentTable();
+    } else {
+        studentWrapper.style.display = 'none';
+        courseWrapper.style.display = 'block';
+        studentView.style.display = 'none';
+        courseView.style.display = 'block';
+        
+        btnStudent.classList.remove('active');
+        btnCourse.classList.add('active');
+        
+        // Refresh filtering based on input
+        filterCourseTable();
+    }
+}
+
+// On load, activate student search view
+document.addEventListener('DOMContentLoaded', () => {
+    switchEnrollView('student');
+});
 </script>
 }

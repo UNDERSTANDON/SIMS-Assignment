@@ -1,4 +1,5 @@
 using SIMS_Assignment.Abstract;
+using SIMS_Assignment.Authentication;
 using SIMS_Assignment.Authentication.SecurityHasher;
 using SIMS_Assignment.Storage;
 using SIMS_Assignment.Services;
@@ -58,6 +59,9 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IDataStorage>(sp =>
     new CvsStorageEngine(dataStoragePath));
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<RegisterService>();
+builder.Services.AddScoped<IAuth, AuthFacade>();
 // Course-related handlers for materials, assignments, submissions
 builder.Services.AddSingleton<SIMS_Assignment.Services.CourseServices.MaterialHandler>();
 builder.Services.AddSingleton<SIMS_Assignment.Services.CourseServices.AssignmentHandler>();

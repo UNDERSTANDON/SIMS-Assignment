@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using SIMS_Assignment.Abstract;
 using SIMS_Assignment.Models;
 
@@ -39,12 +39,14 @@ namespace SIMS_Assignment.Storage
                     var uname = parts[1].Trim();
                     var role = parts[2].Trim();
                     var pwd = parts[3].Trim();
+                    var email = parts.Length > 4 ? Unescape(parts[4].Trim()) : string.Empty;
+                    var fullname = parts.Length > 5 ? Unescape(parts[5].Trim()) : string.Empty;
 
                     User? user = role switch
                     {
-                        "Admin" => new Admin { Id = id, Name = uname, Role = role, PasswordHash = pwd },
-                        "Faculty" or "Lecturer" => new Lecturer { Id = id, Name = uname, Role = role, PasswordHash = pwd },
-                        "Student" => new Student { Id = id, Name = uname, Role = role, PasswordHash = pwd },
+                        "Admin" => new Admin { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
+                        "Faculty" or "Lecturer" => new Lecturer { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
+                        "Student" => new Student { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
                         _ => null
                     };
 
@@ -96,28 +98,55 @@ namespace SIMS_Assignment.Storage
                 foreach (var line in File.ReadAllLines(UsersPath, Encoding.UTF8))
                 {
                     if (string.IsNullOrWhiteSpace(line)) continue;
-                    // Id,Name,Role,PasswordHash,Extra
                     var parts = line.Split(',');
                     if (parts.Length < 4) continue;
                     var uname = parts[1].Trim();
-                    if (!string.Equals(uname, name, StringComparison.OrdinalIgnoreCase)) continue;
-                    var id = int.TryParse(parts[0], out var iid) ? iid : 0;
                     var role = parts[2].Trim();
                     var pwd = parts[3].Trim();
+                    var email = parts.Length > 4 ? Unescape(parts[4].Trim()) : string.Empty;
+                    var fullname = parts.Length > 5 ? Unescape(parts[5].Trim()) : string.Empty;
+
+                    if (!string.Equals(uname, name, StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(email, name, StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(fullname, name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var id = int.TryParse(parts[0], out var iid) ? iid : 0;
 
                     User? user = role switch
                     {
-                        "Admin" => new Admin { Id = id, Name = uname, Role = role, PasswordHash = pwd },
-                        "Faculty" or "Lecturer" => new Lecturer { Id = id, Name = uname, Role = role, PasswordHash = pwd },
-                        "Student" => new Student { Id = id, Name = uname, Role = role, PasswordHash = pwd },
+                        "Admin" => new Admin { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
+                        "Faculty" or "Lecturer" => new Lecturer { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
+                        "Student" => new Student { Id = id, Name = uname, Role = role, PasswordHash = pwd, Email = email, FullName = fullname },
                         _ => null
                     };
 
-                    // additional fields may be present (ignored for now)
                     return Task.FromResult(user);
                 }
             }
             return Task.FromResult<User?>(null!);
+        }
+
+        public Task<bool> DeleteUserByNameAsync(string name)
+        {
+            lock (_lock)
+            {
+                if (!File.Exists(UsersPath)) return Task.FromResult(false);
+                var lines = File.ReadAllLines(UsersPath, Encoding.UTF8).ToList();
+                var remaining = lines.Where(line =>
+                {
+                    if (string.IsNullOrWhiteSpace(line)) return false;
+                    var parts = line.Split(',');
+                    if (parts.Length < 2) return false;
+                    return !string.Equals(parts[1].Trim(), name, StringComparison.OrdinalIgnoreCase);
+                }).ToList();
+
+                if (remaining.Count == lines.Count) return Task.FromResult(false);
+                File.WriteAllLines(UsersPath, remaining, Encoding.UTF8);
+                return Task.FromResult(true);
+            }
         }
 
         public Task<bool> SaveCourseAsync(Course course)
@@ -222,8 +251,8 @@ namespace SIMS_Assignment.Storage
 
         private static string SerializeUser(User u)
         {
-            // Id,Name,Role,PasswordHash
-            return string.Join(',', new[] { u.Id.ToString(), Escape(u.Name), Escape(u.Role), Escape(u.PasswordHash) });
+            // Id,Name,Role,PasswordHash,Email,FullName
+            return string.Join(',', new[] { u.Id.ToString(), Escape(u.Name), Escape(u.Role), Escape(u.PasswordHash), Escape(u.Email), Escape(u.FullName) });
         }
 
         private static string SerializeCourse(Course c)

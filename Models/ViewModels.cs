@@ -117,6 +117,10 @@ namespace SIMS_WEB.Models
         public List<GradeRecord> RecentGrades { get; set; } = new();
         public string? Message { get; set; }
         public bool IsSuccess { get; set; }
+
+        // New properties for editing flow
+        public string? EditStudentId { get; set; }
+        public string? EditStudentName { get; set; }
     }
 
     public class PaymentViewModel

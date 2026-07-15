@@ -11,9 +11,14 @@
             Quản lý Khóa học
             <span class="sims-badge badge-success ms-2 font-mono">@ViewBag.Total</span>
         </h1>
-        <a asp-action="Create" class="btn btn-sims-success">
-            <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
-        </a>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-sims-success">
+                <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
+            </a>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sims-outline">
+                <i class="fa-solid fa-arrow-left fa-xs"></i> Bảng điều khiển
+            </a>
+        </div>
     </div>
     
     @if (!Model.Any())

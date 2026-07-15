@@ -1,8 +1,24 @@
-﻿@{
+@{
     ViewData["Title"] = "Giảng viên - Khóa học";
 }
 
 <h2>Khóa học</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="sims-alert sims-alert-danger mb-3">
+        <i class="fa-solid fa-circle-xmark fa-sm"></i>
+        <span>@TempData["Error"]</span>
+    </div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="sims-alert sims-alert-success mb-3">
+        <i class="fa-solid fa-circle-check fa-sm"></i>
+        <span>@TempData["Success"]</span>
+    </div>
+}
+
 <div class="sims-table-wrap">
     <table class="table">
         <thead>
@@ -22,7 +38,8 @@
                     <td>@c.Instructor</td>
                     <td>
                         <a class="btn btn-sims-outline btn-sm" asp-action="Manage" asp-route-id="@c.Code">Quản lý</a>
-                        <a class="btn btn-sims-primary btn-sm ms-2" asp-action="Enrollments" asp-route-courseCode="@c.Code">Sinh viên (@c.EnrolledCount)</a>
+                        <a class="btn btn-sims-primary btn-sm ms-2" asp-action="Enrollments" asp-route-courseCode="@c.Code">Sinh viên</a>
+                        <a class="btn btn-sims-success btn-sm ms-2" asp-action="CourseAssignments" asp-route-courseCode="@c.Code">Quản lý bài tập</a>
                     </td>
                 </tr>
             }

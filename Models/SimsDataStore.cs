@@ -23,7 +23,7 @@ namespace SIMS_WEB.Models
 
         private SimsDataStore()
         {
-            // Try to load students and courses from the CSV-backed DataStorage on startup.
+            // Try to load students, courses, and enrollments from the CSV-backed DataStorage on startup.
             try
             {
                 SIMS_WEB.Storage.ModelFilePersistence.EnsureDataDir();
@@ -36,6 +36,11 @@ namespace SIMS_WEB.Models
                 if (loadedCourses != null && loadedCourses.Any())
                 {
                     Courses.AddRange(loadedCourses);
+                }
+                var loadedEnrollments = SIMS_WEB.Storage.ModelFilePersistence.LoadEnrollments();
+                if (loadedEnrollments != null && loadedEnrollments.Any())
+                {
+                    Enrollments.AddRange(loadedEnrollments);
                 }
             }
             catch { }

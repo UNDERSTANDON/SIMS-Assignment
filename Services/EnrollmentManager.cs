@@ -29,6 +29,7 @@ namespace SIMS_Assignment.Services
                 if (res.success)
                 {
                     try { ModelFilePersistence.SaveCourses(store.Courses); } catch { }
+                    try { ModelFilePersistence.SaveEnrollments(store.Enrollments); } catch { }
                     try
                     {
                         foreach (var c in store.Courses)
@@ -60,6 +61,7 @@ namespace SIMS_Assignment.Services
                 var course = store.Courses.FirstOrDefault(c => c.Code == courseCode);
                 if (course != null && course.EnrolledCount > 0) course.EnrolledCount--;
                 try { ModelFilePersistence.SaveCourses(store.Courses); } catch { }
+                try { ModelFilePersistence.SaveEnrollments(store.Enrollments); } catch { }
                 try
                 {
                     foreach (var c in store.Courses)

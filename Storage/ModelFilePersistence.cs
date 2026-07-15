@@ -119,5 +119,52 @@ namespace SIMS_WEB.Storage
             catch { }
             return result;
         }
+
+        public static void SaveEnrollments(IEnumerable<Enrollment> enrollments)
+        {
+            EnsureDataDir();
+            var path = Path.Combine(DataDir, "enrollments.csv");
+            var lines = new List<string>();
+            lines.Add("StudentId,CourseCode,EnrolledAt,IsEnrolled");
+            foreach (var e in enrollments)
+            {
+                var line = string.Join(',', new[] {
+                    Escape(e.StudentId), Escape(e.CourseCode), e.EnrolledAt.ToString("o"), e.IsEnrolled.ToString()
+                });
+                lines.Add(line);
+            }
+            File.WriteAllLines(path, lines, Encoding.UTF8);
+        }
+
+        public static List<Enrollment> LoadEnrollments()
+        {
+            EnsureDataDir();
+            var path = Path.Combine(DataDir, "enrollments.csv");
+            var result = new List<Enrollment>();
+            if (!File.Exists(path)) return result;
+
+            try
+            {
+                using var sr = new StreamReader(path, Encoding.UTF8);
+                string? line;
+                bool isHeader = true;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (isHeader) { isHeader = false; continue; }
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 2) continue;
+
+                    var e = new Enrollment();
+                    e.StudentId = parts[0].Trim().Replace(';', ',');
+                    e.CourseCode = parts[1].Trim().Replace(';', ',');
+                    if (parts.Length > 2 && DateTime.TryParse(parts[2].Trim(), out var dt)) e.EnrolledAt = dt;
+                    if (parts.Length > 3 && bool.TryParse(parts[3].Trim(), out var b)) e.IsEnrolled = b;
+                    result.Add(e);
+                }
+            }
+            catch { }
+            return result;
+        }
     }
 }

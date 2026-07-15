@@ -18,46 +18,60 @@ namespace SIMS_Assignment.Services
 
         public async Task<List<Student>> GetAllAsync()
         {
+            var store = SIMS_WEB.Models.SimsDataStore.Instance;
+            bool changed = false;
+
             try
             {
                 var users = await _storage.GetAllUsersAsync();
-                if (users != null && users.Any())
+                if (users != null)
                 {
-                    var students = users.Where(u => u is SIMS_Assignment.Models.Student)
-                        .Select(u => new Student
+                    foreach (var u in users)
+                    {
+                        if (u is SIMS_Assignment.Models.Student)
                         {
-                            StudentId = u.Id > 0 ? $"U{u.Id}" : u.Name,
-                            FullName = u.Name,
-                            Program = string.Empty,
-                            Email = string.Empty
-                        }).ToList();
-                    if (students.Any()) return students;
+                            var exists = store.Students.Any(s => string.Equals(s.StudentId, u.Name, StringComparison.OrdinalIgnoreCase)
+                                                              || string.Equals(s.FullName, u.Name, StringComparison.OrdinalIgnoreCase));
+                            if (!exists)
+                            {
+                                var newStudent = new Student
+                                {
+                                    StudentId = u.Name,
+                                    FullName = !string.IsNullOrEmpty(u.FullName) ? u.FullName : u.Name,
+                                    Program = "Chương trình tự chọn",
+                                    Email = u.Email,
+                                    DateOfBirth = DateTime.Now.AddYears(-20)
+                                };
+                                store.Students.Add(newStudent);
+                                changed = true;
+                            }
+                            else
+                            {
+                                var existing = store.Students.FirstOrDefault(s => string.Equals(s.StudentId, u.Name, StringComparison.OrdinalIgnoreCase)
+                                                                                || string.Equals(s.FullName, u.Name, StringComparison.OrdinalIgnoreCase));
+                                if (existing != null && string.IsNullOrEmpty(existing.Email) && !string.IsNullOrEmpty(u.Email))
+                                {
+                                    existing.Email = u.Email;
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             catch { }
 
-            return SIMS_WEB.Models.SimsDataStore.Instance.Students.ToList();
+            if (changed)
+            {
+                try { ModelFilePersistence.SaveStudents(store.Students); } catch { }
+            }
+
+            return store.Students.ToList();
         }
 
         public async Task<Student?> GetByIdAsync(string studentId)
         {
-            try
-            {
-                var users = await _storage.GetAllUsersAsync();
-                if (users != null && users.Any())
-                {
-                    // studentId format U<id> or original id
-                    if (studentId.StartsWith("U") && int.TryParse(studentId.Substring(1), out var iid))
-                    {
-                        var u = users.FirstOrDefault(x => x.Id == iid && x is SIMS_Assignment.Models.Student);
-                        if (u != null) return new Student { StudentId = $"U{u.Id}", FullName = u.Name };
-                    }
-                    var byName = users.FirstOrDefault(x => string.Equals(x.Name, studentId, StringComparison.OrdinalIgnoreCase) && x is SIMS_Assignment.Models.Student);
-                    if (byName != null) return new Student { StudentId = $"U{byName.Id}", FullName = byName.Name };
-                }
-            }
-            catch { }
-
+            await GetAllAsync();
             return SIMS_WEB.Models.SimsDataStore.Instance.Students.FirstOrDefault(x => x.StudentId == studentId);
         }
 
@@ -72,7 +86,7 @@ namespace SIMS_Assignment.Services
                 try
                 {
                     // create a user record for authentication (no password yet)
-                    var u = new SIMS_Assignment.Models.Student { Name = student.FullName, Role = "Student", PasswordHash = string.Empty };
+                    var u = new SIMS_Assignment.Models.Student { Name = student.StudentId, Role = "Student", PasswordHash = string.Empty, Email = student.Email };
                     _storage.SaveUserAsync(u).GetAwaiter().GetResult();
                 }
                 catch { }
@@ -108,6 +122,13 @@ namespace SIMS_Assignment.Services
                     {
                         ModelFilePersistence.SaveStudents(store.Students);
                         ModelFilePersistence.SaveCourses(store.Courses);
+                        ModelFilePersistence.SaveEnrollments(store.Enrollments);
+                    }
+                    catch { }
+
+                    try
+                    {
+                        _storage.DeleteUserByNameAsync(studentId).GetAwaiter().GetResult();
                     }
                     catch { }
                 }

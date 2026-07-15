@@ -1,4 +1,4 @@
-﻿﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SIMS_WEB.Filters;
 using SIMS_WEB.Models;
 using SIMS_Assignment.Services.CourseServices;
@@ -7,6 +7,7 @@ using SIMS_Assignment.Models.CourseRelatedModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using SIMS_Assignment.Abstract;
 
 namespace SIMS_WEB.Controllers
 {
@@ -18,13 +19,17 @@ namespace SIMS_WEB.Controllers
         private readonly AssignmentHandler _assignments;
         private readonly IEnrollmentManager _enrollmentManager;
         private readonly IWebHostEnvironment _env;
+        private readonly IDataStorage _storage;
+        private readonly ICourseManager _courseManager;
 
-        public LecturerController(MaterialHandler materials, AssignmentHandler assignments, IEnrollmentManager enrollmentManager, IWebHostEnvironment env)
+        public LecturerController(MaterialHandler materials, AssignmentHandler assignments, IEnrollmentManager enrollmentManager, IWebHostEnvironment env, IDataStorage storage, ICourseManager courseManager)
         {
             _materials = materials;
             _assignments = assignments;
             _enrollmentManager = enrollmentManager;
             _env = env;
+            _storage = storage;
+            _courseManager = courseManager;
         }
 
         public IActionResult Submissions(string assignmentId)
@@ -44,16 +49,56 @@ namespace SIMS_WEB.Controllers
             return View("Submissions", all);
         }
 
-        public IActionResult Index()
+        private async Task<bool> IsCourseAssignedToLecturer(string courseCode, string username)
         {
-            // For now show all courses; in future filter by lecturer identity
-            ViewBag.Username = HttpContext.Session.GetString("Username") ?? "Giảng viên";
+            var user = await _storage.GetUserByNameAsync(username);
+            if (user == null) return false;
+
+            var course = _store.Courses.FirstOrDefault(c => c.Code == courseCode);
+            if (course == null) return false;
+
+            var instructorList = course.Instructor?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                    .Select(i => i.Trim()).ToList() ?? new List<string>();
+            return instructorList.Any(inst =>
+                inst.Equals(user.FullName, StringComparison.OrdinalIgnoreCase) ||
+                inst.Equals(user.Name, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var username = HttpContext.Session.GetString("Username") ?? "";
+            var user = await _storage.GetUserByNameAsync(username);
+
+            ViewBag.Username = user?.FullName ?? username;
             ViewData["ActivePage"] = "FacultyCourses";
-            return View(_store.Courses);
+
+            if (user == null)
+            {
+                return View(new List<Course>());
+            }
+
+            var assignedCourses = _store.Courses.Where(course => {
+                var instructorList = course.Instructor?.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(i => i.Trim()).ToList() ?? new List<string>();
+                return instructorList.Any(inst =>
+                    inst.Equals(user.FullName, StringComparison.OrdinalIgnoreCase) ||
+                    inst.Equals(user.Name, StringComparison.OrdinalIgnoreCase)
+                );
+            }).ToList();
+
+            return View(assignedCourses);
         }
 
         public async Task<IActionResult> Enrollments(string courseCode)
         {
+            var username = HttpContext.Session.GetString("Username") ?? "";
+            if (!await IsCourseAssignedToLecturer(courseCode, username))
+            {
+                TempData["Error"] = "Bạn không có quyền truy cập khóa học này.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var course = _store.Courses.FirstOrDefault(c => c.Code == courseCode);
             if (course == null) return NotFound();
 
@@ -71,8 +116,15 @@ namespace SIMS_WEB.Controllers
             return View(vm);
         }
 
-        public IActionResult Manage(string id)
+        public async Task<IActionResult> Manage(string id)
         {
+            var username = HttpContext.Session.GetString("Username") ?? "";
+            if (!await IsCourseAssignedToLecturer(id, username))
+            {
+                TempData["Error"] = "Bạn không có quyền truy cập khóa học này.";
+                return RedirectToAction(nameof(Index));
+            }
+
             var course = _store.Courses.FirstOrDefault(c => c.Code == id);
             if (course == null) return NotFound();
             var vm = new LecturerCourseViewModel
@@ -102,6 +154,13 @@ namespace SIMS_WEB.Controllers
         [HttpPost]
         public async Task<IActionResult> AddMaterial(string courseId, string title, string description, IFormFile? file)
         {
+            var username = HttpContext.Session.GetString("Username") ?? "";
+            if (!await IsCourseAssignedToLecturer(courseId, username))
+            {
+                TempData["Error"] = "Bạn không có quyền thực hiện thao tác này.";
+                return RedirectToAction(nameof(Index));
+            }
+
             if (string.IsNullOrWhiteSpace(title))
             {
                 TempData["Error"] = "Tiêu đề không được để trống";
@@ -153,8 +212,15 @@ namespace SIMS_WEB.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddAssignment(string courseCode, string title, string description, DateTime dueDate)
+        public async Task<IActionResult> AddAssignment(string courseCode, string title, string description, DateTime dueDate)
         {
+            var username = HttpContext.Session.GetString("Username") ?? "";
+            if (!await IsCourseAssignedToLecturer(courseCode, username))
+            {
+                TempData["Error"] = "Bạn không có quyền thực hiện thao tác này.";
+                return RedirectToAction(nameof(Index));
+            }
+
             if (string.IsNullOrWhiteSpace(title))
             {
                 TempData["Error"] = "Tiêu đề không được để trống";
@@ -263,6 +329,151 @@ namespace SIMS_WEB.Controllers
                 Console.WriteLine($"Error downloading submission: {ex.Message}");
                 return StatusCode(500, "Lỗi tải tệp");
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            ViewData["ActivePage"] = "Profile";
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            var user = await _storage.GetUserByNameAsync(username);
+            if (user == null) return NotFound("Giảng viên không tồn tại trong hệ thống");
+            return View("Profile", user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Profile(string fullName, string email, string? avatarBase64)
+        {
+            ViewData["ActivePage"] = "Profile";
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            var user = await _storage.GetUserByNameAsync(username);
+            if (user == null) return NotFound("Giảng viên không tồn tại trong hệ thống");
+
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                TempData["Error"] = "Họ tên không được để trống";
+                return View("Profile", user);
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                TempData["Error"] = "Email không được để trống";
+                return View("Profile", user);
+            }
+
+            var oldName = user.FullName;
+            user.FullName = fullName.Trim();
+            user.Email = email.Trim();
+
+            await _storage.SaveUserAsync(user);
+
+            HttpContext.Session.SetString("Username", user.FullName);
+
+            if (!string.IsNullOrEmpty(oldName) && oldName != user.FullName)
+            {
+                foreach (var course in _store.Courses)
+                {
+                    if (course.Instructor == oldName)
+                    {
+                        course.Instructor = user.FullName;
+                    }
+                }
+                SIMS_WEB.Storage.ModelFilePersistence.SaveCourses(_store.Courses);
+            }
+
+            if (!string.IsNullOrEmpty(avatarBase64))
+            {
+                try
+                {
+                    var base64Data = avatarBase64;
+                    if (base64Data.Contains(","))
+                    {
+                        base64Data = base64Data.Split(',')[1];
+                    }
+                    var imageBytes = System.Convert.FromBase64String(base64Data);
+
+                    var avatarsDir = Path.Combine(_env.WebRootPath, "img", "avatars");
+                    if (!Directory.Exists(avatarsDir)) Directory.CreateDirectory(avatarsDir);
+
+                    var filePath = Path.Combine(avatarsDir, $"{user.Name}.png");
+                    System.IO.File.WriteAllBytes(filePath, imageBytes);
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine($"Error saving avatar: {ex.Message}");
+                }
+            }
+
+            TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
+            return RedirectToAction("Profile");
+        }
+
+        [HttpGet]
+        public IActionResult CreateCourse()
+        {
+            ViewData["ActivePage"] = "CreateCourse";
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            var course = new Course
+            {
+                Instructor = username
+            };
+            return View("CreateCourse", course);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCourse(Course model)
+        {
+            ViewData["ActivePage"] = "CreateCourse";
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+
+            model.Instructor = username;
+
+            if (!ModelState.IsValid)
+            {
+                return View("CreateCourse", model);
+            }
+
+            var ok = await _courseManager.CreateAsync(model);
+            if (!ok)
+            {
+                ModelState.AddModelError("Code", "Mã khóa học đã tồn tại");
+                return View("CreateCourse", model);
+            }
+
+            TempData["Success"] = $"Đã thêm khóa học {model.Title} thành công!";
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult CourseAssignments(string courseCode, string? assignmentId)
+        {
+            ViewData["ActivePage"] = "FacultyCourses";
+            var course = _store.Courses.FirstOrDefault(c => c.Code == courseCode);
+            if (course == null) return NotFound("Khóa học không tồn tại");
+
+            var allAssignments = _assignments.GetAll().Where(a => a.CourseCode == courseCode).ToList();
+            var selectedAssignment = !string.IsNullOrEmpty(assignmentId) 
+                ? allAssignments.FirstOrDefault(a => a.Id == assignmentId)
+                : allAssignments.FirstOrDefault();
+
+            var enrollmentStudentIds = _store.Enrollments.Where(e => e.CourseCode == courseCode).Select(e => e.StudentId).ToHashSet();
+            var enrolledStudents = _store.Students.Where(s => enrollmentStudentIds.Contains(s.StudentId)).ToList();
+
+            List<Submission> submissions = new();
+            if (selectedAssignment != null)
+            {
+                var sh = HttpContext.RequestServices.GetService(typeof(SubmissionHandler)) as SubmissionHandler;
+                if (sh != null)
+                {
+                    submissions = sh.GetByAssignment(selectedAssignment.Title);
+                }
+            }
+
+            ViewBag.Course = course;
+            ViewBag.Assignments = allAssignments;
+            ViewBag.SelectedAssignment = selectedAssignment;
+            ViewBag.Submissions = submissions;
+
+            return View(enrolledStudents);
         }
     }
 

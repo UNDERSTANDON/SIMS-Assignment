@@ -16,27 +16,45 @@
 
         @if (Model.EnrolledStudents.Any())
         {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>MSSV</th>
-                        <th>Họ tên</th>
-                        <th>Email</th>
-                        <th>Chương trình đào tạo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var student in Model.EnrolledStudents.OrderBy(s => s.StudentId))
-                    {
+            <div class="sims-table-wrap">
+                <table class="table table-hover">
+                    <thead>
                         <tr>
-                            <td><code>@student.StudentId</code></td>
-                            <td>@student.FullName</td>
-                            <td>@student.Email</td>
-                            <td>@student.Program</td>
+                            <th style="color: #ffffff !important; width: 60px;"></th>
+                            <th style="color: #ffffff !important;">MSSV</th>
+                            <th style="color: #ffffff !important;">Họ tên</th>
+                            <th style="color: #ffffff !important;">Email</th>
+                            <th style="color: #ffffff !important;">Chương trình đào tạo</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var student in Model.EnrolledStudents.OrderBy(s => s.StudentId))
+                        {
+                            var stuAvatarFile = "/img/avatars/" + student.StudentId + ".png";
+                            var stuAvatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", student.StudentId + ".png");
+                            var stuHasAvatar = System.IO.File.Exists(stuAvatarPath);
+                            <tr>
+                                <td>
+                                    @if (stuHasAvatar)
+                                    {
+                                        <img src="@stuAvatarFile" alt="Avatar" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,255,255,0.15);" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width:36px; height:36px; border-radius:50%; background:rgba(99,102,241,0.15); border:2px solid rgba(99,102,241,0.3); display:flex; align-items:center; justify-content:center;">
+                                            <i class="fa-solid fa-user" style="color:#818cf8; font-size:0.85rem;"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td style="color: #e2e8f0 !important;"><code style="color: #fbbf24 !important;">@student.StudentId</code></td>
+                                <td style="color: #ffffff !important; font-weight: 500;">@student.FullName</td>
+                                <td style="color: #e2e8f0 !important;">@student.Email</td>
+                                <td style="color: #e2e8f0 !important;">@student.Program</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
         else
         {
