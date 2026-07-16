@@ -123,6 +123,7 @@ namespace SIMS_Assignment.Services
                         ModelFilePersistence.SaveStudents(store.Students);
                         ModelFilePersistence.SaveCourses(store.Courses);
                         ModelFilePersistence.SaveEnrollments(store.Enrollments);
+                        ModelFilePersistence.SaveGrades(store.Grades);
                     }
                     catch { }
 

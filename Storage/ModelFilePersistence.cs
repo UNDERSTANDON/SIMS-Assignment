@@ -166,5 +166,52 @@ namespace SIMS_WEB.Storage
             catch { }
             return result;
         }
+
+        public static void SaveGrades(IEnumerable<GradeRecord> grades)
+        {
+            EnsureDataDir();
+            var path = Path.Combine(DataDir, "grades.csv");
+            var lines = new List<string>();
+            lines.Add("StudentId,CourseCode,Score,UpdatedAt");
+            foreach (var g in grades)
+            {
+                var line = string.Join(',', new[] {
+                    Escape(g.StudentId), Escape(g.CourseCode), g.Score.ToString(), g.UpdatedAt.ToString("o")
+                });
+                lines.Add(line);
+            }
+            File.WriteAllLines(path, lines, Encoding.UTF8);
+        }
+
+        public static List<GradeRecord> LoadGrades()
+        {
+            EnsureDataDir();
+            var path = Path.Combine(DataDir, "grades.csv");
+            var result = new List<GradeRecord>();
+            if (!File.Exists(path)) return result;
+
+            try
+            {
+                using var sr = new StreamReader(path, Encoding.UTF8);
+                string? line;
+                bool isHeader = true;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (isHeader) { isHeader = false; continue; }
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 3) continue;
+
+                    var g = new GradeRecord();
+                    g.StudentId = parts[0].Trim().Replace(';', ',');
+                    g.CourseCode = parts[1].Trim().Replace(';', ',');
+                    if (double.TryParse(parts[2].Trim(), out var score)) g.Score = score;
+                    if (parts.Length > 3 && DateTime.TryParse(parts[3].Trim(), out var dt)) g.UpdatedAt = dt;
+                    result.Add(g);
+                }
+            }
+            catch { }
+            return result;
+        }
     }
 }

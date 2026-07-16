@@ -11,7 +11,7 @@ namespace SIMS_Assignment.Storage
     /// next to the application base directory. This implementation is intentionally small
     /// and synchronous-file-operation based for demo purposes.
     /// </summary>
-    public class CvsStorageEngine : IDataStorage
+    public class CvsStorageEngine : IDataStorage, IMaterialStorage
     {
         private readonly string _dataDir;
         private readonly object _lock = new();

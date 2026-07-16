@@ -483,6 +483,11 @@ namespace SIMS_WEB.Controllers
             if (removed > 0)
             {
                 TempData["Success"] = "Đã xóa điểm số của sinh viên thành công.";
+                try
+                {
+                    SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(store.Grades);
+                }
+                catch { }
             }
             else
             {
@@ -523,15 +528,19 @@ namespace SIMS_WEB.Controllers
         public IActionResult Index()
         {
             var store = SimsDataStore.Instance;
-            ViewBag.StudentName = store.Students.FirstOrDefault()?.FullName ?? "Sinh viên";
-            ViewBag.Grades = store.Grades.ToList();
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            var student = store.Students.FirstOrDefault(s => string.Equals(s.StudentId, username, StringComparison.OrdinalIgnoreCase));
+            ViewBag.StudentName = student?.FullName ?? "Sinh viên";
+            ViewBag.Grades = store.Grades.Where(g => string.Equals(g.StudentId, username, StringComparison.OrdinalIgnoreCase)).ToList();
             ViewBag.Courses = store.Courses;
             return View();
         }
 
         public IActionResult CheckUpdates(int count)
         {
-            var total = SimsDataStore.Instance.Grades.Count;
+            var store = SimsDataStore.Instance;
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            var total = store.Grades.Count(g => string.Equals(g.StudentId, username, StringComparison.OrdinalIgnoreCase));
             return Json(new { hasNew = total > count, count = total });
         }
 

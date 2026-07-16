@@ -7,10 +7,10 @@ namespace SIMS_Assignment.Services.CourseServices
     {
         // Basic CRUD for material
         private readonly List<Material> _materials;
-        private readonly IDataStorage _storage;
+        private readonly IMaterialStorage _storage;
         private readonly object _fileLock = new();
 
-        public MaterialHandler(IDataStorage storage)
+        public MaterialHandler(IMaterialStorage storage)
         {
             _storage = storage;
             _materials = _storage.GetAllMaterialsAsync().GetAwaiter().GetResult();

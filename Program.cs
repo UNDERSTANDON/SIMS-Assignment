@@ -56,8 +56,10 @@ builder.WebHost.UseUrls($"http://127.0.0.1:{desiredHttp}", $"https://127.0.0.1:{
 builder.Services.AddControllersWithViews();
 // Register CSV-backed storage and password hasher
 // Store CSV files under the content root in a `DataStorage` folder
-builder.Services.AddSingleton<IDataStorage>(sp =>
-    new CvsStorageEngine(dataStoragePath));
+builder.Services.AddSingleton<SIMS_Assignment.Storage.CvsStorageEngine>(sp =>
+    new SIMS_Assignment.Storage.CvsStorageEngine(dataStoragePath));
+builder.Services.AddSingleton<IDataStorage>(sp => sp.GetRequiredService<SIMS_Assignment.Storage.CvsStorageEngine>());
+builder.Services.AddSingleton<IMaterialStorage>(sp => sp.GetRequiredService<SIMS_Assignment.Storage.CvsStorageEngine>());
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<RegisterService>();

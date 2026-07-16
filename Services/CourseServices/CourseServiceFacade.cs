@@ -9,7 +9,7 @@ namespace SIMS_Assignment.Services.CourseServices
         private readonly MaterialHandler _materialHandler;
         private readonly AssignmentHandler _assignmentHandler;
         private readonly SubmissionHandler _submissionHandler;
-        public CourseServiceFacade(IWebHostEnvironment env, IDataStorage storage)
+        public CourseServiceFacade(IWebHostEnvironment env, IMaterialStorage storage)
         {
             _materialHandler = new MaterialHandler(storage);
             _assignmentHandler = new AssignmentHandler(env);
