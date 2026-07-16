@@ -74,7 +74,10 @@
             <!-- File upload (retains reference to old file if exists) -->
             <div class="mb-4">
                 <label class="form-label" style="color: #ffffff !important;">Tệp đính kèm (tùy chọn)</label>
-                <input type="file" name="file" class="form-control" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
+                <small class="form-text" style="color: rgba(255,255,255,0.7); display: block; margin-bottom: 0.5rem;">
+                    Dung lượng tối đa: 10 MB | Định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP
+                </small>
+                <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.txt,.zip" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
                 
                 @if(Model.ExistingSubmission != null && !string.IsNullOrEmpty(Model.ExistingSubmission.FilePath))
                 {

@@ -54,6 +54,17 @@ builder.WebHost.UseUrls($"http://127.0.0.1:{desiredHttp}", $"https://127.0.0.1:{
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Configure file upload limits
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue; // No limit on individual form values
+    options.MultipartBodyLengthLimit = long.MaxValue; // No limit on the entire request body
+});
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = null; // No limit
+});
 // Register CSV-backed storage and password hasher
 // Store CSV files under the content root in a `DataStorage` folder
 builder.Services.AddSingleton<SIMS_Assignment.Storage.CvsStorageEngine>(sp =>

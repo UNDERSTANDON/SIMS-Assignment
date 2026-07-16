@@ -297,6 +297,27 @@ namespace SIMS_WEB.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        public IActionResult Enrollments(string id)
+        {
+            var store = SimsDataStore.Instance;
+            var course = store.Courses.FirstOrDefault(c => c.Code == id);
+            if (course == null) return NotFound();
+
+            var enrolledStudents = store.Enrollments
+                .Where(e => e.CourseCode == id && e.IsEnrolled)
+                .Join(store.Students, 
+                    e => e.StudentId, 
+                    s => s.StudentId, 
+                    (e, s) => new { Enrollment = e, Student = s })
+                .Select(x => x.Student)
+                .ToList();
+
+            ViewBag.Course = course;
+            ViewBag.TotalEnrolled = enrolledStudents.Count;
+            ViewBag.EnrolledCount = course.EnrolledCount;
+            return View(enrolledStudents);
+        }
     }
 
     [RequireLogin(AllowedRoles = new[] { "Admin" })]

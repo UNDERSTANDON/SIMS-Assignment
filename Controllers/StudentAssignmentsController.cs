@@ -116,26 +116,43 @@ namespace SIMS_WEB.Controllers
             // Handle file upload if provided
             if (file != null && file.Length > 0)
             {
-                const long maxSubmissionFileSize = 10 * 1024 * 1024;
+                const long maxSubmissionFileSize = 10 * 1024 * 1024; // 10 MB
                 var uploadName = Path.GetFileName(file.FileName);
-                var extension = Path.GetExtension(uploadName);
+                var extension = Path.GetExtension(uploadName).ToLowerInvariant();
                 var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".txt", ".zip" };
 
-                if (file.Length > maxSubmissionFileSize ||
-                    !allowedExtensions.Any(e => string.Equals(e, extension, StringComparison.OrdinalIgnoreCase)))
+                // Validate file size
+                if (file.Length > maxSubmissionFileSize)
                 {
-                    TempData["Error"] = "Tệp tải lên không hợp lệ hoặc vượt quá dung lượng cho phép.";
+                    var sizeMB = (file.Length / (1024 * 1024.0)).ToString("F2");
+                    TempData["Error"] = $"Tệp tải lên ({sizeMB} MB) vượt quá dung lượng cho phép (10 MB).";
+                    return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
+                }
+
+                // Validate file extension
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["Error"] = $"Định dạng tệp '{extension}' không được hỗ trợ. Các định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP";
                     return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
                 }
 
                 try
                 {
                     var storage = Path.Combine(_env.ContentRootPath, "DataStorage", "Submissions");
-                    if (!Directory.Exists(storage)) Directory.CreateDirectory(storage);
+                    if (!Directory.Exists(storage)) 
+                    {
+                        Directory.CreateDirectory(storage);
+                    }
+                    
                     var fileName = submissionId + extension;
                     var fullPath = Path.Combine(storage, fileName);
-                    await using var fs = new FileStream(fullPath, FileMode.Create);
-                    await file.CopyToAsync(fs);
+                    
+                    // Use using statement for proper resource disposal
+                    using (var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await file.CopyToAsync(fs);
+                    }
+                    
                     filePath = Path.Combine("DataStorage", "Submissions", fileName);
                     originalFileName = uploadName;
                     Console.WriteLine($"Saved uploaded submission file to {fullPath}");
