@@ -1,0 +1,284 @@
+@model SIMS_Assignment.Models.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    ViewData["ActivePage"] = "Profile";
+
+    var currentAvatar = "/Account/GetAvatar?id=" + Model.Name;
+    var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", Model.Name + ".png");
+    var hasAvatar = System.IO.File.Exists(avatarPath);
+}
+
+<div class="sims-page" style="max-width: 900px;">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-user-gear fa-sm"></i>
+            Thông tin cá nhân
+        </h1>
+    </div>
+
+    <!-- Alert notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="sims-alert sims-alert-success mb-3">
+            <i class="fa-solid fa-circle-check fa-sm"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="sims-alert sims-alert-danger mb-3">
+            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Form Section -->
+        <div class="col-md-7">
+            <div class="sims-card p-4 h-100">
+                <form id="profileForm" asp-action="Profile" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="avatarBase64" id="avatarBase64" />
+
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #ffffff !important;">Mã số giảng viên</label>
+                        <input class="form-control font-mono" value="@Model.Name" readonly style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1); cursor: not-allowed;" />
+                        <small class="text-muted">Mã số tài khoản cố định của bạn trong hệ thống.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #ffffff !important;">Họ và tên giảng viên</label>
+                        <input name="fullName" class="form-control" value="@Model.FullName" placeholder="Nhập họ và tên giảng viên..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
+                        <span class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" style="color: #ffffff !important;">Địa chỉ Email</label>
+                        <input name="email" class="form-control" value="@Model.Email" type="email" placeholder="Nhập địa chỉ email..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-sims-success" id="btnSave">
+                            <i class="fa-solid fa-floppy-disk fa-xs me-1"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Avatar Upload and Cropping Section -->
+        <div class="col-md-5">
+            <div class="sims-card p-4 text-center h-100 d-flex flex-column align-items-center justify-content-between">
+                <div>
+                    <h5 style="color: #ffffff !important; margin-bottom: 1.5rem;">Ảnh đại diện</h5>
+                    
+                    <!-- Current Avatar Preview -->
+                    <div class="mb-3 position-relative d-inline-block">
+                        <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center" style="width: 150px; height: 150px; border: 3px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05);">
+                            @if (hasAvatar)
+                            {
+                                <img id="avatarPreview" src="@currentAvatar" alt="Avatar" style="width:100%; height:100%; object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <i id="avatarFallbackIcon" class="fa-solid fa-circle-user fa-8x" style="color: var(--text-tertiary);"></i>
+                                <img id="avatarPreview" style="width:100%; height:100%; object-fit:cover; display:none;" />
+                            }
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button type="button" class="btn btn-sims-outline btn-sm" onclick="document.getElementById('avatarUpload').click();">
+                            <i class="fa-solid fa-camera me-1"></i> Chọn ảnh mới
+                        </button>
+                        <input type="file" id="avatarUpload" accept="image/*" style="display:none;" />
+                    </div>
+                </div>
+
+                <!-- Crop UI Panel (hidden by default) -->
+                <div id="cropContainer" style="display:none; width: 100%; margin-top: 1.5rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: #ffffff !important; font-size: 0.8rem; margin-bottom: 0.5rem;" class="d-flex align-items-center justify-content-between">
+                        <span><i class="fa-solid fa-scissors fa-xs me-1"></i> Cắt ảnh đại diện (Tỉ lệ 1:1)</span>
+                        <span class="text-muted">Kéo để di chuyển</span>
+                    </div>
+
+                    <!-- Interaction Canvas -->
+                    <canvas id="cropCanvas" width="220" height="220" style="background:#000; border-radius:4px; cursor:move; display:block; margin:0 auto;"></canvas>
+                    
+                    <!-- Zoom Slider -->
+                    <div class="mt-2 px-2">
+                        <div class="d-flex justify-content-between text-muted" style="font-size:0.75rem;">
+                            <span><i class="fa-solid fa-minus"></i></span>
+                            <span>Thu nhỏ / Phóng to</span>
+                            <span><i class="fa-solid fa-plus"></i></span>
+                        </div>
+                        <input type="range" id="zoomRange" min="10" max="300" value="100" class="form-range" />
+                    </div>
+
+                    <button type="button" class="btn btn-sims-primary btn-sm mt-3 w-100" id="btnConfirmCrop">
+                        <i class="fa-solid fa-check me-1"></i> Đồng ý cắt ảnh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const avatarUpload = document.getElementById('avatarUpload');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarFallbackIcon = document.getElementById('avatarFallbackIcon');
+    const cropContainer = document.getElementById('cropContainer');
+    const cropCanvas = document.getElementById('cropCanvas');
+    const zoomRange = document.getElementById('zoomRange');
+    const btnConfirmCrop = document.getElementById('btnConfirmCrop');
+    const avatarBase64 = document.getElementById('avatarBase64');
+    const profileForm = document.getElementById('profileForm');
+
+    const ctx = cropCanvas.getContext('2d');
+    let sourceImage = new Image();
+    let imgX = 110, imgY = 110; // Center position of the image
+    let imgScale = 1.0;
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let baseWidth = 0, baseHeight = 0;
+
+    // Load file and start crop UI
+    avatarUpload.addEventListener('change', function(e) {
+        if(e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                sourceImage.src = evt.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    sourceImage.onload = function() {
+        // Setup initial scale to cover the canvas
+        const minDim = Math.min(sourceImage.width, sourceImage.height);
+        imgScale = 220 / minDim;
+        baseWidth = sourceImage.width * imgScale;
+        baseHeight = sourceImage.height * imgScale;
+        imgX = 110;
+        imgY = 110;
+
+        zoomRange.min = Math.round(imgScale * 50);
+        zoomRange.max = Math.round(imgScale * 400);
+        zoomRange.value = Math.round(imgScale * 100);
+
+        cropContainer.style.display = 'block';
+        drawCanvas();
+    };
+
+    function drawCanvas() {
+        ctx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+        
+        // Draw the image centered
+        const currentScale = parseInt(zoomRange.value) / 100;
+        const w = sourceImage.width * currentScale;
+        const h = sourceImage.height * currentScale;
+        ctx.drawImage(sourceImage, imgX - w/2, imgY - h/2, w, h);
+
+        // Draw crop area overlay (semi-transparent border, circular viewport)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        
+        // Outer box path
+        ctx.beginPath();
+        ctx.rect(0, 0, 220, 220);
+        
+        // Inner circle crop mask (subtracted)
+        ctx.arc(110, 110, 95, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.fill();
+
+        // Circle border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(110, 110, 95, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Drag-to-pan handlers
+    cropCanvas.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX - imgX;
+        startY = e.clientY - imgY;
+    });
+
+    window.addEventListener('mousemove', function(e) {
+        if(isDragging) {
+            imgX = e.clientX - startX;
+            imgY = e.clientY - startY;
+            drawCanvas();
+        }
+    });
+
+    window.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+
+    // Touch support for mobile devices
+    cropCanvas.addEventListener('touchstart', function(e) {
+        if(e.touches && e.touches[0]) {
+            isDragging = true;
+            startX = e.touches[0].clientX - imgX;
+            startY = e.touches[0].clientY - imgY;
+        }
+    });
+
+    cropCanvas.addEventListener('touchmove', function(e) {
+        if(isDragging && e.touches && e.touches[0]) {
+            imgX = e.touches[0].clientX - startX;
+            imgY = e.touches[0].clientY - startY;
+            drawCanvas();
+        }
+    });
+
+    cropCanvas.addEventListener('touchend', function() {
+        isDragging = false;
+    });
+
+    // Zoom slider handler
+    zoomRange.addEventListener('input', drawCanvas);
+
+    // Confirm Crop Button
+    btnConfirmCrop.addEventListener('click', function() {
+        // Create hidden canvas to output 200x200 pixel crop
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = 200;
+        outCanvas.height = 200;
+        const outCtx = outCanvas.getContext('2d');
+
+        // Draw cropped section from main canvas coordinate system
+        const currentScale = parseInt(zoomRange.value) / 100;
+        const w = sourceImage.width * currentScale;
+        const h = sourceImage.height * currentScale;
+
+        // Math mapping to locate cropped box from source image
+        // Center mapping on main cropCanvas (110, 110)
+        // Center offset relative to source image:
+        const srcCenterX = (110 - imgX) / currentScale + sourceImage.width/2;
+        const srcCenterY = (110 - imgY) / currentScale + sourceImage.height/2;
+        
+        // We crop 95 pixels radius (190 diameter) from center, which scales to 200
+        const d = (190 / currentScale); 
+        const x = srcCenterX - d/2;
+        const y = srcCenterY - d/2;
+
+        outCtx.drawImage(sourceImage, x, y, d, d, 0, 0, 200, 200);
+
+        // Convert output to base64 DataURL
+        const croppedBase64 = outCanvas.toDataURL('image/png');
+        avatarBase64.value = croppedBase64;
+
+        // Show cropped preview
+        avatarPreview.src = croppedBase64;
+        avatarPreview.style.display = 'block';
+        if(avatarFallbackIcon) avatarFallbackIcon.style.display = 'none';
+
+        // Hide crop panel
+        cropContainer.style.display = 'none';
+    });
+</script>

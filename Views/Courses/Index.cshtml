@@ -11,9 +11,14 @@
             Quản lý Khóa học
             <span class="sims-badge badge-success ms-2 font-mono">@ViewBag.Total</span>
         </h1>
-        <a asp-action="Create" class="btn btn-sims-success">
-            <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
-        </a>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-sims-success">
+                <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
+            </a>
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sims-outline">
+                <i class="fa-solid fa-arrow-left fa-xs"></i> Bảng điều khiển
+            </a>
+        </div>
     </div>
     
     @if (!Model.Any())
@@ -63,6 +68,9 @@
                             </td>
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
+                                    <a asp-action="Enrollments" asp-route-id="@c.Code" class="btn btn-sims-outline btn-sm py-1 px-2" title="Xem danh sách học sinh đăng ký">
+                                        <i class="fa-solid fa-users fa-xs"></i>
+                                    </a>
                                     <a asp-action="Edit" asp-route-id="@c.Code" class="btn btn-sims-outline btn-sm py-1 px-2">
                                         <i class="fa-solid fa-pen fa-xs"></i>
                                     </a>

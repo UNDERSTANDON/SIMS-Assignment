@@ -1,0 +1,256 @@
+@model List<SIMS_WEB.Models.Student>
+@{
+    var course = ViewBag.Course as SIMS_WEB.Models.Course;
+    var assignments = ViewBag.Assignments as List<SIMS_Assignment.Models.CourseRelatedModels.Assignment> ?? new();
+    var selectedAssignment = ViewBag.SelectedAssignment as SIMS_Assignment.Models.CourseRelatedModels.Assignment;
+    var submissions = ViewBag.Submissions as List<SIMS_Assignment.Models.CourseRelatedModels.Submission> ?? new();
+
+    ViewData["Title"] = "Quản lý bài tập nộp";
+    ViewData["ActivePage"] = "FacultyCourses";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-file-signature fa-sm"></i>
+            Quản lý bài tập: @course.Title (<code>@course.Code</code>)
+        </h1>
+        <a asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <!-- Alert notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="sims-alert sims-alert-success mb-3">
+            <i class="fa-solid fa-circle-check fa-sm"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="sims-alert sims-alert-danger mb-3">
+            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    <!-- Selection Area -->
+    <div class="sims-card p-3 mb-4">
+        @if (!assignments.Any())
+        {
+            <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-3">
+                <i class="fa-solid fa-folder-open fa-2x mb-2 d-block" style="opacity: 0.5;"></i>
+                Chưa có bài tập nào được tạo cho khóa học này.
+                <a asp-action="Manage" asp-route-id="@course.Code" class="btn btn-sims-primary btn-sm d-inline-block mt-2">
+                    <i class="fa-solid fa-plus fa-xs me-1"></i> Tạo bài tập mới
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label" style="color: #ffffff !important; font-weight: 500;">Chọn bài tập cần kiểm tra:</label>
+                    <select class="form-select" onchange="location.href='?courseCode=@course.Code&assignmentId=' + this.value;" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">
+                        @foreach(var a in assignments)
+                        {
+                            if (selectedAssignment != null && selectedAssignment.Id == a.Id)
+                            {
+                                <option value="@a.Id" selected>@a.Title</option>
+                            }
+                            else
+                            {
+                                <option value="@a.Id">@a.Title</option>
+                            }
+                        }
+                    </select>
+                </div>
+                @if (selectedAssignment != null)
+                {
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <div class="p-2 rounded d-inline-block text-start" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                            <div class="fs-xs text-muted-sims">Hạn nộp bài:</div>
+                            <strong style="color: #ffffff !important;" class="font-mono">@selectedAssignment.DueDate.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Student Submissions Status Table -->
+    @if (selectedAssignment != null)
+    {
+        <div class="sims-card">
+            <div class="sims-card-header">
+                <i class="fa-solid fa-users" style="color:#10b981"></i>
+                Danh sách nộp bài tập của Sinh viên
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4" style="color: #ffffff !important; opacity: 0.7;">
+                    Chưa có sinh viên nào ghi danh vào khóa học này.
+                </div>
+            }
+            else
+            {
+                <div class="sims-table-wrap">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;"></th>
+                                <th>Họ và tên</th>
+                                <th>Mã số sinh viên</th>
+                                <th class="text-center" style="width: 160px;">Trạng thái nộp</th>
+                                <th class="text-center" style="width: 120px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int rowIdx = 0; }
+                            @foreach(var s in Model)
+                            {
+                                var sub = submissions.FirstOrDefault(x => x.StudentId == s.StudentId);
+                                var hasSubmitted = sub != null;
+                                var detailId = "detail-" + rowIdx;
+                                var caAvatarFile = "/Account/GetAvatar?id=" + s.StudentId;
+                                var caAvatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", s.StudentId + ".png");
+                                var caHasAvatar = System.IO.File.Exists(caAvatarPath);
+                                <tr>
+                                    <td>
+                                        @if (caHasAvatar)
+                                        {
+                                            <img src="@caAvatarFile" alt="Avatar" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border: 2px solid rgba(255,255,255,0.15);" />
+                                        }
+                                        else
+                                        {
+                                            <div style="width:36px; height:36px; border-radius:50%; background:rgba(99,102,241,0.15); border:2px solid rgba(99,102,241,0.3); display:flex; align-items:center; justify-content:center;">
+                                                <i class="fa-solid fa-user" style="color:#818cf8; font-size:0.85rem;"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong style="color: #ffffff !important;">@s.FullName</strong>
+                                    </td>
+                                    <td>
+                                        <span class="font-mono text-muted-sims">@s.StudentId</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (hasSubmitted)
+                                        {
+                                            <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.85rem; padding: 6px 12px;">
+                                                <i class="fa-solid fa-circle-check me-1"></i> Đã nộp
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444 !important; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.85rem; padding: 6px 12px;">
+                                                <i class="fa-solid fa-circle-xmark me-1"></i> Chưa nộp
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (hasSubmitted)
+                                        {
+                                            <button type="button" class="btn btn-sims-outline btn-sm toggle-detail-btn" data-target="@detailId">
+                                                <i class="fa-solid fa-eye fa-xs me-1"></i> <span class="btn-text">Xem chi tiết</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted-sims fs-xs">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                                @if (hasSubmitted && sub != null)
+                                {
+                                    <tr id="@detailId" class="detail-row" style="display: none;">
+                                        <td colspan="5" style="padding: 0 !important; border-top: none !important;">
+                                            <div class="p-3 mx-2 mb-2 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <div class="mb-2">
+                                                            <span class="fs-xs text-muted-sims d-block mb-1">
+                                                                <i class="fa-solid fa-clock fa-xs me-1"></i> Ngày giờ nộp bài:
+                                                            </span>
+                                                            <strong class="font-mono" style="color: #fbbf24 !important;">@sub.SubmissionDate.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <span class="fs-xs text-muted-sims d-block mb-1">
+                                                                <i class="fa-solid fa-pen fa-xs me-1"></i> Nội dung bài nộp:
+                                                            </span>
+                                                            <div class="p-2 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #ffffff !important; font-size: 0.9rem; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">@(string.IsNullOrWhiteSpace(sub.Content) ? "(Không có nội dung văn bản)" : sub.Content)</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        @if (!string.IsNullOrEmpty(sub.FilePath))
+                                                        {
+                                                            <div class="mb-2">
+                                                                <span class="fs-xs text-muted-sims d-block mb-1">
+                                                                    <i class="fa-solid fa-paperclip fa-xs me-1"></i> Tệp đính kèm:
+                                                                </span>
+                                                                <a href="/@sub.FilePath" download class="btn btn-sims-primary btn-sm">
+                                                                    <i class="fa-solid fa-download fa-xs me-1"></i> @(sub.OriginalFileName ?? "Tải xuống")
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="mb-2">
+                                                                <span class="fs-xs text-muted-sims d-block mb-1">
+                                                                    <i class="fa-solid fa-paperclip fa-xs me-1"></i> Tệp đính kèm:
+                                                                </span>
+                                                                <span style="color: #ffffff !important; opacity: 0.5; font-size: 0.85rem;">Không có tệp đính kèm</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                rowIdx++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+document.querySelectorAll('.toggle-detail-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var targetId = this.getAttribute('data-target');
+        var detailRow = document.getElementById(targetId);
+        var btnText = this.querySelector('.btn-text');
+        var icon = this.querySelector('i');
+
+        if (detailRow.style.display === 'none' || detailRow.style.display === '') {
+            detailRow.style.display = 'table-row';
+            detailRow.style.animation = 'fadeIn 0.3s ease-in-out';
+            btnText.textContent = 'Thu gọn';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            detailRow.style.display = 'none';
+            btnText.textContent = 'Xem chi tiết';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+});
+</script>
+
+<style>
+@@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.detail-row td {
+    background: transparent !important;
+}
+</style>

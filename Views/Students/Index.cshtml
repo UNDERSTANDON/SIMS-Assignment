@@ -1,6 +1,6 @@
 @model List<SIMS_WEB.Models.Student>
 @{
-    ViewData["Title"] = "Quản lý Sinh viên";
+    ViewData["Title"] = "Quản lý Người dùng";
     ViewData["ActivePage"] = "Students";
 }
 
@@ -22,68 +22,94 @@
 <div class="sims-page">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
-            <i class="fa-solid fa-users fa-sm"></i>
-            Quản lý Sinh viên
-            <span class="sims-badge badge-primary ms-2 font-mono">@ViewBag.Total</span>
+            <i class="fa-solid fa-user-group fa-sm"></i>
+            Quản lý Người dùng
         </h1>
         <div class="d-flex gap-2">
-            <a asp-action="Create" class="btn btn-sims-primary">
-                <i class="fa-solid fa-plus fa-xs"></i> Thêm sinh viên
-            </a>
-            <button class="btn btn-sims-outline" onclick="toggleImport()" id="importToggleBtn">
-                <i class="fa-solid fa-file-csv fa-xs"></i> Nhập CSV
-            </button>
+            @if (ViewBag.Tab == "faculty")
+            {
+                <a href="/Account/CreateUser?role=Faculty" class="btn btn-sims-success">
+                    <i class="fa-solid fa-plus fa-xs"></i> Thêm giảng viên
+                </a>
+            }
+            else
+            {
+                <a asp-action="Create" class="btn btn-sims-primary">
+                    <i class="fa-solid fa-plus fa-xs"></i> Thêm sinh viên
+                </a>
+                <button class="btn btn-sims-outline" onclick="toggleImport()" id="importToggleBtn">
+                    <i class="fa-solid fa-file-csv fa-xs"></i> Nhập CSV
+                </button>
+            }
         </div>
     </div>
 
-    <!-- CSV Import Panel — Section 4.5: empty/action states -->
-    <div id="importPanel" class="sims-card mb-4" style="display:none">
-        <div class="sims-card-header">
-            <i class="fa-solid fa-cloud-arrow-up" style="color:#4ade80"></i>
-            Nhập danh sách từ file CSV
-        </div>
-        <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            <div class="file-upload-area mb-3"
-                 onclick="document.getElementById('csvFile').click()"
-                 ondragover="event.preventDefault(); this.classList.add('drag-over')"
-                 ondragleave="this.classList.remove('drag-over')"
-                 ondrop="handleDrop(event)">
-                <i class="fa-solid fa-cloud-arrow-up mb-2 d-block"></i>
-                <div style="font-weight:600;font-size:0.875rem;">Kéo thả file CSV vào đây</div>
-                <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:0.25rem;">
-                    hoặc <span style="color:var(--accent-light)">chọn file từ máy tính</span>
-                </div>
-                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
-                    Format: MaSV, HoTen, ChuongTrinh, Email
-                </div>
-                <input type="file" id="csvFile" name="csvFile" accept=".csv" class="d-none"
-                       onchange="updateFileName(this)" />
-            </div>
-            <div id="fileNameDisplay" class="font-mono fs-xs text-muted-sims mb-3" style="min-height:1.2rem"></div>
-            <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.65rem 0.875rem;margin-bottom:1rem;font-size:0.75rem;font-family:'Geist Mono',monospace;color:var(--text-tertiary)">
-                SV2024005,Nguyen Thi E,Cong nghe Thong tin,e.nt@@univ.edu
-            </div>
-                <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-sims-success">
-                    <i class="fa-solid fa-upload fa-xs"></i> Tải lên & Nhập
-                </button>
-                <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Hủy</button>
-            </div>
-        </form>
+    <!-- Tabs Navigation -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border-subtle);padding-bottom:0.5rem;">
+        <a href="?tab=student&search=@ViewBag.Search" 
+           style="padding:0.5rem 1rem;border-radius:var(--r-md);font-size:0.875rem;font-weight:600;text-decoration:none;transition:all var(--dur);color:@(ViewBag.Tab != "faculty" ? "var(--accent-light)" : "var(--text-tertiary)");background:@(ViewBag.Tab != "faculty" ? "var(--accent-ghost)" : "transparent");border:1px solid @(ViewBag.Tab != "faculty" ? "var(--accent-ring)" : "transparent")">
+            <i class="fa-solid fa-graduation-cap"></i> Sinh viên
+            <span class="sims-badge badge-primary ms-1">@ViewBag.StudentsCount</span>
+        </a>
+        <a href="?tab=faculty&search=@ViewBag.Search" 
+           style="padding:0.5rem 1rem;border-radius:var(--r-md);font-size:0.875rem;font-weight:600;text-decoration:none;transition:all var(--dur);color:@(ViewBag.Tab == "faculty" ? "var(--accent-light)" : "var(--text-tertiary)");background:@(ViewBag.Tab == "faculty" ? "var(--accent-ghost)" : "transparent");border:1px solid @(ViewBag.Tab == "faculty" ? "var(--accent-ring)" : "transparent")">
+            <i class="fa-solid fa-chalkboard-user"></i> Giảng viên
+            <span class="sims-badge badge-success ms-1">@ViewBag.LecturersCount</span>
+        </a>
     </div>
+
+    <!-- CSV Import Panel (only for students) -->
+    @if (ViewBag.Tab != "faculty")
+    {
+        <div id="importPanel" class="sims-card mb-4" style="display:none">
+            <div class="sims-card-header">
+                <i class="fa-solid fa-cloud-arrow-up" style="color:#4ade80"></i>
+                Nhập danh sách từ file CSV
+            </div>
+            <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="file-upload-area mb-3"
+                     onclick="document.getElementById('csvFile').click()"
+                     ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                     ondragleave="this.classList.remove('drag-over')"
+                     ondrop="handleDrop(event)">
+                    <i class="fa-solid fa-cloud-arrow-up mb-2 d-block"></i>
+                    <div style="font-weight:600;font-size:0.875rem;">Kéo thả file CSV vào đây</div>
+                    <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:0.25rem;">
+                        hoặc <span style="color:var(--accent-light)">chọn file từ máy tính</span>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
+                        Format: MaSV, HoTen, ChuongTrinh, Email
+                    </div>
+                    <input type="file" id="csvFile" name="csvFile" accept=".csv" class="d-none"
+                           onchange="updateFileName(this)" />
+                </div>
+                <div id="fileNameDisplay" class="font-mono fs-xs text-muted-sims mb-3" style="min-height:1.2rem"></div>
+                <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.65rem 0.875rem;margin-bottom:1rem;font-size:0.75rem;font-family:'Geist Mono',monospace;color:var(--text-tertiary)">
+                    SV2024005,Nguyen Thi E,Cong nghe Thong tin,e.nt@@univ.edu
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sims-success">
+                        <i class="fa-solid fa-upload fa-xs"></i> Tải lên & Nhập
+                    </button>
+                    <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Hủy</button>
+                </div>
+            </form>
+        </div>
+    }
 
     <!-- Search bar -->
     <form method="get" class="mb-3 search-bar">
+        <input type="hidden" name="tab" value="@ViewBag.Tab" />
         <div class="input-group">
             <span class="input-group-text">
                 <i class="fa-solid fa-magnifying-glass fa-xs"></i>
             </span>
             <input type="text" name="search" value="@ViewBag.Search"
-                   class="form-control" placeholder="Tìm theo tên, mã sinh viên..." />
+                   class="form-control" placeholder="Tìm kiếm tên, email..." />
             @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
             {
-                <a asp-action="Index" class="btn btn-sims-outline px-2">
+                <a href="?tab=@ViewBag.Tab" class="btn btn-sims-outline px-2">
                     <i class="fa-solid fa-xmark fa-xs"></i>
                 </a>
             }
@@ -92,80 +118,198 @@
     </form>
 
     <!-- Table or empty state -->
-    @if (!Model.Any())
+    @if (ViewBag.Tab == "faculty")
     {
-        <!-- Empty state — Section 4.5: beautiful empty state -->
-        <div class="sims-card">
-        <div class="sims-empty">
-                <i class="fa-solid fa-users-slash"></i>
-                <div class="em-title">Không tìm thấy sinh viên</div>
-                <div class="em-sub">
-                    @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
-                    {
-                        <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
-                    }
-                    else
-                    {
-                        <span>Chưa có sinh viên nào. Thêm sinh viên đầu tiên hoặc nhập từ CSV.</span>
-                    }
+        var lecturers = (List<SIMS_WEB.Models.Student>)ViewBag.Lecturers;
+        @if (lecturers == null || !lecturers.Any())
+        {
+            <div class="sims-card">
+                <div class="sims-empty">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <div class="em-title">Không tìm thấy giảng viên</div>
+                    <div class="em-sub">
+                        @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+                        {
+                            <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
+                        }
+                        else
+                        {
+                            <span>Chưa có giảng viên nào trong hệ thống.</span>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="sims-table-wrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Mã GV</th>
+                            <th>Gmail</th>
+                            <th>Khóa học</th>
+                            <th class="text-center" style="width:100px">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in lecturers)
+                        {
+                            var initials = string.Join("", l.FullName.Split(' ').Where(x => x.Length > 0)
+                                               .TakeLast(2).Select(x => x[0]));
+                            var avatarUrl = "/Account/GetAvatar?id=" + l.StudentId;
+                            var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", l.StudentId + ".png");
+                            var hasAvatar = System.IO.File.Exists(avatarPath);
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (hasAvatar)
+                                        {
+                                            <img src="@avatarUrl" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-ring);" />
+                                        }
+                                        else
+                                        {
+                                            <div class="avatar-lg" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80">
+                                                @initials.ToUpper()
+                                            </div>
+                                        }
+                                        <span style="font-weight:600">@l.FullName</span>
+                                    </div>
+                                </td>
+                                <td class="font-mono" style="font-size:0.8rem">@l.StudentId</td>
+                                <td style="color:var(--text-secondary);font-size:0.8rem">@l.Email</td>
+                                <td>
+                                    @{
+                                        var courseList = l.Program?.Split('|', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+                                    }
+                                    @if (courseList.Length == 0 || (courseList.Length == 1 && courseList[0] == "null"))
+                                    {
+                                        <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-secondary);font-size:0.75rem;cursor:not-allowed;" disabled>
+                                            <option>null</option>
+                                        </select>
+                                    }
+                                    else if (courseList.Length == 1)
+                                    {
+                                        <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
+                                            <option>@courseList[0]</option>
+                                            <option disabled style="color:var(--text-muted);font-style:italic;">null</option>
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
+                                            @foreach (var course in courseList)
+                                            {
+                                                <option>@course</option>
+                                            }
+                                        </select>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <button class="btn btn-sims-danger btn-sm py-1 px-2"
+                                                onclick="confirmDeleteUser('@l.StudentId')">
+                                            <i class="fa-solid fa-trash fa-xs"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 fs-xs text-muted-sims font-mono">
+                Hiển thị @lecturers.Count / @ViewBag.LecturersCount giảng viên
+            </div>
+        }
     }
     else
     {
-        <div class="sims-table-wrap">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Sinh viên</th>
-                        <th>Mã SV</th>
-                        <th>Chương trình</th>
-                        <th>Email</th>
-                        <th class="text-center">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in Model)
-                    {
-                        var initials = string.Join("", s.FullName.Split(' ').Where(x => x.Length > 0)
-                                           .TakeLast(2).Select(x => x[0]));
+        @if (!Model.Any())
+        {
+            <div class="sims-card">
+                <div class="sims-empty">
+                    <i class="fa-solid fa-users-slash"></i>
+                    <div class="em-title">Không tìm thấy sinh viên</div>
+                    <div class="em-sub">
+                        @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+                        {
+                            <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
+                        }
+                        else
+                        {
+                            <span>Chưa có sinh viên nào. Thêm sinh viên đầu tiên hoặc nhập từ CSV.</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="sims-table-wrap">
+                <table class="table table-hover">
+                    <thead>
                         <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="avatar-lg">@initials.ToUpper()</div>
-                                    <span style="font-weight:600">@s.FullName</span>
-                                </div>
-                            </td>
-                            <td><code class="font-mono" style="color:var(--accent-light);font-size:0.8rem">@s.StudentId</code></td>
-                            <td>
-                                <span class="sims-badge badge-purple">@s.Program</span>
-                            </td>
-                            <td style="color:var(--text-tertiary);font-size:0.8rem">@s.Email</td>
-                            <td class="text-center">
-                                <div class="d-flex justify-content-center gap-1">
-                                    <a asp-action="Edit" asp-route-id="@s.StudentId"
-                                       class="btn btn-sims-outline btn-sm py-1 px-2">
-                                        <i class="fa-solid fa-pen fa-xs"></i>
-                                    </a>
-                                    <button class="btn btn-sims-danger btn-sm py-1 px-2"
-                                            onclick="confirmDelete('@s.StudentId', '@s.FullName')">
-                                        <i class="fa-solid fa-trash fa-xs"></i>
-                                    </button>
-                                </div>
-                            </td>
+                            <th>Sinh viên</th>
+                            <th>Mã SV</th>
+                            <th>Chương trình</th>
+                            <th>Email</th>
+                            <th class="text-center" style="width:100px">Thao tác</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        <div class="mt-2 fs-xs text-muted-sims font-mono">
-            Hiển thị @Model.Count / @ViewBag.Total sinh viên
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            var initials = string.Join("", s.FullName.Split(' ').Where(x => x.Length > 0)
+                                                .TakeLast(2).Select(x => x[0]));
+                            var avatarUrl = "/Account/GetAvatar?id=" + s.StudentId;
+                            var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", s.StudentId + ".png");
+                            var hasAvatar = System.IO.File.Exists(avatarPath);
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (hasAvatar)
+                                        {
+                                            <img src="@avatarUrl" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-ring);" />
+                                        }
+                                        else
+                                        {
+                                            <div class="avatar-lg">@initials.ToUpper()</div>
+                                        }
+                                        <span style="font-weight:600">@s.FullName</span>
+                                    </div>
+                                </td>
+                                <td><code class="font-mono" style="color:var(--accent-light);font-size:0.8rem">@s.StudentId</code></td>
+                                <td>
+                                    <span class="sims-badge badge-purple">@s.Program</span>
+                                </td>
+                                <td style="color:var(--text-tertiary);font-size:0.8rem">@s.Email</td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <a asp-action="Edit" asp-route-id="@s.StudentId"
+                                           class="btn btn-sims-outline btn-sm py-1 px-2">
+                                            <i class="fa-solid fa-pen fa-xs"></i>
+                                        </a>
+                                        <button class="btn btn-sims-danger btn-sm py-1 px-2"
+                                                onclick="confirmDelete('@s.StudentId', '@s.FullName')">
+                                            <i class="fa-solid fa-trash fa-xs"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 fs-xs text-muted-sims font-mono">
+                Hiển thị @Model.Count / @ViewBag.StudentsCount sinh viên
+            </div>
+        }
     }
 </div>
 
-<!-- Delete Modal — Section 4.5: error state design -->
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
@@ -191,8 +335,10 @@
 <script>
 function toggleImport() {
     const p = document.getElementById('importPanel');
-    const open = p.style.display !== 'none';
-    p.style.display = open ? 'none' : 'block';
+    if (p) {
+        const open = p.style.display !== 'none';
+        p.style.display = open ? 'none' : 'block';
+    }
 }
 function updateFileName(input) {
     document.getElementById('fileNameDisplay').textContent =
@@ -209,12 +355,20 @@ function handleDrop(e) {
 }
 function confirmDelete(id, name) {
     const modalEl = document.getElementById('deleteModal');
-    // ensure modal is attached to document.body so Bootstrap backdrop/z-index behave correctly
     if (modalEl && modalEl.parentNode !== document.body) {
         document.body.appendChild(modalEl);
     }
     document.getElementById('deleteMsg').innerHTML = `Xóa sinh viên <strong style="color:var(--text-primary)">${name}</strong>? Hành động này không thể hoàn tác.`;
     document.getElementById('deleteForm').action = '/Students/Delete/' + id;
+    new bootstrap.Modal(modalEl).show();
+}
+function confirmDeleteUser(username) {
+    const modalEl = document.getElementById('deleteModal');
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
+    document.getElementById('deleteMsg').innerHTML = `Xóa tài khoản giảng viên <strong style="color:var(--text-primary)">${username}</strong>? Hành động này cũng sẽ xóa tài khoản đăng nhập tương ứng.`;
+    document.getElementById('deleteForm').action = '/Students/DeleteUser?username=' + encodeURIComponent(username);
     new bootstrap.Modal(modalEl).show();
 }
 </script>

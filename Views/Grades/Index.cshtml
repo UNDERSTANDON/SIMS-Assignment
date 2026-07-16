@@ -29,97 +29,138 @@
             <i class="fa-solid fa-star fa-sm"></i>
             Quản lý Điểm số
         </h1>
-        <span class="pattern-badge pattern-observer">Observer Pattern</span>
+        <div class="d-flex align-items-center gap-2">
+            <span class="pattern-badge pattern-observer">Observer Pattern</span>
+        </div>
     </div>
 
+    <!-- Alert notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="sims-alert sims-alert-success mb-3">
+            <i class="fa-solid fa-circle-check fa-sm"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="sims-alert sims-alert-danger mb-3">
+            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
     <div class="grade-grid">
-        <!-- LEFT: Form -->
-        <div>
+        <!-- LEFT: Course Filter & Grade Form -->
+        <div class="d-flex flex-column gap-3">
+            <!-- Course Selector -->
+            <div class="sims-card">
+                <div class="sims-card-header text-primary-sims">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    Chọn Khóa học
+                </div>
+                <div class="mb-2">
+                    <select id="courseSelect" class="form-select" onchange="location.href='?courseCode=' + this.value">
+                        <option value="">-- Chọn khóa học --</option>
+                        @foreach (var c in Model.Courses)
+                        {
+                            <!option value="@c.Code" @(Model.CourseCode == c.Code ? "selected" : "")>
+                                @c.Code - @c.Title
+                            </!option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grade Update Form -->
             <div class="sims-card">
                 <div class="sims-card-header">
-                <i class="fa-solid fa-star" style="color:#fbbf24"></i>
+                    <i class="fa-solid fa-star" style="color:#fbbf24"></i>
                     Cập nhật điểm
                 </div>
 
-                <!-- Observer info — one alert max (Section 4.5: informational state) -->
-                <div class="sims-alert sims-alert-warning mb-3" style="font-size:0.78rem;">
-                    <i class="fa-solid fa-bolt fa-xs"></i>
-                    <span><strong>Observer:</strong> Khi lưu điểm, sinh viên nhận thông báo real-time tự động</span>
-                </div>
-
-                @if (Model.Message != null)
+                @if (!string.IsNullOrEmpty(Model.EditStudentId))
                 {
-                    <div class="sims-alert @(Model.IsSuccess ? "sims-alert-success" : "sims-alert-danger") mb-3">
-                        <i class="fa-solid @(Model.IsSuccess ? "fa-bell" : "fa-circle-xmark") fa-sm"></i>
-                        <span>@Model.Message</span>
-                    </div>
-                }
-
-                <form asp-action="Save" asp-controller="Grades" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div class="mb-3">
-                        <label asp-for="CourseCode" class="form-label"></label>
-                        <select asp-for="CourseCode" class="form-select">
-                        <option value="">-- Chọn khóa học --</option>
-                            @foreach (var c in Model.Courses)
-                            {
-                                <option value="@c.Code">@c.Code - @c.Title</option>
-                            }
-                        </select>
+                    <!-- Observer info -->
+                    <div class="sims-alert sims-alert-warning mb-3" style="font-size:0.78rem;">
+                        <i class="fa-solid fa-bolt fa-xs"></i>
+                        <span><strong>Observer:</strong> Khi lưu điểm, sinh viên nhận thông báo real-time tự động</span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="StudentId" class="form-label"></label>
-                        <select asp-for="StudentId" class="form-select">
-                        <option value="">-- Chọn sinh viên --</option>
-                            @foreach (var s in Model.Students)
-                            {
-                                <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
-                            }
-                        </select>
-                    </div>
+                    <form asp-action="Save" asp-controller="Grades" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="CourseCode" />
+                        <input type="hidden" asp-for="StudentId" value="@Model.EditStudentId" />
 
-                    <div class="mb-3">
-                        <label asp-for="Score" class="form-label"></label>
-                        <input asp-for="Score" type="number" class="form-control font-mono"
-                               min="0" max="100" step="0.5" placeholder="0 - 100"
-                               oninput="previewGrade(this.value)" />
-                        <span asp-validation-for="Score" class="invalid-feedback d-block"></span>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Khóa học đang chọn</label>
+                            <input class="form-control" value="@Model.CourseCode" readonly style="background-color: var(--bg); cursor: not-allowed;" />
+                        </div>
 
-                    <!-- Grade preview — Section 4.5: tactile feedback -->
-                    <div id="gradePreview" style="display:none;margin-bottom:1rem;">
-                        <div style="display:flex;align-items:center;gap:0.75rem;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;">
-                            <div class="grade-letter" id="gradeLetterBox"></div>
-                            <div>
-                                <div id="gradeLabel" style="font-weight:700;font-size:0.875rem;"></div>
-                                <div id="gradeGPA" class="fs-xs text-muted-sims font-mono" style="margin-top:0.1rem;"></div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Sinh viên</label>
+                            <input class="form-control" value="@Model.EditStudentName (@Model.EditStudentId)" readonly style="background-color: var(--bg); cursor: not-allowed;" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Score" class="form-label"></label>
+                            <input asp-for="Score" type="number" class="form-control font-mono"
+                                   min="0" max="100" step="0.5" placeholder="0 - 100"
+                                   oninput="previewGrade(this.value)" id="Score" />
+                            <span asp-validation-for="Score" class="invalid-feedback d-block"></span>
+                        </div>
+
+                        <!-- Grade preview -->
+                        <div id="gradePreview" style="display:none;margin-bottom:1rem;">
+                            <div style="display:flex;align-items:center;gap:0.75rem;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;">
+                                <div class="grade-letter" id="gradeLetterBox"></div>
+                                <div>
+                                    <div id="gradeLabel" style="font-weight:700;font-size:0.875rem;"></div>
+                                    <div id="gradeGPA" class="fs-xs text-muted-sims font-mono" style="margin-top:0.1rem;"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <button type="submit" class="btn btn-sims-warning w-100">
-                        <i class="fa-solid fa-floppy-disk fa-xs"></i> Lưu điểm và gửi thông báo
-                    </button>
-                </form>
+                        <button type="submit" class="btn btn-sims-warning w-100">
+                            <i class="fa-solid fa-floppy-disk fa-xs"></i> Lưu điểm và gửi thông báo
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted-sims" style="font-size:0.875rem;">
+                        <i class="fa-solid fa-info-circle fa-2x mb-2" style="color:var(--accent-light);"></i>
+                        <p class="mb-0">Chọn nút <strong>Sửa</strong> trên dòng sinh viên ở bảng bên phải để nhập hoặc cập nhật điểm số.</p>
+                    </div>
+                }
             </div>
         </div>
 
-        <!-- RIGHT: Grade history -->
+        <!-- RIGHT: Student List for Selected Course -->
         <div class="sims-card">
-                <div class="sims-card-header">
-                <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent-light)"></i>
-                Điểm đã cập nhật
-                <span class="sims-badge badge-warning ms-auto font-mono">@Model.RecentGrades.Count</span>
+            <div class="sims-card-header">
+                <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                Danh sách Sinh viên
+                @if (!string.IsNullOrEmpty(Model.CourseCode))
+                {
+                    <span class="sims-badge badge-warning ms-auto font-mono">Lớp: @Model.CourseCode (@Model.Students.Count)</span>
+                }
             </div>
 
-            @if (!Model.RecentGrades.Any())
+            @if (string.IsNullOrEmpty(Model.CourseCode))
             {
-                <div class="sims-empty py-3">
-                    <i class="fa-solid fa-chart-bar"></i>
-                    <div class="em-title">Chưa có điểm nào</div>
-                    <div class="em-sub">Dùng form bên trái để cập nhật điểm sinh viên.</div>
+                <div class="sims-empty py-4">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <div class="em-title">Chưa chọn khóa học</div>
+                    <div class="em-sub">Vui lòng chọn một khóa học ở dropdown bên trái để quản lý danh sách điểm của sinh viên lớp đó.</div>
+                </div>
+            }
+            else if (!Model.Students.Any())
+            {
+                <div class="sims-empty py-4">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div class="em-title">Không có sinh viên</div>
+                    <div class="em-sub">Hiện tại chưa có sinh viên nào ghi danh vào khóa học này.</div>
                 </div>
             }
             else
@@ -128,26 +169,75 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Sinh viên</th>
-                                <th>Khóa học</th>
-                                <th class="text-center">Điểm</th>
-                                <th class="text-center">Xếp loại</th>
-                                <th>Cập nhật</th>
+                                <th>Họ và Tên</th>
+                                <th>Mã số Sinh viên</th>
+                                <th class="text-center">Điểm số</th>
+                                <th class="text-center">Kết quả</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var g in Model.RecentGrades)
+                            @foreach (var s in Model.Students)
                             {
-                                var student = Model.Students.FirstOrDefault(s => s.StudentId == g.StudentId);
-                                var scoreColor = g.Score >= 80 ? "#4ade80" : g.Score >= 65 ? "#fbbf24" : g.Score >= 50 ? "#a78bfa" : "#f87171";
+                                var gradeRecord = Model.RecentGrades.FirstOrDefault(g => g.CourseCode == Model.CourseCode && g.StudentId == s.StudentId);
+                                var scoreText = gradeRecord != null ? gradeRecord.Score.ToString() : "-";
+                                var statusText = "Chưa nhập";
+                                var statusClass = "bg-secondary text-white";
+                                if (gradeRecord != null)
+                                {
+                                    if (gradeRecord.Score >= 50)
+                                    {
+                                        statusText = "Pass";
+                                        statusClass = "sims-badge badge-success";
+                                    }
+                                    else
+                                    {
+                                        statusText = "Fail";
+                                        statusClass = "sims-badge badge-danger";
+                                    }
+                                }
+                                var scoreColor = gradeRecord != null ? (gradeRecord.Score >= 80 ? "#4ade80" : gradeRecord.Score >= 65 ? "#fbbf24" : gradeRecord.Score >= 50 ? "#a78bfa" : "#f87171") : "var(--text-muted)";
                                 <tr>
-                                    <td style="font-size:0.875rem">@(student?.FullName ?? g.StudentId)</td>
-                                    <td><code class="font-mono" style="color:#a78bfa;font-size:0.75rem">@g.CourseCode</code></td>
-                                    <td class="text-center font-mono fw-800" style="color:@scoreColor;font-size:1.05rem">@g.Score</td>
+                                    <td>@s.FullName</td>
+                                    <td><code>@s.StudentId</code></td>
+                                    <td class="text-center font-mono fw-800" style="color:@scoreColor;font-size:1.05rem">@scoreText</td>
                                     <td class="text-center">
-                                        <span class="sims-badge @g.GradeBadgeClass">@g.GradeLabel</span>
+                                        <span class="sims-badge @statusClass">@statusText</span>
                                     </td>
-                                    <td class="fs-xs text-muted-sims font-mono">@g.UpdatedAt.ToString("dd/MM HH:mm")</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <a class="btn btn-sims-outline btn-sm" asp-action="Index" asp-route-courseCode="@Model.CourseCode" asp-route-editStudentId="@s.StudentId">
+                                                <i class="fa-solid fa-pen-to-square fa-xs"></i> Sửa
+                                            </a>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sims-outline-danger btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fa-solid fa-trash fa-xs"></i> Xóa
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                    <li>
+                                                        <form asp-action="DeleteGrade" asp-controller="Grades" method="post" onsubmit="return confirmDeleteGrade()">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="courseCode" value="@Model.CourseCode" />
+                                                            <input type="hidden" name="studentId" value="@s.StudentId" />
+                                                            <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
+                                                                <i class="fa-solid fa-eraser fa-xs"></i> Xóa điểm số
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                    <li>
+                                                        <form asp-action="DeleteStudent" asp-controller="Grades" method="post" onsubmit="return confirmDeleteStudent()">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="courseCode" value="@Model.CourseCode" />
+                                                            <input type="hidden" name="studentId" value="@s.StudentId" />
+                                                            <button type="submit" class="dropdown-item text-danger fw-bold d-flex align-items-center gap-2">
+                                                                <i class="fa-solid fa-user-minus fa-xs"></i> Xóa sinh viên khỏi lớp
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -180,6 +270,22 @@ function previewGrade(val) {
     document.getElementById('gradeLabel').style.color = g.color;
     document.getElementById('gradeGPA').textContent = 'GPA: ' + g.gpa;
     preview.style.display = 'block';
+}
+
+// Initial preview load if value is present
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreInput = document.getElementById('Score');
+    if (scoreInput && scoreInput.value) {
+        previewGrade(scoreInput.value);
+    }
+});
+
+function confirmDeleteGrade() {
+    return confirm("Bạn có chắc muốn xóa điểm của sinh viên này?");
+}
+
+function confirmDeleteStudent() {
+    return confirm("Bạn có chắc có muốn XÓA SINH VIÊN NÀY KHÔNG?");
 }
 </script>
 }

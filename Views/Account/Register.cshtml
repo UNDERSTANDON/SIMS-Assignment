@@ -33,14 +33,7 @@
                 <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="Role" class="form-label"></label>
-                <select asp-for="Role" class="form-select">
-                    <option value="Student">Sinh viên</option>
-                    <option value="Faculty">Giảng viên</option>
-                </select>
-                <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
-            </div>
+            <input type="hidden" asp-for="Role" value="Student" />
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>

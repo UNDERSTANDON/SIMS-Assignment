@@ -28,18 +28,26 @@ namespace SIMS_WEB.Controllers
         {
             ViewData["ActivePage"] = "StudentAssignments";
             var model = new StudentAssignmentsViewModel();
-            model.StudentId = studentId ?? "";
+
+            var sessionStudent = HttpContext.Session.GetString("StudentId");
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+
+            model.StudentId = studentId ?? sessionStudent ?? "";
+            if (string.IsNullOrEmpty(model.StudentId) && username == "sinhvien")
+            {
+                model.StudentId = _store.Students.FirstOrDefault()?.StudentId ?? "";
+            }
+
             model.Students = _store.Students;
 
             var allAssignments = _assignments.GetAll();
-            if (!string.IsNullOrEmpty(studentId))
+            if (!string.IsNullOrEmpty(model.StudentId))
             {
-                var enrolledCourseCodes = _store.Enrollments.Where(e => e.StudentId == studentId).Select(e => e.CourseCode).ToHashSet();
+                var enrolledCourseCodes = _store.Enrollments.Where(e => e.StudentId == model.StudentId).Select(e => e.CourseCode).ToHashSet();
                 model.Assignments = allAssignments.Where(a => enrolledCourseCodes.Contains(a.CourseCode)).ToList();
             }
             else
             {
-                // show none until student selected
                 model.Assignments = new List<Assignment>();
             }
 
@@ -54,11 +62,34 @@ namespace SIMS_WEB.Controllers
             var assignment = _assignments.GetAll().FirstOrDefault(a => a.Id == assignmentId);
             if (assignment == null) return NotFound();
 
+            var sessionStudent = HttpContext.Session.GetString("StudentId");
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            string studentId = sessionStudent;
+            if (string.IsNullOrEmpty(studentId) && username == "sinhvien")
+            {
+                studentId = _store.Students.FirstOrDefault()?.StudentId;
+            }
+
+            var enrolledCodes = _store.Enrollments
+                .Where(e => e.StudentId == studentId)
+                .Select(e => e.CourseCode)
+                .ToHashSet();
+
+            var enrolledCourses = _store.Courses
+                .Where(c => enrolledCodes.Contains(c.Code))
+                .ToList();
+
+            var existingSubmission = _submissions.GetAll()
+                .FirstOrDefault(s => s.StudentId == studentId && s.AssignmentTitle == assignment.Title);
+
             var vm = new SubmitViewModel
             {
                 Assignment = assignment,
                 Course = _store.Courses.FirstOrDefault(c => c.Code == courseCode) ?? new SIMS_WEB.Models.Course(),
-                Students = _store.Students
+                Students = _store.Students,
+                StudentId = studentId ?? string.Empty,
+                EnrolledCourses = enrolledCourses,
+                ExistingSubmission = existingSubmission
             };
             return View(vm);
         }
@@ -74,40 +105,57 @@ namespace SIMS_WEB.Controllers
                 return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
             }
 
-            var submission = new Submission
-            {
-                Id = Guid.NewGuid().ToString("N"),
-                StudentId = studentId,
-                AssignmentTitle = assignment.Title,
-                SubmissionDate = DateTime.Now,
-                Content = content ?? string.Empty
-            };
+            // Find existing submission or create new
+            var existing = _submissions.GetAll()
+                .FirstOrDefault(s => s.StudentId == studentId && s.AssignmentTitle == assignment.Title);
+
+            string submissionId = existing?.Id ?? Guid.NewGuid().ToString("N");
+            string? filePath = existing?.FilePath;
+            string? originalFileName = existing?.OriginalFileName;
 
             // Handle file upload if provided
             if (file != null && file.Length > 0)
             {
-                const long maxSubmissionFileSize = 10 * 1024 * 1024;
-                var originalFileName = Path.GetFileName(file.FileName);
-                var extension = Path.GetExtension(originalFileName);
+                const long maxSubmissionFileSize = 10 * 1024 * 1024; // 10 MB
+                var uploadName = Path.GetFileName(file.FileName);
+                var extension = Path.GetExtension(uploadName).ToLowerInvariant();
                 var allowedExtensions = new[] { ".pdf", ".doc", ".docx", ".txt", ".zip" };
 
-                if (file.Length > maxSubmissionFileSize ||
-                    !allowedExtensions.Any(e => string.Equals(e, extension, StringComparison.OrdinalIgnoreCase)))
+                // Validate file size
+                if (file.Length > maxSubmissionFileSize)
                 {
-                    TempData["Error"] = "Tệp tải lên không hợp lệ hoặc vượt quá dung lượng cho phép.";
+                    var sizeMB = (file.Length / (1024 * 1024.0)).ToString("F2");
+                    TempData["Error"] = $"Tệp tải lên ({sizeMB} MB) vượt quá dung lượng cho phép (10 MB).";
+                    return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
+                }
+
+                // Validate file extension
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["Error"] = $"Định dạng tệp '{extension}' không được hỗ trợ. Các định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP";
                     return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
                 }
 
                 try
                 {
                     var storage = Path.Combine(_env.ContentRootPath, "DataStorage", "Submissions");
-                    if (!Directory.Exists(storage)) Directory.CreateDirectory(storage);
-                    var fileName = submission.Id + extension;
-                    var filePath = Path.Combine(storage, fileName);
-                    await using var fs = new FileStream(filePath, FileMode.Create);
-                    await file.CopyToAsync(fs);
-                    submission.FilePath = Path.Combine("DataStorage", "Submissions", fileName);
-                    submission.OriginalFileName = originalFileName;                    Console.WriteLine($"Saved uploaded submission file to {filePath}");
+                    if (!Directory.Exists(storage)) 
+                    {
+                        Directory.CreateDirectory(storage);
+                    }
+                    
+                    var fileName = submissionId + extension;
+                    var fullPath = Path.Combine(storage, fileName);
+                    
+                    // Use using statement for proper resource disposal
+                    using (var fs = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        await file.CopyToAsync(fs);
+                    }
+                    
+                    filePath = Path.Combine("DataStorage", "Submissions", fileName);
+                    originalFileName = uploadName;
+                    Console.WriteLine($"Saved uploaded submission file to {fullPath}");
                 }
                 catch (Exception ex)
                 {
@@ -117,7 +165,29 @@ namespace SIMS_WEB.Controllers
                 }
             }
 
-            _submissions.AddSubmission(submission);
+            if (existing != null)
+            {
+                existing.SubmissionDate = DateTime.Now;
+                existing.Content = content ?? string.Empty;
+                existing.FilePath = filePath;
+                existing.OriginalFileName = originalFileName;
+                _submissions.EditSubmission(existing);
+            }
+            else
+            {
+                var submission = new Submission
+                {
+                    Id = submissionId,
+                    StudentId = studentId,
+                    AssignmentTitle = assignment.Title,
+                    SubmissionDate = DateTime.Now,
+                    Content = content ?? string.Empty,
+                    FilePath = filePath,
+                    OriginalFileName = originalFileName
+                };
+                _submissions.AddSubmission(submission);
+            }
+
             TempData["Success"] = "Nộp bài thành công";
             return RedirectToAction("Index", new { studentId });
         }
@@ -136,5 +206,8 @@ namespace SIMS_WEB.Controllers
         public Assignment Assignment { get; set; } = new Assignment();
         public SIMS_WEB.Models.Course Course { get; set; } = new SIMS_WEB.Models.Course();
         public List<Student> Students { get; set; } = new();
+        public string StudentId { get; set; } = string.Empty;
+        public List<SIMS_WEB.Models.Course> EnrolledCourses { get; set; } = new();
+        public Submission? ExistingSubmission { get; set; }
     }
 }

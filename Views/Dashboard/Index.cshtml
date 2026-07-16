@@ -28,6 +28,10 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
 }
+.slide-dot.active {
+    background: var(--accent-light) !important;
+    transform: scale(1.2);
+}
 /* Image tile in bento — real visual (Section 4.9: bento background diversity) */
 .bento-image-cell {
     grid-column: span 2;
@@ -97,13 +101,50 @@
         {
             <!-- STAT CARDS — 4 items, 4 cells (bento cell count rule) -->
             <div class="stat-grid">
-                <div class="sims-stat-card">
-                    <div class="sims-stat-icon" style="background:var(--accent-ghost)">
-                        <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
+                <div class="sims-stat-card" style="position:relative;overflow:hidden;min-height:92px;display:block;">
+                    <!-- Slide Container -->
+                    <div id="statCarousel" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
+                        
+                        <!-- Slide 1: Sinh viên -->
+                        <div class="stat-slide" id="slide-student" style="display:flex;align-items:center;gap:0.75rem;width:100%;">
+                            <div class="sims-stat-icon" style="background:var(--accent-ghost)">
+                                <i class="fa-solid fa-graduation-cap" style="color:var(--accent-light)"></i>
+                            </div>
+                            <div>
+                                <div class="sims-stat-num" style="color:var(--accent-light)">@total_students</div>
+                                <div class="sims-stat-label">Sinh viên</div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 2: Giảng viên -->
+                        <div class="stat-slide" id="slide-faculty" style="display:none;align-items:center;gap:0.75rem;width:100%;">
+                            <div class="sims-stat-icon" style="background:var(--success-muted)">
+                                <i class="fa-solid fa-chalkboard-user" style="color:#4ade80"></i>
+                            </div>
+                            <div>
+                                <div class="sims-stat-num" style="color:#4ade80">@ViewBag.TotalLecturers</div>
+                                <div class="sims-stat-label">Giảng viên</div>
+                            </div>
+                        </div>
+
+                        <!-- Slide 3: Admin -->
+                        <div class="stat-slide" id="slide-admin" style="display:none;align-items:center;gap:0.75rem;width:100%;">
+                            <div class="sims-stat-icon" style="background:rgba(96,165,250,0.1)">
+                                <i class="fa-solid fa-user-shield" style="color:#60a5fa"></i>
+                            </div>
+                            <div>
+                                <div class="sims-stat-num" style="color:#60a5fa">@ViewBag.TotalAdmins</div>
+                                <div class="sims-stat-label">Quản trị viên</div>
+                            </div>
+                        </div>
+
                     </div>
-                    <div>
-                        <div class="sims-stat-num" style="color:var(--accent-light)">@total_students</div>
-                        <div class="sims-stat-label">Sinh viên</div>
+
+                    <!-- Navigation Dots -->
+                    <div style="position:absolute;right:0.75rem;bottom:0.4rem;display:flex;gap:4px;z-index:10;">
+                        <button onclick="showSlide(0)" class="slide-dot active" style="width:6px;height:6px;border-radius:50%;border:none;background:var(--border-subtle);cursor:pointer;padding:0;transition:all 0.2s;"></button>
+                        <button onclick="showSlide(1)" class="slide-dot" style="width:6px;height:6px;border-radius:50%;border:none;background:var(--border-subtle);cursor:pointer;padding:0;transition:all 0.2s;"></button>
+                        <button onclick="showSlide(2)" class="slide-dot" style="width:6px;height:6px;border-radius:50%;border:none;background:var(--border-subtle);cursor:pointer;padding:0;transition:all 0.2s;"></button>
                     </div>
                 </div>
                 <div class="sims-stat-card">
@@ -137,10 +178,10 @@
 
             <!-- QUICK ACCESS GRID — 5 items -->
             <div class="quick-grid" style="grid-template-columns: repeat(5, 1fr);">
-                    <a asp-controller="Students" asp-action="Index" class="quick-card">
-                    <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
-                    <div class="qc-title">Sinh viên</div>
-                    <div class="qc-desc">Thêm, sửa, xóa, nhập CSV</div>
+                <a asp-controller="Students" asp-action="Index" class="quick-card">
+                    <i class="fa-solid fa-user-group" style="color:var(--accent-light)"></i>
+                    <div class="qc-title">Người dùng</div>
+                    <div class="qc-desc">Quản lý Sinh viên và Giảng viên</div>
                 </a>
                 <a asp-controller="Courses" asp-action="Index" class="quick-card">
                     <i class="fa-solid fa-book" style="color:#4ade80"></i>
@@ -257,3 +298,44 @@
 
     </div><!-- /.dash-bento -->
 </div>
+
+@section Scripts {
+<script>
+    let currentSlideIndex = 0;
+    const slides = ['slide-student', 'slide-faculty', 'slide-admin'];
+
+    function changeSlide(index) {
+        currentSlideIndex = index;
+        slides.forEach((id, idx) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = (idx === index) ? 'flex' : 'none';
+            }
+        });
+        const dots = document.querySelectorAll('.slide-dot');
+        dots.forEach((dot, idx) => {
+            if (idx === index) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // Auto slide every 5 seconds
+    let slideTimer = setInterval(() => {
+        let next = (currentSlideIndex + 1) % slides.length;
+        changeSlide(next);
+    }, 5000);
+
+    // Global function called by onclick buttons
+    window.showSlide = function(index) {
+        clearInterval(slideTimer);
+        changeSlide(index);
+        slideTimer = setInterval(() => {
+            let next = (currentSlideIndex + 1) % slides.length;
+            changeSlide(next);
+        }, 5000);
+    }
+</script>
+}

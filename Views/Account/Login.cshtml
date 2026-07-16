@@ -235,22 +235,7 @@
                     <a asp-action="Register" asp-controller="Account">Đăng ký tại đây</a>
                 </div>
 
-                <!-- Demo credentials — Geist Mono table (Section 4.6: no placeholder-as-label) -->
-                <div class="creds-hint mt-4">
-                    <div class="creds-hint-title">Thông tin demo</div>
-                    <div class="creds-row">
-                        <span class="role-badge role-admin">Admin</span>
-                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">admin / admin123</span>
-                    </div>
-                    <div class="creds-row">
-                        <span class="role-badge role-faculty">Faculty</span>
-                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">giaovien / faculty123</span>
-                    </div>
-                    <div class="creds-row">
-                        <span class="role-badge role-student">Student</span>
-                        <span style="font-family:'Geist Mono',monospace;font-size:0.72rem;color:var(--text-secondary)">sinhvien / student123</span>
-                    </div>
-                </div>
+
             }
 
             <div style="margin-top:2rem;font-size:0.7rem;color:var(--text-tertiary);text-align:center;font-family:'Geist Mono',monospace;">
@@ -265,12 +250,6 @@
 // Sync radio selection to hidden Role input
 function setRole(val) {
     document.getElementById('roleHidden').value = val;
-    // Quick-fill demo credentials
-    const demos = { Admin: ['admin','admin123'], Faculty: ['giaovien','faculty123'], Student: ['sinhvien','student123'] };
-    if (demos[val]) {
-        document.getElementById('usernameInput').value = demos[val][0];
-        document.getElementById('pwdInput').value = demos[val][1];
-    }
 }
 // Init on load
 const checked = document.querySelector('input[name=RoleSelect]:checked');

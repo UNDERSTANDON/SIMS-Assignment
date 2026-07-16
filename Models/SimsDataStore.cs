@@ -23,7 +23,7 @@ namespace SIMS_WEB.Models
 
         private SimsDataStore()
         {
-            // Try to load students and courses from the CSV-backed DataStorage on startup.
+            // Try to load students, courses, enrollments, and grades from the CSV-backed DataStorage on startup.
             try
             {
                 SIMS_WEB.Storage.ModelFilePersistence.EnsureDataDir();
@@ -36,6 +36,16 @@ namespace SIMS_WEB.Models
                 if (loadedCourses != null && loadedCourses.Any())
                 {
                     Courses.AddRange(loadedCourses);
+                }
+                var loadedEnrollments = SIMS_WEB.Storage.ModelFilePersistence.LoadEnrollments();
+                if (loadedEnrollments != null && loadedEnrollments.Any())
+                {
+                    Enrollments.AddRange(loadedEnrollments);
+                }
+                var loadedGrades = SIMS_WEB.Storage.ModelFilePersistence.LoadGrades();
+                if (loadedGrades != null && loadedGrades.Any())
+                {
+                    Grades.AddRange(loadedGrades);
                 }
             }
             catch { }
@@ -96,6 +106,11 @@ namespace SIMS_WEB.Models
                 Grades.Add(record);
                 NotifyGradeUpdated(record);
             }
+            try
+            {
+                SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(Grades);
+            }
+            catch { }
         }
 
         // ============ Removal helpers (clean-up related data) ============
@@ -119,7 +134,12 @@ namespace SIMS_WEB.Models
 
             // Remove grades for the student
             Grades.RemoveAll(g => g.StudentId == studentId);
-
+            try
+            {
+                SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(Grades);
+            }
+            catch { }
+ 
             return true;
         }
 
@@ -137,7 +157,12 @@ namespace SIMS_WEB.Models
 
             // Remove grades associated with the course
             Grades.RemoveAll(g => g.CourseCode == courseCode);
-
+            try
+            {
+                SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(Grades);
+            }
+            catch { }
+ 
             // Finally remove the course
             Courses.Remove(course);
             return true;

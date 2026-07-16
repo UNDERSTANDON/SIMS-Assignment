@@ -116,6 +116,7 @@ namespace SIMS_Assignment.Services
                     {
                         ModelFilePersistence.SaveCourses(store.Courses);
                         ModelFilePersistence.SaveStudents(store.Students);
+                        ModelFilePersistence.SaveEnrollments(store.Enrollments);
                     }
                     catch { }
                     try

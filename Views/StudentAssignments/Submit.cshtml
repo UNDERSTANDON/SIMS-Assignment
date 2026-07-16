@@ -5,32 +5,96 @@
 
 <div class="sims-page">
     <div class="sims-page-header">
-        <h1 class="sims-page-title">Nộp bài: @Model.Assignment.Title</h1>
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-file-arrow-up fa-sm"></i>
+            Nộp bài: @Model.Assignment.Title
+        </h1>
+        <a asp-action="Index" asp-route-studentId="@Model.StudentId" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+        </a>
     </div>
+
+    <!-- Alert notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="sims-alert sims-alert-success mb-3">
+            <i class="fa-solid fa-circle-check fa-sm"></i>
+            <span>@TempData["Success"]</span>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="sims-alert sims-alert-danger mb-3">
+            <i class="fa-solid fa-circle-xmark fa-sm"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
 
     <div class="sims-card p-3">
         <form asp-action="Submit" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="assignmentId" value="@Model.Assignment.Id" />
+            <input type="hidden" name="studentId" value="@Model.StudentId" />
+
+            <!-- Display current student name -->
             <div class="mb-3">
-                <label class="form-label">Sinh viên</label>
-                <select name="studentId" class="form-select">
-                    <option value="">-- Chọn sinh viên --</option>
-                    @foreach(var s in Model.Students)
+                <label class="form-label" style="color: #ffffff !important;">Sinh viên nộp bài</label>
+                @{
+                    var currentStudent = Model.Students.FirstOrDefault(s => s.StudentId == Model.StudentId);
+                    var studentDisplayName = currentStudent != null ? $"{currentStudent.FullName} ({currentStudent.StudentId})" : Model.StudentId;
+                }
+                <input class="form-control" value="@studentDisplayName" readonly style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
+            </div>
+
+            <!-- Display student's enrolled courses -->
+            <div class="mb-3">
+                <label class="form-label" style="color: #ffffff !important;">Khóa học đăng ký</label>
+                <select name="courseCode" class="form-select" disabled style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">
+                    @foreach(var c in Model.EnrolledCourses)
                     {
-                        <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
+                        if (c.Code == Model.Course.Code)
+                        {
+                            <option value="@c.Code" selected>@c.Title (@c.Code)</option>
+                        }
+                        else
+                        {
+                            <option value="@c.Code">@c.Title (@c.Code)</option>
+                        }
                     }
                 </select>
+                <input type="hidden" name="courseCode" value="@Model.Course.Code" />
             </div>
+
+            <!-- Content text area (prefilled if submitted previously) -->
             <div class="mb-3">
-                <label class="form-label">Nội dung / liên kết</label>
-                <textarea name="content" class="form-control" rows="6"></textarea>
+                <label class="form-label" style="color: #ffffff !important;">Nội dung / Liên kết bài nộp</label>
+                <textarea name="content" class="form-control" rows="6" placeholder="Nhập câu trả lời hoặc liên kết tài liệu tại đây..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">@Model.ExistingSubmission?.Content</textarea>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Tệp đính kèm (tuỳ chọn)</label>
-                <input type="file" name="file" class="form-control" />
+
+            <!-- File upload (retains reference to old file if exists) -->
+            <div class="mb-4">
+                <label class="form-label" style="color: #ffffff !important;">Tệp đính kèm (tùy chọn)</label>
+                <small class="form-text" style="color: rgba(255,255,255,0.7); display: block; margin-bottom: 0.5rem;">
+                    Dung lượng tối đa: 10 MB | Định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP
+                </small>
+                <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.txt,.zip" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
+                
+                @if(Model.ExistingSubmission != null && !string.IsNullOrEmpty(Model.ExistingSubmission.FilePath))
+                {
+                    <div class="mt-2 p-2 rounded d-flex align-items-center gap-2" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: fit-content;">
+                        <i class="fa-solid fa-file-arrow-down" style="color: #ffffff !important;"></i>
+                        <span style="color: #ffffff !important; font-size: 0.9rem;">Tệp đã nộp:</span>
+                        <a href="/@Model.ExistingSubmission.FilePath" style="color: #ffffff !important; text-decoration: underline; font-weight: 500;" download>
+                            @Model.ExistingSubmission.OriginalFileName
+                        </a>
+                    </div>
+                }
             </div>
-            <button class="btn btn-sims-primary">Nộp bài</button>
-            <a asp-action="Index" class="btn btn-sims-outline ms-2">Hủy</a>
+
+            <button type="submit" class="btn btn-sims-primary">
+                <i class="fa-solid fa-paper-plane fa-xs me-1"></i> Nộp bài
+            </button>
+            <a asp-action="Index" asp-route-studentId="@Model.StudentId" class="btn btn-sims-outline ms-2">Hủy</a>
         </form>
     </div>
 </div>

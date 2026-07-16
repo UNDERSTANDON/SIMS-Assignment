@@ -1,6 +1,5 @@
 using SIMS_Assignment.Models.CourseRelatedModels;
-using Microsoft.AspNetCore.Hosting;
-using SIMS_Assignment.Storage;
+using SIMS_Assignment.Abstract;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
@@ -8,15 +7,13 @@ namespace SIMS_Assignment.Services.CourseServices
     {
         // Basic CRUD for material
         private readonly List<Material> _materials;
-        private readonly JsonStorage<Material> _materialStorage;
-        private readonly JsonStorage<FileMapping> _fileMappingStorage;
+        private readonly IMaterialStorage _storage;
         private readonly object _fileLock = new();
 
-        public MaterialHandler(IWebHostEnvironment env)
+        public MaterialHandler(IMaterialStorage storage)
         {
-            _materialStorage = new JsonStorage<Material>(env, "materials.json");
-            _fileMappingStorage = new JsonStorage<FileMapping>(env, "file_mappings.json");
-            _materials = _materialStorage.Load();
+            _storage = storage;
+            _materials = _storage.GetAllMaterialsAsync().GetAwaiter().GetResult();
         }
 
         public void AddMaterial(Material material)
@@ -24,7 +21,7 @@ namespace SIMS_Assignment.Services.CourseServices
             lock (_fileLock)
             {
                 _materials.Add(material);
-                _materialStorage.Save(_materials);
+                _storage.SaveMaterialAsync(material).GetAwaiter().GetResult();
             }
         }
 
@@ -38,7 +35,7 @@ namespace SIMS_Assignment.Services.CourseServices
                     _materials.Remove(materialToRemove);
                 }
                 _materials.Add(material);
-                _materialStorage.Save(_materials);
+                _storage.SaveMaterialAsync(material).GetAwaiter().GetResult();
             }
         }
 
@@ -50,7 +47,7 @@ namespace SIMS_Assignment.Services.CourseServices
                 if (materialToRemove != null)
                 {
                     _materials.Remove(materialToRemove);
-                    _materialStorage.Save(_materials);
+                    _storage.DeleteMaterialAsync(materialId).GetAwaiter().GetResult();
                 }
             }
         }
@@ -76,18 +73,15 @@ namespace SIMS_Assignment.Services.CourseServices
             {
                 lock (_fileLock)
                 {
-                    var mappings = _fileMappingStorage.Load();
-                    mappings.Add(
-                        new FileMapping
-                        {
-                            MaterialId = materialId,
-                            OriginalFileName = originalFileName,
-                            HashedFileName = hashedFileName,
-                            CourseId = courseId,
-                            UploadDate = DateTime.Now,
-                        }
-                    );
-                    _fileMappingStorage.Save(mappings);
+                    var mapping = new FileMapping
+                    {
+                        MaterialId = materialId,
+                        OriginalFileName = originalFileName,
+                        HashedFileName = hashedFileName,
+                        CourseId = courseId,
+                        UploadDate = DateTime.Now,
+                    };
+                    _storage.SaveFileMappingAsync(mapping).GetAwaiter().GetResult();
                 }
             }
             catch (Exception ex)
@@ -101,7 +95,7 @@ namespace SIMS_Assignment.Services.CourseServices
         {
             try
             {
-                var mappings = _fileMappingStorage.Load();
+                var mappings = _storage.GetFileMappingsAsync().GetAwaiter().GetResult();
                 return mappings.FirstOrDefault(m => m.MaterialId == materialId)?.OriginalFileName;
             }
             catch (Exception ex)
@@ -115,7 +109,7 @@ namespace SIMS_Assignment.Services.CourseServices
         {
             try
             {
-                var mappings = _fileMappingStorage.Load();
+                var mappings = _storage.GetFileMappingsAsync().GetAwaiter().GetResult();
                 return mappings.FirstOrDefault(m => m.MaterialId == materialId);
             }
             catch (Exception ex)

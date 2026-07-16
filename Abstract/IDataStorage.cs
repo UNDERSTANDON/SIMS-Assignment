@@ -1,4 +1,6 @@
-﻿using SIMS_Assignment.Models;
+using SIMS_Assignment.Models;
+using SIMS_Assignment.Models.CourseRelatedModels;
+using SIMS_Assignment.Services.CourseServices;
 
 namespace SIMS_Assignment.Abstract
 {
@@ -10,5 +12,6 @@ namespace SIMS_Assignment.Abstract
         Task<bool> DeleteCourseAsync(string courseId);
         Task<List<Course>> GetAllCoursesAsync();
         Task<List<User>> GetAllUsersAsync();
+        Task<bool> DeleteUserByNameAsync(string name);
     }
 }

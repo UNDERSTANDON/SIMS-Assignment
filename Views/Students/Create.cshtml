@@ -1,4 +1,4 @@
-﻿@model SIMS_WEB.Models.Student
+@model SIMS_WEB.Models.Student
 @{
     bool isEdit = !string.IsNullOrEmpty(Model?.StudentId);
     ViewData["Title"] = isEdit ? "Sửa Sinh viên" : "Thêm Sinh viên";
@@ -26,15 +26,11 @@
 
             <div class="mb-3">
                 <label asp-for="StudentId" class="form-label"></label>
-                @if (isEdit) {
-                    <input asp-for="StudentId" class="form-control font-mono" readonly
-                           style="color:var(--text-tertiary);cursor:not-allowed" />
-                    <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.3rem;font-family:'Geist Mono',monospace;">
-                        <i class="fa-solid fa-lock fa-xs"></i> Mã sinh viên không th? thay ??i
-                    </div>
-                } else {
-                    <input asp-for="StudentId" class="form-control font-mono" placeholder="VD: SV2024005" />
-                }
+                <input asp-for="StudentId" class="form-control font-mono" readonly
+                       style="color:var(--text-secondary) !important; background:var(--bg) !important; cursor:not-allowed;" />
+                <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.3rem;font-family:'Geist Mono',monospace;">
+                    <i class="fa-solid fa-magic fa-xs"></i> Mã sinh viên được tạo tự động và không thể thay đổi
+                </div>
                 <span asp-validation-for="StudentId" class="invalid-feedback d-block"></span>
             </div>
 

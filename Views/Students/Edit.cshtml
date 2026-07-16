@@ -1,4 +1,4 @@
-﻿@model SIMS_WEB.Models.Student
+@model SIMS_WEB.Models.Student
 @{
     ViewData["Title"] = "Sửa Sinh viên";
     ViewData["ActivePage"] = "Students";
@@ -25,7 +25,7 @@
             <div class="mb-3">
                 <label class="form-label">MÃ SINH VIÊN</label>
                 <input asp-for="StudentId" class="form-control font-mono" readonly
-                       style="color:var(--text-tertiary);cursor:not-allowed" />
+                       style="color:var(--text-secondary) !important; background:var(--bg) !important; cursor:not-allowed;" />
                 <div style="font-size:0.72rem;color:var(--text-tertiary);margin-top:0.3rem;font-family:'Geist Mono',monospace;">
                     <i class="fa-solid fa-lock fa-xs"></i> Không thể thay đổi
                 </div>

@@ -28,13 +28,13 @@
             Thông tin tài khoản mới
         </div>
 
-        <form asp-action="CreateUser" asp-controller="Account" method="post">
+        <form asp-action="CreateUser" asp-controller="Account" method="post" onreset="setTimeout(onRoleChange, 10)">
             @Html.AntiForgeryToken()
 
             <div class="row g-3">
                 <div class="col-md-6">
                     <label asp-for="Username" class="form-label"></label>
-                    <input asp-for="Username" class="form-control" placeholder="VD: user001" />
+                    <input asp-for="Username" class="form-control font-mono" placeholder="VD: user001" id="usernameInput" />
                     <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
                 </div>
                 <div class="col-md-6">
@@ -49,10 +49,10 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Role" class="form-label"></label>
-                    <select asp-for="Role" class="form-select">
-                        <option value="Admin">Admin</option>
-                        <option value="Faculty">Giảng viên</option>
+                    <select asp-for="Role" class="form-select" id="roleSelect" onchange="onRoleChange()">
                         <option value="Student">Sinh viên</option>
+                        <option value="Faculty">Giảng viên</option>
+                        <option value="Admin">Admin</option>
                     </select>
                     <span asp-validation-for="Role" class="invalid-feedback d-block"></span>
                 </div>
@@ -74,10 +74,41 @@
 
     <div class="sims-alert sims-alert-info mt-4">
         <i class="fa-solid fa-circle-info"></i>
-        <span>Chức năng demo: tài khoản được lưu tạm trong bộ nhớ, khởi động lại ứng dụng sẽ mất dữ liệu mới tạo.</span>
+        <span>Thông tin: Tài khoản được lưu trữ an toàn và lâu dài trong cơ sở dữ liệu hệ thống (users.csv).</span>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        const nextStudentId = '@ViewBag.NextStudentId';
+        const nextLecturerId = '@ViewBag.NextLecturerId';
+
+        function onRoleChange() {
+            const role = document.getElementById('roleSelect').value;
+            const input = document.getElementById('usernameInput');
+            if (role === 'Student') {
+                input.value = nextStudentId;
+                input.readOnly = true;
+                input.style.backgroundColor = 'var(--bg)';
+                input.style.cursor = 'not-allowed';
+            } else if (role === 'Faculty') {
+                input.value = nextLecturerId;
+                input.readOnly = true;
+                input.style.backgroundColor = 'var(--bg)';
+                input.style.cursor = 'not-allowed';
+            } else {
+                // Keep the input value if it's already there (e.g. on validation reload), otherwise empty it
+                if (input.value.startsWith('SV') || input.value.startsWith('GV')) {
+                    input.value = '';
+                }
+                input.readOnly = false;
+                input.style.backgroundColor = '';
+                input.style.cursor = '';
+            }
+        }
+
+        // Run on load
+        onRoleChange();
+    </script>
 }
