@@ -1,0 +1,74 @@
+@model List<SIMS_WEB.Models.Student>
+@{
+    ViewData["Title"] = "Danh sách học sinh đăng ký";
+}
+
+<div class="sims-page">
+    <div class="sims-page-header">
+        <h1 class="sims-page-title">
+            <i class="fa-solid fa-users fa-sm"></i>
+            Danh sách học sinh: @ViewBag.Course.Title (@ViewBag.Course.Code)
+        </h1>
+        <a asp-action="Index" class="btn btn-sims-outline">
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="sims-card p-3">
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted-sims" style="font-size: 0.9rem;">Tổng số học sinh đăng ký:</span>
+                    <span class="sims-badge badge-success ms-2" style="font-size: 1.1rem;">@Model.Count</span>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="sims-empty" style="padding: 3rem 1rem;">
+                <i class="fa-solid fa-inbox"></i>
+                <div class="em-title">Chưa có học sinh nào đăng ký</div>
+                <div class="em-sub">Sinh viên sẽ xuất hiện ở đây khi đăng ký khóa học.</div>
+            </div>
+        }
+        else
+        {
+            <div class="sims-table-wrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>MSSV</th>
+                            <th>Họ và Tên</th>
+                            <th>Email</th>
+                            <th>Chương Trình</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var student = Model[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td><code class="font-mono" style="color:#4ade80;font-size:0.8rem">@student.StudentId</code></td>
+                                <td style="font-weight:500">@student.FullName</td>
+                                <td style="font-size:0.9rem;color:var(--text-tertiary)">@student.Email</td>
+                                <td style="font-size:0.85rem">
+                                    @if (!string.IsNullOrEmpty(student.Program) && student.Program != "null")
+                                    {
+                                        <span style="color:var(--text-tertiary)">@student.Program</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:var(--text-tertiary);opacity:0.6;">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

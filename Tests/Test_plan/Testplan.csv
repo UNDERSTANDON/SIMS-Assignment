@@ -1,0 +1,111 @@
+Student test plan,,,,
+ID,Type,Component/Feature,Scenario Description,Expected Outcome
+1,Unit,StudentService.LoginAsync,Valid username and password provided.,Returns true; user session initialized.
+2,Unit,StudentService.LoginAsync,Invalid password provided.,Returns false; access denied.
+3,Unit,StudentService.LoginAsync,Non-existent username provided.,Returns false; access denied.
+4,Unit,StudentService.LoginAsync,Empty username or password strings.,Throws ArgumentException or returns false.
+5,Unit,StudentService.LoginAsync,SQL/CSV injection attempt in username field.,Input is sanitized; authentication fails gracefully.
+6,Unit,Authenticate user,Token or session cookie validation for logged-in student.,Authentication successful; access to student routes granted.
+7,Unit,StudentService.ViewDashboard,"Invoked by a valid, authenticated student object.",Returns/Renders the student dashboard view.
+8,Unit,View Profile,Student requests their own profile data.,"Profile details (Name, CurrentProgram, Id) returned successfully."
+9,Unit,View Profile,Student attempts to view another user's profile via URL manipulation.,Access denied; returns 403 Forbidden.
+10,Unit,View Profile,Profile data is missing AcademicRecords.,Profile loads with empty records section; no crash.
+11,Unit,View Profile,Profile contains corrupted/malformed dictionary data.,System handles parsing error safely; logs warning.
+12,Unit,View Courses,Student requests list of available courses.,Returns list of Course objects.
+13,Unit,View Courses,Student requests courses but none are available.,"Returns empty list; displays ""No courses found""."
+14,Unit,View Courses,Pagination logic for >50 available courses.,Returns the first page of results correctly.
+15,Unit,View Courses,Filtering courses by department or keyword.,Returns only courses matching the filter criteria.
+16,Unit,StudentService.RegisterForCourse,"Student enrolls in a valid, open course.",Student ID added to Course.EnrolledStudentIds.
+17,Unit,StudentService.RegisterForCourse,Student enrolls in a full course (capacity limit).,Throws CourseFullException or returns failure flag.
+18,Unit,StudentService.RegisterForCourse,Student is already enrolled in the course.,Registration blocked; duplicate error returned.
+19,Unit,StudentService.RegisterForCourse,Student attempts to enroll in overlapping schedules.,Registration blocked; schedule conflict error returned.
+20,Unit,Verify Prerequisite,Student meets all prerequisites for the course.,Verification passes; registration proceeds.
+21,Unit,Verify Prerequisite,Student is missing one prerequisite.,Verification fails; missing prerequisite listed in error.
+22,Unit,Verify Prerequisite,Student failed the prerequisite previously (AcademicRecords = false).,Verification fails; registration blocked.
+23,Unit,Verify Prerequisite,Course has no prerequisites.,Verification automatically passes.
+24,Unit,Verify Prerequisite,Prerequisite course ID no longer exists in system.,Fails safely; flags error for admin review.
+25,Unit,StudentService.RegisterForCourse,Concurrency check: 2 students enroll for 1 remaining seat.,"Only one succeeds; the other gets ""Course Full""."
+26,Unit,Student.AcademicRecords,Adding a new passed course to the dictionary.,Dictionary count increases; key-value pair is correct.
+27,Unit,Student.AcademicRecords,Updating an existing course record (retake).,Dictionary value updates correctly.
+28,Unit,StudentService.ViewDashboard,Ensure dashboard correctly separates past vs. current courses.,UI logic properly filters courses by enrollment status.
+29,Integration,LoginAsync + CsvStorage,Authenticate using credentials read directly from users.csv.,Successfully matches hashed password and returns user.
+30,Integration,View Profile + CsvStorage,Retrieve complex student object (with Dict) from CsvStorage.,Data successfully deserialized from CSV string format to object.
+31,Integration,RegisterForCourse + CsvStorage,Enroll student and call SaveCourseAsync.,courses.csv is updated with the new EnrolledStudentId.
+32,Integration,RegisterForCourse + CsvStorage,Verify CSV file lock handling during simultaneous enrollments.,Storage abstraction queues writes; no data corruption in CSV.
+33,Integration,View Courses + CsvStorage,"Retrieve 10,000 courses from CSV.",System parses CSV and returns results within acceptable performance time.
+34,Integration,End-to-End Flow,Login -> View Courses -> Enroll -> Verify CSV update.,Entire student registration lifecycle completes without errors.
+,,,,
+,,,,
+Course Management test plan,,,,
+,,,,
+ID,Type,Component/Feature,Scenario Description,Expected Outcome
+35,Unit,AdminService.CreateCourse,Admin creates a valid new course.,Course object initialized with correct properties.
+36,Unit,AdminService.CreateCourse,Admin creates course missing required CourseName.,Throws validation error.
+37,Unit,AdminService.CreateCourse,Admin creates a course with duplicate CourseId.,Creation blocked; duplicate ID error returned.
+38,Unit,AdminService.CreateCourse,"Admin assigns invalid Credits (e.g., negative).",Throws ArgumentOutOfRangeException.
+39,Unit,Edit Course,Admin updates existing CourseName and Credits.,Course properties reflect the new values.
+40,Unit,Edit Course,Admin attempts to edit a non-existent course.,"Returns ""Course Not Found"" error."
+41,Unit,Delete Course,Admin deletes a course with no enrolled students.,Course successfully removed from active system.
+42,Unit,Delete Course,Admin attempts to delete a course with enrolled students.,Deletion blocked; requires student reassignment first.
+43,Unit,Hide Course,Admin toggles course visibility to hidden.,"Course no longer appears in Student ""View Courses"" list."
+44,Unit,AdminService.AssignLecturer,Assign valid Lecturer to a Course.,Course.LecturerId updated; Course added to Lecturer.AssignedCourses.
+45,Unit,AdminService.AssignLecturer,Reassign a course to a different lecturer.,Old lecturer's list updated; new lecturer assigned successfully.
+46,Unit,Manage Courses,Admin views list of all courses (hidden and active).,"Complete list returned, ignoring visibility filters."
+47,Unit,Assign Students to Course,Admin forcefully assigns student overriding prerequisites.,Student added to Course.EnrolledStudentIds successfully.
+48,Unit,LecturerService.ViewDashboard,Lecturer dashboard requested.,Returns list containing only courses in Lecturer.AssignedCourses.
+49,Unit,Add materials,Professor uploads a syllabus PDF to a course.,Material linked to the course record.
+50,Unit,Add materials,Professor attempts to add material to unassigned course.,Action denied; 403 Forbidden.
+51,Unit,Add materials,Professor exceeds file size limit for material.,Upload rejected with size limit error.
+52,Unit,Add assignments,Professor creates a new assignment with a due date.,Assignment linked to course; students notified.
+53,Unit,Add assignments,Due date set in the past.,Validation error thrown.
+54,Unit,Assign Students to Course,Professor invites a student to join the course.,Invitation sent/Student added to pending list.
+55,Unit,View Enrolled Students,Professor views roster for their course.,Returns list of Student objects corresponding to EnrolledStudentIds.
+56,Unit,View Enrolled Students,Professor requests roster for empty course.,Returns empty list gracefully.
+57,Unit,LecturerService.GradeStudent,Assign passing grade (isPassed = true) to student.,Student's AcademicRecords dictionary updated to true.
+58,Unit,LecturerService.GradeStudent,Assign failing grade (isPassed = false) to student.,Student's AcademicRecords dictionary updated to false.
+59,Unit,LecturerService.GradeStudent,Attempt to grade a student not enrolled in the course.,Action blocked; error returned.
+60,Unit,LecturerService.GradeStudent,Update an existing grade.,Student's AcademicRecords dictionary value is overwritten.
+61,Unit,Manage Student Grades,Professor requests average grade statistics for a course.,Calculations return accurate aggregations.
+62,Integration,CreateCourse + CsvStorage,Admin creates course; verify SaveCourseAsync.,New row appended correctly to courses.csv.
+63,Integration,Edit Course + CsvStorage,Admin updates course credits; verify CSV rewrite.,Existing row in courses.csv updated without duplicating data.
+64,Integration,Delete Course + CsvStorage,Admin deletes course.,Row is fully removed from courses.csv on disk.
+65,Integration,GradeStudent + CsvStorage,Professor grades student; verify student record update.,users.csv is updated with serialized dictionary representation of grades.
+66,Integration,DB Consistency,Lecturer deleted from system.,All corresponding Course.LecturerId fields in CSV set to null/empty.
+67,Integration,End-to-End Flow,Admin creates course -> assigns Lecturer -> Lecturer adds material -> students view.,Complete course lifecycle works without data loss.
+,,,,
+,,,,
+Session handling,,,,
+ID,Type,Component/Feature,Scenario Description,Expected Outcome
+68,Unit,Login (User),Generic user login routing.,System correctly identifies role (Student/Admin/Lecturer) and routes properly.
+69,Unit,Handle Session timeout,User is inactive for predetermined timeout duration.,Session token invalidated; user prompted to re-login.
+70,Unit,Handle Session timeout,User interacts with system 1 minute before timeout.,Session timer resets; user remains logged in.
+71,Unit,Handle Session timeout,"Timeout occurs during a long form submission (e.g., grading).",Form data saved as draft or graceful error presented.
+72,Unit,Session Management,User logs in simultaneously from two different browsers.,Older session invalidated or multi-session handled per security policy.
+73,Unit,Session Management,User manually logs out.,Session token immediately destroyed.
+74,Unit,Session Management,System generates secure JWT or session cookie on authentication.,Token contains correct claims and is signed cryptographically.
+75,Unit,Manage user permission,Admin elevates a Student account to Lecturer.,User role updated; access to LecturerService granted.
+76,Unit,Manage user permission,Admin revokes access for an active user.,User session immediately terminated; login blocked.
+77,Unit,Manage user permission,Admin attempts to revoke their own permissions.,Action blocked to prevent lock-out.
+78,Unit,Manage user permission,Role-based access control (RBAC) validation for Student accessing Admin routes.,Endpoint returns 401 Unauthorized / 403 Forbidden.
+79,Unit,Manage user permission,RBAC validation for Lecturer accessing Admin routes.,Endpoint returns 401 Unauthorized / 403 Forbidden.
+80,Unit,Generate system report,Triggered automatically at end-of-day.,"Report compiles system usage, errors, and active sessions."
+81,Unit,Generate system report,Triggered by Admin manually via dashboard.,Report generated on-demand with current timestamp.
+82,Unit,Generate system report,"Report includes triggered ""Session Timeout"" anomalies.",Report accurately reflects timeout counts per the <Extend> relationship.
+83,Unit,Export report log to CVS,Admin triggers CSV generation of a system report.,Formats report data into valid comma-separated string format.
+84,Unit,Export report log to CVS,Data contains commas or line breaks.,CSV formatter properly escapes characters using quotes.
+85,Unit,Export report log to CVS,Report contains zero records.,CSV generated with only headers; no errors thrown.
+86,Unit,Export report log to CVS,File name generation.,"Output filename includes timestamp (e.g., report_20260621.csv)."
+87,Unit,System Logger,Track failed login attempts.,System writes failure events to temporary log storage.
+88,Unit,Security,"Password hashing implementation (e.g., BCrypt).",Plain text passwords are never stored or exposed in memory.
+89,Integration,IDataStorage - SaveUserAsync,Save a user model to users.csv concurrently.,Abstraction layer handles file locking; no data race occurs.
+90,Integration,IDataStorage - GetUserByNameAsync,Lookup user in a 50MB users.csv file.,"Search is optimized (e.g., indexed or streaming) to meet performance criteria."
+91,Integration,Session + CsvStorage,Read active user roles directly from CSV during session validation.,Validates against truth source; performance is acceptable.
+92,Integration,Export report log to CVS,Write a massive generated report to disk.,File streams properly without causing OutOfMemoryException.
+93,Integration,System Recovery,System crashes during a CSV write operation.,Backup/Temporary .tmp file logic prevents CSV corruption upon reboot.
+94,Integration,Manage user permission,Admin changes a user role; verify CSV update.,Role column in users.csv reflects the change immediately.
+95,Integration,Session Timeout + Reports,System experiences 50 simulated timeouts.,Subsequent CSV export log contains exactly 50 timeout entries.
+96,Integration,Security Testing,Attempt path traversal via CSV file names (../users.csv).,File access is isolated to designated storage directory.
+97,Integration,Accessibility / UI,Automated screen reader test on Login and Dashboard UI.,Achieves passing score on WCAG accessibility standards.
+98,Integration,Scalability Testing,"Simulate 1,000 concurrent user logins.",System responds within acceptable timeframe without dropping connections.
+99,Integration,CSV Format Change,Add a new column to User entity and save.,System automatically appends new column to existing users.csv gracefully.
+100,Integration,Environment Switch,System initialized with MySqlStorage instead of CsvStorage.,All test flows continue to operate successfully due to Dependency Inversion.
