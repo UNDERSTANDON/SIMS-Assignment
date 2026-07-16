@@ -1,5 +1,6 @@
 using SIMS_Assignment.Models.CourseRelatedModels;
 using Microsoft.AspNetCore.Hosting;
+using SIMS_Assignment.Abstract;
 
 namespace SIMS_Assignment.Services.CourseServices
 {
@@ -8,9 +9,9 @@ namespace SIMS_Assignment.Services.CourseServices
         private readonly MaterialHandler _materialHandler;
         private readonly AssignmentHandler _assignmentHandler;
         private readonly SubmissionHandler _submissionHandler;
-        public CourseServiceFacade(IWebHostEnvironment env)
+        public CourseServiceFacade(IWebHostEnvironment env, IDataStorage storage)
         {
-            _materialHandler = new MaterialHandler(env);
+            _materialHandler = new MaterialHandler(storage);
             _assignmentHandler = new AssignmentHandler(env);
             _submissionHandler = new SubmissionHandler(env);
         }

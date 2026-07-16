@@ -3,8 +3,8 @@
     ViewData["Title"] = "Thông tin cá nhân";
     ViewData["ActivePage"] = "Profile";
 
-    var currentAvatar = "/img/avatars/" + Model.Name + ".png";
-    var avatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", Model.Name + ".png");
+    var currentAvatar = "/Account/GetAvatar?id=" + Model.Name;
+    var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", Model.Name + ".png");
     var hasAvatar = System.IO.File.Exists(avatarPath);
 }
 

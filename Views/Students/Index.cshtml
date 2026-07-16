@@ -158,12 +158,22 @@
                         {
                             var initials = string.Join("", l.FullName.Split(' ').Where(x => x.Length > 0)
                                                .TakeLast(2).Select(x => x[0]));
+                            var avatarUrl = "/Account/GetAvatar?id=" + l.StudentId;
+                            var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", l.StudentId + ".png");
+                            var hasAvatar = System.IO.File.Exists(avatarPath);
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar-lg" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80">
-                                            @initials.ToUpper()
-                                        </div>
+                                        @if (hasAvatar)
+                                        {
+                                            <img src="@avatarUrl" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-ring);" />
+                                        }
+                                        else
+                                        {
+                                            <div class="avatar-lg" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:#4ade80">
+                                                @initials.ToUpper()
+                                            </div>
+                                        }
                                         <span style="font-weight:600">@l.FullName</span>
                                     </div>
                                 </td>
@@ -252,11 +262,21 @@
                         @foreach (var s in Model)
                         {
                             var initials = string.Join("", s.FullName.Split(' ').Where(x => x.Length > 0)
-                                               .TakeLast(2).Select(x => x[0]));
+                                                .TakeLast(2).Select(x => x[0]));
+                            var avatarUrl = "/Account/GetAvatar?id=" + s.StudentId;
+                            var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", s.StudentId + ".png");
+                            var hasAvatar = System.IO.File.Exists(avatarPath);
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar-lg">@initials.ToUpper()</div>
+                                        @if (hasAvatar)
+                                        {
+                                            <img src="@avatarUrl" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--accent-ring);" />
+                                        }
+                                        else
+                                        {
+                                            <div class="avatar-lg">@initials.ToUpper()</div>
+                                        }
                                         <span style="font-weight:600">@s.FullName</span>
                                     </div>
                                 </td>

@@ -115,8 +115,8 @@
                                 var sub = submissions.FirstOrDefault(x => x.StudentId == s.StudentId);
                                 var hasSubmitted = sub != null;
                                 var detailId = "detail-" + rowIdx;
-                                var caAvatarFile = "/img/avatars/" + s.StudentId + ".png";
-                                var caAvatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", s.StudentId + ".png");
+                                var caAvatarFile = "/Account/GetAvatar?id=" + s.StudentId;
+                                var caAvatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", s.StudentId + ".png");
                                 var caHasAvatar = System.IO.File.Exists(caAvatarPath);
                                 <tr>
                                     <td>

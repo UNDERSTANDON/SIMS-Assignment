@@ -114,12 +114,7 @@
                                 <i class="fa-solid fa-book fa-xs"></i> Khóa học
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "CreateCourse" ? "active" : "")"
-                               asp-controller="Lecturer" asp-action="CreateCourse">
-                                <i class="fa-solid fa-plus fa-xs"></i> Thêm khóa học
-                            </a>
-                        </li>
+@* Faculty is no longer allowed to add courses as per admin assignment policy *@
                         <li class="nav-item">
                             <a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Profile" ? "active" : "")"
                                asp-controller="Lecturer" asp-action="Profile">
@@ -168,8 +163,8 @@
                         };
                     }
                     @{
-                        var avatarFile = "/img/avatars/" + username + ".png";
-                        var avatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", username + ".png");
+                        var avatarFile = "/Account/GetAvatar?id=" + username;
+                        var avatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", username + ".png");
                         var hasAvatar = System.IO.File.Exists(avatarPath);
                     }
                     @if (hasAvatar)

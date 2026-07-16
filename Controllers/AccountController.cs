@@ -3,6 +3,8 @@ using SIMS_WEB.Models;
 using SIMS_Assignment.Abstract;
 using SIMS_Assignment.Authentication;
 using SIMS_Assignment.Services;
+using System.IO;
+using SIMS_WEB.Storage;
 
 namespace SIMS_WEB.Controllers
 {
@@ -10,11 +12,13 @@ namespace SIMS_WEB.Controllers
     {
         private readonly IAuth _auth;
         private readonly IDataStorage _storage;
+        private readonly IStudentManager _studentManager;
 
-        public AccountController(IAuth auth, IDataStorage storage)
+        public AccountController(IAuth auth, IDataStorage storage, IStudentManager studentManager)
         {
             _auth = auth;
             _storage = storage;
+            _studentManager = studentManager;
         }
 
         private static string NormalizeRole(string? role)
@@ -64,6 +68,7 @@ namespace SIMS_WEB.Controllers
                     // If it is a student, associate their StudentId in session
                     if (normalizedRole == "Student")
                     {
+                        await _studentManager.GetAllAsync();
                         var studentObj = store.Students.FirstOrDefault(s => s.FullName.Equals(user.Name, StringComparison.OrdinalIgnoreCase)
                                                                            || s.StudentId.Equals(user.Name, StringComparison.OrdinalIgnoreCase));
                         if (studentObj != null)
@@ -139,6 +144,11 @@ namespace SIMS_WEB.Controllers
             {
                 ModelState.AddModelError("", "Đăng ký không thành công. Vui lòng thử lại.");
                 return View(model);
+            }
+
+            if (normalizedRole == "Student")
+            {
+                await _studentManager.GetAllAsync();
             }
 
             TempData["Success"] = $"Đăng ký thành công! Bạn có thể đăng nhập với tài khoản {model.Username}.";
@@ -219,11 +229,7 @@ namespace SIMS_WEB.Controllers
             // Sync student profile immediately if role is Student (so it has email right away)
             if (normalizedRole == "Student")
             {
-                var studentManager = HttpContext.RequestServices.GetService(typeof(IStudentManager)) as IStudentManager;
-                if (studentManager != null)
-                {
-                    await studentManager.GetAllAsync();
-                }
+                await _studentManager.GetAllAsync();
             }
 
             // Recalculate next IDs after successful creation
@@ -244,6 +250,18 @@ namespace SIMS_WEB.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult GetAvatar(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+            var path = Path.Combine(ModelFilePersistence.DataDir, "ProfilePictures", $"{id}.png");
+            if (!System.IO.File.Exists(path))
+            {
+                return NotFound();
+            }
+            return PhysicalFile(path, "image/png");
         }
 
         public static string GenerateNextStudentId(IEnumerable<string> existingIds)

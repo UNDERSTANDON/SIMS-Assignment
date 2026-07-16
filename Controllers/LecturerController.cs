@@ -367,7 +367,8 @@ namespace SIMS_WEB.Controllers
 
             await _storage.SaveUserAsync(user);
 
-            HttpContext.Session.SetString("Username", user.FullName);
+            // Maintain login username in session instead of overwriting with full name
+            HttpContext.Session.SetString("Username", user.Name);
 
             if (!string.IsNullOrEmpty(oldName) && oldName != user.FullName)
             {
@@ -392,7 +393,7 @@ namespace SIMS_WEB.Controllers
                     }
                     var imageBytes = System.Convert.FromBase64String(base64Data);
 
-                    var avatarsDir = Path.Combine(_env.WebRootPath, "img", "avatars");
+                    var avatarsDir = Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures");
                     if (!Directory.Exists(avatarsDir)) Directory.CreateDirectory(avatarsDir);
 
                     var filePath = Path.Combine(avatarsDir, $"{user.Name}.png");
@@ -411,36 +412,14 @@ namespace SIMS_WEB.Controllers
         [HttpGet]
         public IActionResult CreateCourse()
         {
-            ViewData["ActivePage"] = "CreateCourse";
-            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
-            var course = new Course
-            {
-                Instructor = username
-            };
-            return View("CreateCourse", course);
+            TempData["Error"] = "Bạn không có quyền thực hiện thao tác này. Chỉ Admin mới có quyền quản lý khóa học.";
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCourse(Course model)
+        public IActionResult CreateCourse(Course model)
         {
-            ViewData["ActivePage"] = "CreateCourse";
-            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
-
-            model.Instructor = username;
-
-            if (!ModelState.IsValid)
-            {
-                return View("CreateCourse", model);
-            }
-
-            var ok = await _courseManager.CreateAsync(model);
-            if (!ok)
-            {
-                ModelState.AddModelError("Code", "Mã khóa học đã tồn tại");
-                return View("CreateCourse", model);
-            }
-
-            TempData["Success"] = $"Đã thêm khóa học {model.Title} thành công!";
+            TempData["Error"] = "Bạn không có quyền thực hiện thao tác này. Chỉ Admin mới có quyền quản lý khóa học.";
             return RedirectToAction("Index");
         }
 

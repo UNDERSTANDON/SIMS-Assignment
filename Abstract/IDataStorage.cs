@@ -1,4 +1,6 @@
 using SIMS_Assignment.Models;
+using SIMS_Assignment.Models.CourseRelatedModels;
+using SIMS_Assignment.Services.CourseServices;
 
 namespace SIMS_Assignment.Abstract
 {
@@ -11,5 +13,12 @@ namespace SIMS_Assignment.Abstract
         Task<List<Course>> GetAllCoursesAsync();
         Task<List<User>> GetAllUsersAsync();
         Task<bool> DeleteUserByNameAsync(string name);
+        
+        // Materials management
+        Task<List<Material>> GetAllMaterialsAsync();
+        Task<bool> SaveMaterialAsync(Material material);
+        Task<bool> DeleteMaterialAsync(string id);
+        Task<List<FileMapping>> GetFileMappingsAsync();
+        Task<bool> SaveFileMappingAsync(FileMapping mapping);
     }
 }

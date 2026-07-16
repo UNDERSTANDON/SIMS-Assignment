@@ -1,6 +1,8 @@
 using System.Text;
 using SIMS_Assignment.Abstract;
 using SIMS_Assignment.Models;
+using SIMS_Assignment.Models.CourseRelatedModels;
+using SIMS_Assignment.Services.CourseServices;
 
 namespace SIMS_Assignment.Storage
 {
@@ -23,6 +25,8 @@ namespace SIMS_Assignment.Storage
         private string UsersPath => Path.Combine(_dataDir, "users.csv");
         // Use a separate file for assignment/course storage to avoid clashing with UI CSV format
         private string CoursesPath => Path.Combine(_dataDir, "assignment_courses.csv");
+        private string MaterialsPath => Path.Combine(_dataDir, "materials.csv");
+        private string FileMappingsPath => Path.Combine(_dataDir, "file_mappings.csv");
 
         public Task<List<User>> GetAllUsersAsync()
         {
@@ -262,6 +266,171 @@ namespace SIMS_Assignment.Storage
                 ? string.Join(';', c.EnrolledStudentIds)
                 : string.Empty;
             return string.Join(',', new[] { Escape(c.CourseId), Escape(c.CourseName), c.Credits.ToString(), c.LecturerId.ToString(), Escape(enrolled) });
+        }
+
+        private static string SerializeMaterial(Material m)
+        {
+            // Id,Title,Description,FilePath,OriginalFileName,UploadDate,CourseId
+            return string.Join(',', new[] {
+                Escape(m.Id),
+                Escape(m.Title),
+                Escape(m.Description),
+                Escape(m.FilePath),
+                Escape(m.OriginalFileName),
+                m.UploadDate.ToString("o"),
+                Escape(m.CourseId)
+            });
+        }
+
+        private static string SerializeFileMapping(FileMapping f)
+        {
+            // MaterialId,OriginalFileName,HashedFileName,CourseId,UploadDate
+            return string.Join(',', new[] {
+                Escape(f.MaterialId),
+                Escape(f.OriginalFileName),
+                Escape(f.HashedFileName),
+                Escape(f.CourseId),
+                f.UploadDate.ToString("o")
+            });
+        }
+
+        public Task<List<Material>> GetAllMaterialsAsync()
+        {
+            lock (_lock)
+            {
+                var result = new List<Material>();
+                if (!File.Exists(MaterialsPath)) return Task.FromResult(result);
+                foreach (var line in File.ReadAllLines(MaterialsPath, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 1) continue;
+
+                    var m = new Material
+                    {
+                        Id = Unescape(parts[0]),
+                        Title = parts.Length > 1 ? Unescape(parts[1]) : string.Empty,
+                        Description = parts.Length > 2 ? Unescape(parts[2]) : string.Empty,
+                        FilePath = parts.Length > 3 ? Unescape(parts[3]) : string.Empty,
+                        OriginalFileName = parts.Length > 4 ? Unescape(parts[4]) : string.Empty,
+                        UploadDate = parts.Length > 5 && DateTime.TryParse(parts[5], out var dt) ? dt : DateTime.Now,
+                        CourseId = parts.Length > 6 ? Unescape(parts[6]) : string.Empty
+                    };
+                    result.Add(m);
+                }
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<bool> SaveMaterialAsync(Material material)
+        {
+            lock (_lock)
+            {
+                var lines = new List<string>();
+                if (File.Exists(MaterialsPath))
+                {
+                    lines.AddRange(File.ReadAllLines(MaterialsPath, Encoding.UTF8));
+                }
+
+                bool updated = false;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var parts = lines[i].Split(',');
+                    if (parts.Length == 0) continue;
+                    if (parts[0] == material.Id)
+                    {
+                        lines[i] = SerializeMaterial(material);
+                        updated = true;
+                        break;
+                    }
+                }
+
+                if (!updated)
+                {
+                    lines.Add(SerializeMaterial(material));
+                }
+
+                File.WriteAllLines(MaterialsPath, lines, Encoding.UTF8);
+                return Task.FromResult(true);
+            }
+        }
+
+        public Task<bool> DeleteMaterialAsync(string id)
+        {
+            lock (_lock)
+            {
+                if (!File.Exists(MaterialsPath)) return Task.FromResult(false);
+                var lines = File.ReadAllLines(MaterialsPath, Encoding.UTF8).ToList();
+                var remaining = lines.Where(line =>
+                {
+                    if (string.IsNullOrWhiteSpace(line)) return false;
+                    var parts = line.Split(',');
+                    return parts.Length == 0 || parts[0] != id;
+                }).ToList();
+
+                if (remaining.Count == lines.Count) return Task.FromResult(false);
+                File.WriteAllLines(MaterialsPath, remaining, Encoding.UTF8);
+                return Task.FromResult(true);
+            }
+        }
+
+        public Task<List<FileMapping>> GetFileMappingsAsync()
+        {
+            lock (_lock)
+            {
+                var result = new List<FileMapping>();
+                if (!File.Exists(FileMappingsPath)) return Task.FromResult(result);
+                foreach (var line in File.ReadAllLines(FileMappingsPath, Encoding.UTF8))
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    var parts = line.Split(',');
+                    if (parts.Length < 1) continue;
+
+                    var f = new FileMapping
+                    {
+                        MaterialId = Unescape(parts[0]),
+                        OriginalFileName = parts.Length > 1 ? Unescape(parts[1]) : string.Empty,
+                        HashedFileName = parts.Length > 2 ? Unescape(parts[2]) : string.Empty,
+                        CourseId = parts.Length > 3 ? Unescape(parts[3]) : string.Empty,
+                        UploadDate = parts.Length > 4 && DateTime.TryParse(parts[4], out var dt) ? dt : DateTime.Now
+                    };
+                    result.Add(f);
+                }
+                return Task.FromResult(result);
+            }
+        }
+
+        public Task<bool> SaveFileMappingAsync(FileMapping mapping)
+        {
+            lock (_lock)
+            {
+                var lines = new List<string>();
+                if (File.Exists(FileMappingsPath))
+                {
+                    lines.AddRange(File.ReadAllLines(FileMappingsPath, Encoding.UTF8));
+                }
+
+                bool updated = false;
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var parts = lines[i].Split(',');
+                    if (parts.Length == 0) continue;
+                    if (parts[0] == mapping.MaterialId)
+                    {
+                        lines[i] = SerializeFileMapping(mapping);
+                        updated = true;
+                        break;
+                    }
+                }
+
+                if (!updated)
+                {
+                    lines.Add(SerializeFileMapping(mapping));
+                }
+
+                File.WriteAllLines(FileMappingsPath, lines, Encoding.UTF8);
+                return Task.FromResult(true);
+            }
         }
 
         private static string Escape(string s)

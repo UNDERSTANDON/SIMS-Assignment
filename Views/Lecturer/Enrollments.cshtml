@@ -30,8 +30,8 @@
                     <tbody>
                         @foreach (var student in Model.EnrolledStudents.OrderBy(s => s.StudentId))
                         {
-                            var stuAvatarFile = "/img/avatars/" + student.StudentId + ".png";
-                            var stuAvatarPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "img", "avatars", student.StudentId + ".png");
+                            var stuAvatarFile = "/Account/GetAvatar?id=" + student.StudentId;
+                            var stuAvatarPath = System.IO.Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures", student.StudentId + ".png");
                             var stuHasAvatar = System.IO.File.Exists(stuAvatarPath);
                             <tr>
                                 <td>

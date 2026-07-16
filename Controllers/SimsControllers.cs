@@ -571,13 +571,15 @@ namespace SIMS_WEB.Controllers
 
             await _storage.SaveUserAsync(user);
 
-            HttpContext.Session.SetString("Username", user.FullName);
+            // Maintain login username in session instead of overwriting with full name
+            HttpContext.Session.SetString("Username", user.Name);
 
             var store = SimsDataStore.Instance;
             var studentObj = store.Students.FirstOrDefault(s => s.StudentId == user.Name);
             if (studentObj != null)
             {
                 studentObj.FullName = user.FullName;
+                studentObj.Email = user.Email;
                 try
                 {
                     SIMS_WEB.Storage.ModelFilePersistence.SaveStudents(store.Students);
@@ -596,7 +598,7 @@ namespace SIMS_WEB.Controllers
                     }
                     var imageBytes = System.Convert.FromBase64String(base64Data);
 
-                    var avatarsDir = Path.Combine(_env.WebRootPath, "img", "avatars");
+                    var avatarsDir = Path.Combine(SIMS_WEB.Storage.ModelFilePersistence.DataDir, "ProfilePictures");
                     if (!Directory.Exists(avatarsDir)) Directory.CreateDirectory(avatarsDir);
 
                     var filePath = Path.Combine(avatarsDir, $"{user.Name}.png");

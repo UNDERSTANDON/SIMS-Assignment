@@ -9,6 +9,5 @@ namespace SIMS_Assignment.Models.CourseRelatedModels
         public string OriginalFileName { get; set; } = string.Empty;
         public DateTime UploadDate { get; set; }
         public string CourseId { get; set; } = string.Empty;
-        public Course? Course { get; set; }
     }
 }
