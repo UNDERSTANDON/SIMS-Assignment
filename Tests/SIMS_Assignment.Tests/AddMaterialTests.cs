@@ -4,83 +4,81 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using SIMS_WEB.Models;
 using Xunit;
 
 namespace SIMS_Assignment.Tests
 {
+    [Collection("WebApplication")]
     public class AddMaterialTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly WebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
 
         public AddMaterialTests(WebApplicationFactory<Program> factory)
         {
-            _factory = factory;
+            _factory = factory.WithWebHostBuilder(builder => builder.UseEnvironment("Development"));
+            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+                BaseAddress = new Uri("https://localhost")
+            });
         }
 
         [Fact]
-        public async Task AddMaterial_WithFile_UploadsSuccessfully()
+        public async Task AddMaterial_WithAssignedCourseAndValidFile_UploadsSuccessfully()
         {
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+            var courseCode = $"AUTO_{Guid.NewGuid():N}";
+            SimsDataStore.Instance.Courses.Add(new SIMS_WEB.Models.Course
             {
-                AllowAutoRedirect = true,
-                BaseAddress = new System.Uri("https://localhost")
+                Code = courseCode,
+                Title = "Automation Course",
+                Capacity = 20,
+                Instructor = "giaovien"
             });
 
-            // Login as faculty to establish session
-            var loginData = new[]
+            var loginResponse = await _client.PostAsync("/Account/Login", new FormUrlEncodedContent(new Dictionary<string, string>
             {
-                new KeyValuePair<string, string>("Username", "giaovien"),
-                new KeyValuePair<string, string>("Password", "faculty123"),
-                new KeyValuePair<string, string>("Role", "Faculty"),
-            };
+                ["Username"] = "giaovien",
+                ["Password"] = "faculty123",
+                ["Role"] = "Faculty"
+            }));
 
-            var loginResp = await client.PostAsync("/Account/Login", new FormUrlEncodedContent(loginData));
-            var loginContent = await loginResp.Content.ReadAsStringAsync();
-            var cookies = loginResp.Headers.Contains("Set-Cookie") ? string.Join(", ", loginResp.Headers.GetValues("Set-Cookie")) : "None";
-            Assert.True(loginResp.IsSuccessStatusCode, $"Login request failed with status {loginResp.StatusCode}. Content: {loginContent}. Cookies: {cookies}");
-            if (loginContent.Contains("Tên đăng nhập hoặc mật khẩu không hợp lệ"))
-            {
-                throw new System.Exception("Login failed: Invalid credentials/role. Response content: " + loginContent);
-            }
+            Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
 
-            // Prepare the test file at C:\Test.txt as requested; fall back to temp file if not writable
-            var filePath = @"C:\Test.txt";
-            try
-            {
-                File.WriteAllText(filePath, "Automated test file content");
-            }
-            catch
-            {
-                filePath = Path.GetTempFileName();
-                File.WriteAllText(filePath, "Automated test file content");
-            }
-
-            System.Console.WriteLine($"DEBUG: File path - {filePath}");
-            System.Console.WriteLine("File accessed successfully.\n");
-
-            // Determine the application's content root so we can inspect DataStorage/Materials
-            using var scope = _factory.Services.CreateScope();
-            var env = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+            var env = _factory.Services.CreateScope().ServiceProvider.GetRequiredService<IWebHostEnvironment>();
             var materialsDir = Path.Combine(env.ContentRootPath, "DataStorage", "Materials");
-            if (!Directory.Exists(materialsDir)) Directory.CreateDirectory(materialsDir);
+            Directory.CreateDirectory(materialsDir);
             var before = Directory.GetFiles(materialsDir).Length;
 
-            using var multipart = new MultipartFormDataContent();
-            multipart.Add(new StringContent("CS101"), "courseId");
-            multipart.Add(new StringContent("Test Material"), "title");
-            multipart.Add(new StringContent("Uploaded from automated test"), "description");
+            using var form = new MultipartFormDataContent();
+            form.Add(new StringContent(courseCode), "courseId");
+            form.Add(new StringContent("Automation Material"), "title");
+            form.Add(new StringContent("Uploaded from automation test"), "description");
 
-            await using var fs = File.OpenRead(filePath);
-            var streamContent = new StreamContent(fs);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
-            multipart.Add(streamContent, "file", Path.GetFileName(filePath));
-            var resp = await client.PostAsync("/Lecturer/AddMaterial", multipart);
-            var responseContent = await resp.Content.ReadAsStringAsync();
-            Assert.True(resp.StatusCode == HttpStatusCode.Redirect || resp.IsSuccessStatusCode, $"Expected redirect or success status code from AddMaterial, but got {resp.StatusCode}. Content: {responseContent}");
-            var after = Directory.GetFiles(materialsDir).Length;
-            Assert.True(after > before, $"Expected a new file in {materialsDir}");
+            var tempFile = Path.GetTempFileName();
+            await File.WriteAllTextAsync(tempFile, "Automation test content");
+            try
+            {
+                await using var fs = File.OpenRead(tempFile);
+                var streamContent = new StreamContent(fs);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+                form.Add(streamContent, "file", Path.GetFileName(tempFile));
+
+                var response = await _client.PostAsync("/Lecturer/AddMaterial", form);
+                Assert.True(response.StatusCode is HttpStatusCode.Redirect or HttpStatusCode.RedirectKeepVerb or HttpStatusCode.OK,
+                    $"Expected redirect or success status code but got {response.StatusCode}");
+
+                var after = Directory.GetFiles(materialsDir).Length;
+                Assert.True(after > before, $"Expected a new file in {materialsDir}");
+            }
+            finally
+            {
+                File.Delete(tempFile);
+            }
         }
     }
 }
