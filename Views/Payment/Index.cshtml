@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.PaymentViewModel
 @{
-    ViewData["Title"] = "Thanh toan Hoc phi";
+    ViewData["Title"] = "Tuition & Fee Payment";
     ViewData["ActivePage"] = "Payment";
 }
 
@@ -13,7 +13,6 @@
 }
 @@media (max-width: 900px) { .payment-layout { grid-template-columns: 1fr; } }
 
-/* Strategy selector — icon tiles, not dropdown (Section 4.6) */
 .strategy-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -38,7 +37,6 @@
 .strategy-tile .st-name  { font-size: 0.72rem; font-weight: 700; }
 .strategy-tile .st-fee   { font-size: 0.65rem; color: var(--text-tertiary); font-family: 'Geist Mono', monospace; margin-top: 0.1rem; }
 
-/* Order summary — sticky panel -->  */
 .order-panel {
     position: sticky;
     top: 80px;
@@ -62,7 +60,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-credit-card fa-sm"></i>
-            Thanh toán Học phí
+            Tuition & Fee Payment
         </h1>
         <span class="pattern-badge pattern-strategy">Strategy Pattern</span>
     </div>
@@ -72,7 +70,7 @@
         <div class="sims-alert sims-alert-success mb-4">
             <i class="fa-solid fa-circle-check fa-lg"></i>
             <div>
-                <div style="font-weight:600;">Thanh toan thanh cong!</div>
+                <div style="font-weight:600;">Payment Successful!</div>
                 <div class="fs-xs" style="margin-top:0.2rem;">@Model.Message</div>
             </div>
         </div>
@@ -85,11 +83,11 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="Method" id="methodInput" value="@Model.Method" />
 
-                <!-- Strategy Pattern selector — 3 tiles, 3 options (exact cell count) -->
+                <!-- Strategy Pattern selector -->
                 <div class="sims-card mb-3">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-shuffle" style="color:#4ade80"></i>
-                        Chọn phương thức thanh toán
+                        Select Payment Method
                         <span class="fs-xs text-muted-sims ms-auto font-mono">Strategy Pattern</span>
                     </div>
 
@@ -97,27 +95,27 @@
                         <div class="strategy-tile @(Model.Method == "credit" ? "active-blue" : "")"
                              id="tile-credit" onclick="selectMethod('credit')">
                             <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
-                            <div class="st-name">Thẻ tín dụng</div>
-                            <div class="st-fee">Phí 2.5%</div>
+                            <div class="st-name">Credit Card</div>
+                            <div class="st-fee">2.5% Fee</div>
                         </div>
                         <div class="strategy-tile @(Model.Method == "bank" ? "active-green" : "")"
                              id="tile-bank" onclick="selectMethod('bank')">
                             <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
-                            <div class="st-name">Chuyển khoản</div>
-                            <div class="st-fee">Miễn phí</div>
+                            <div class="st-name">Bank Transfer</div>
+                            <div class="st-fee">No Fee</div>
                         </div>
                         <div class="strategy-tile @(Model.Method == "ewallet" ? "active-purple" : "")"
                              id="tile-ewallet" onclick="selectMethod('ewallet')">
                             <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
-                            <div class="st-name">Ví điện tử</div>
-                            <div class="st-fee">Phí 1.0%</div>
+                            <div class="st-name">E-Wallet</div>
+                            <div class="st-fee">1.0% Fee</div>
                         </div>
                     </div>
 
-                    <!-- Strategy note — updates on selection -->
+                    <!-- Strategy note -->
                     <div id="strategyNote" class="sims-alert sims-alert-info" style="font-size:0.78rem;">
                         <i class="fa-solid fa-code fa-xs"></i>
-                        <span id="strategyNoteText">Thẻ tín dụng: tính phí 2.5% trên tổng học phí</span>
+                        <span id="strategyNoteText">Credit Card: 2.5% transaction processing fee applied</span>
                     </div>
                 </div>
 
@@ -125,15 +123,15 @@
                 <div id="form-credit" class="sims-card mb-3" style="display:@(Model.Method == "credit" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-credit-card" style="color:var(--accent-light)"></i>
-                        Thông tin thẻ
+                        Card Information
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">SỐ THẺ</label>
+                        <label class="form-label">CARD NUMBER</label>
                         <input name="CardNumber" class="form-control font-mono" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)" />
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                         <div>
-                            <label class="form-label">NGÀY HẾT HẠN</label>
+                            <label class="form-label">EXPIRATION DATE</label>
                             <input name="CardExpiry" class="form-control font-mono" placeholder="MM/YY" maxlength="5" />
                         </div>
                         <div>
@@ -147,10 +145,10 @@
                 <div id="form-bank" class="sims-card mb-3" style="display:@(Model.Method == "bank" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-building-columns" style="color:#4ade80"></i>
-                        Thông tin chuyển khoản
+                        Bank Transfer Details
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">NGÂN HÀNG</label>
+                        <label class="form-label">BANK NAME</label>
                         <select name="BankName" class="form-select">
                             <option>Vietcombank</option><option>BIDV</option>
                             <option>Agribank</option><option>Techcombank</option>
@@ -158,17 +156,16 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">SỐ TÀI KHOẢN</label>
+                        <label class="form-label">ACCOUNT NUMBER</label>
                         <input name="AccountNumber" class="form-control font-mono" placeholder="0123456789" />
                     </div>
-                    <!-- Bank info box — no placeholder-as-label (Section 4.6) -->
                     <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;font-size:0.78rem;">
-                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">THÔNG TIN NHẬN</div>
+                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">RECIPIENT INFORMATION</div>
                         <div style="color:var(--text-secondary);line-height:1.8;">
-                            <span class="text-muted-sims">Ngan hang:</span> <strong>Vietcombank</strong><br/>
-                            <span class="text-muted-sims">STK:</span> <strong class="font-mono">0123456789</strong><br/>
-                            <span class="text-muted-sims">Chủ TK:</span> <strong>TRƯỜNG ĐẠI HỌC ABC</strong><br/>
-                            <span class="text-muted-sims">ND:</span> <strong class="font-mono">HP + Mã SV</strong>
+                            <span class="text-muted-sims">Bank:</span> <strong>Vietcombank</strong><br/>
+                            <span class="text-muted-sims">Acc No:</span> <strong class="font-mono">0123456789</strong><br/>
+                            <span class="text-muted-sims">Account Holder:</span> <strong>ABC UNIVERSITY</strong><br/>
+                            <span class="text-muted-sims">Reference:</span> <strong class="font-mono">Tuition + Student ID</strong>
                         </div>
                     </div>
                 </div>
@@ -177,25 +174,24 @@
                 <div id="form-ewallet" class="sims-card mb-3" style="display:@(Model.Method == "ewallet" ? "block" : "none")">
                     <div class="sims-card-header">
                         <i class="fa-solid fa-wallet" style="color:#a78bfa"></i>
-                        Ví điện tử
+                        E-Wallet Options
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">CHỌN VÍ</label>
+                        <label class="form-label">SELECT WALLET</label>
                         <select name="WalletType" class="form-select">
                             <option>MoMo</option><option>ZaloPay</option>
                             <option>VNPay</option><option>ShopeePay</option>
                         </select>
                     </div>
                     <div>
-                        <label class="form-label">SỐ ĐIỆN THOẠI / ID VÍ</label>
+                        <label class="form-label">PHONE NUMBER / WALLET ID</label>
                         <input name="WalletId" class="form-control font-mono" placeholder="0912 345 678" />
                     </div>
                 </div>
 
-                <!-- Single CTA — no duplicate intent (Section 4.5) -->
                 <button type="submit" class="btn btn-sims-primary w-100" style="font-size:0.9rem;padding:0.65rem !important;justify-content:center;" id="payBtn">
                     <i class="fa-solid fa-lock fa-xs"></i>
-                    Thanh toán <span id="btnAmount" class="font-mono">15,000,000 VND</span>
+                    Pay <span id="btnAmount" class="font-mono">15,000,000 VND</span>
                 </button>
                 <div style="text-align:center;font-size:0.7rem;color:var(--text-tertiary);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
                     SSL 256-bit encrypted
@@ -203,33 +199,32 @@
             </form>
         </div>
 
-        <!-- RIGHT: Order summary — sticky -->
+        <!-- RIGHT: Order summary -->
         <div class="order-panel">
                 <div class="sims-card">
                 <div class="sims-card-header">
                     <i class="fa-solid fa-receipt" style="color:#fbbf24"></i>
-                    Hoá đơn
+                    Payment Invoice
                 </div>
                 <div class="order-line">
-                    <span style="color:var(--text-tertiary)">Học phí học kỳ</span>
+                    <span style="color:var(--text-tertiary)">Semester Tuition</span>
                     <span class="font-mono" style="font-weight:600">15,000,000</span>
                 </div>
                 <div class="order-line">
-                    <span style="color:var(--text-tertiary)">Phí giao dịch</span>
+                    <span style="color:var(--text-tertiary)">Transaction Fee</span>
                     <span id="feeDisplay" class="font-mono" style="color:#fbbf24">375,000 (2.5%)</span>
                 </div>
                 <div class="order-total">
-                    <span style="font-weight:700">Tổng cộng</span>
+                    <span style="font-weight:700">Total Amount</span>
                     <span id="totalDisplay" class="font-mono fw-800" style="font-size:1.1rem;color:var(--accent-light)">15,375,000 VND</span>
                 </div>
 
-                <!-- 3 strategy summaries in compact list — different layout from tile grid -->
                 <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border-subtle)">
-                    <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">3 CHIẾN LƯỢC</div>
+                    <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">3 STRATEGIES</div>
                     <div style="display:flex;flex-direction:column;gap:0.3rem;font-size:0.75rem;">
-                        <div style="display:flex;justify-content:space-between;"><span style="color:var(--accent-light)">Chiến lược Thẻ</span><span class="font-mono text-muted-sims">+2.5%</span></div>
-                        <div style="display:flex;justify-content:space-between;"><span style="color:#4ade80">Chiến lược Chuyển khoản</span><span class="font-mono text-muted-sims">+0%</span></div>
-                        <div style="display:flex;justify-content:space-between;"><span style="color:#a78bfa">Chiến lược Ví</span><span class="font-mono text-muted-sims">+1.0%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:var(--accent-light)">Credit Strategy</span><span class="font-mono text-muted-sims">+2.5%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#4ade80">Bank Transfer Strategy</span><span class="font-mono text-muted-sims">+0%</span></div>
+                        <div style="display:flex;justify-content:space-between;"><span style="color:#a78bfa">E-Wallet Strategy</span><span class="font-mono text-muted-sims">+1.0%</span></div>
                     </div>
                 </div>
             </div>
@@ -241,13 +236,13 @@
 <script>
 const BASE = 15000000;
 const strategies = {
-    credit:  { rate: 0.025, label: '2.5%',  tileClass: 'active-blue',   note: 'Thẻ tín dụng: tính phí 2.5% trên tổng học phí' },
-    bank:    { rate: 0,     label: '0%',    tileClass: 'active-green',  note: 'Chuyển khoản: miễn phí giao dịch' },
-    ewallet: { rate: 0.01,  label: '1.0%',  tileClass: 'active-purple', note: 'Ví điện tử: tính phí 1.0% trên tổng học phí' },
+    credit:  { rate: 0.025, label: '2.5%',  tileClass: 'active-blue',   note: 'Credit Card: 2.5% transaction processing fee applied' },
+    bank:    { rate: 0,     label: '0%',    tileClass: 'active-green',  note: 'Bank Transfer: 0% transaction fee' },
+    ewallet: { rate: 0.01,  label: '1.0%',  tileClass: 'active-purple', note: 'E-Wallet: 1.0% transaction processing fee applied' },
 };
 let current = '@Model.Method' || 'credit';
 
-function fmt(n) { return n.toLocaleString('vi-VN'); }
+function fmt(n) { return n.toLocaleString('en-US'); }
 
 function selectMethod(method) {
     current = method;

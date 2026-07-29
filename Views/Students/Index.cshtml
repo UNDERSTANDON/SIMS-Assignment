@@ -1,6 +1,6 @@
 @model List<SIMS_WEB.Models.Student>
 @{
-    ViewData["Title"] = "Quản lý Người dùng";
+    ViewData["Title"] = "User Management";
     ViewData["ActivePage"] = "Students";
 }
 
@@ -23,22 +23,22 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-user-group fa-sm"></i>
-            Quản lý Người dùng
+            User Management
         </h1>
         <div class="d-flex gap-2">
             @if (ViewBag.Tab == "faculty")
             {
                 <a href="/Account/CreateUser?role=Faculty" class="btn btn-sims-success">
-                    <i class="fa-solid fa-plus fa-xs"></i> Thêm giảng viên
+                    <i class="fa-solid fa-plus fa-xs"></i> Add Faculty
                 </a>
             }
             else
             {
                 <a asp-action="Create" class="btn btn-sims-primary">
-                    <i class="fa-solid fa-plus fa-xs"></i> Thêm sinh viên
+                    <i class="fa-solid fa-plus fa-xs"></i> Add Student
                 </a>
                 <button class="btn btn-sims-outline" onclick="toggleImport()" id="importToggleBtn">
-                    <i class="fa-solid fa-file-csv fa-xs"></i> Nhập CSV
+                    <i class="fa-solid fa-file-csv fa-xs"></i> Import CSV
                 </button>
             }
         </div>
@@ -48,12 +48,12 @@
     <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border-subtle);padding-bottom:0.5rem;">
         <a href="?tab=student&search=@ViewBag.Search" 
            style="padding:0.5rem 1rem;border-radius:var(--r-md);font-size:0.875rem;font-weight:600;text-decoration:none;transition:all var(--dur);color:@(ViewBag.Tab != "faculty" ? "var(--accent-light)" : "var(--text-tertiary)");background:@(ViewBag.Tab != "faculty" ? "var(--accent-ghost)" : "transparent");border:1px solid @(ViewBag.Tab != "faculty" ? "var(--accent-ring)" : "transparent")">
-            <i class="fa-solid fa-graduation-cap"></i> Sinh viên
+            <i class="fa-solid fa-graduation-cap"></i> Students
             <span class="sims-badge badge-primary ms-1">@ViewBag.StudentsCount</span>
         </a>
         <a href="?tab=faculty&search=@ViewBag.Search" 
            style="padding:0.5rem 1rem;border-radius:var(--r-md);font-size:0.875rem;font-weight:600;text-decoration:none;transition:all var(--dur);color:@(ViewBag.Tab == "faculty" ? "var(--accent-light)" : "var(--text-tertiary)");background:@(ViewBag.Tab == "faculty" ? "var(--accent-ghost)" : "transparent");border:1px solid @(ViewBag.Tab == "faculty" ? "var(--accent-ring)" : "transparent")">
-            <i class="fa-solid fa-chalkboard-user"></i> Giảng viên
+            <i class="fa-solid fa-chalkboard-user"></i> Faculty
             <span class="sims-badge badge-success ms-1">@ViewBag.LecturersCount</span>
         </a>
     </div>
@@ -64,7 +64,7 @@
         <div id="importPanel" class="sims-card mb-4" style="display:none">
             <div class="sims-card-header">
                 <i class="fa-solid fa-cloud-arrow-up" style="color:#4ade80"></i>
-                Nhập danh sách từ file CSV
+                Import List from CSV File
             </div>
             <form asp-action="ImportCsv" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
@@ -74,46 +74,47 @@
                      ondragleave="this.classList.remove('drag-over')"
                      ondrop="handleDrop(event)">
                     <i class="fa-solid fa-cloud-arrow-up mb-2 d-block"></i>
-                    <div style="font-weight:600;font-size:0.875rem;">Kéo thả file CSV vào đây</div>
+                    <div style="font-weight:600;font-size:0.875rem;">Drag and drop CSV file here</div>
                     <div style="font-size:0.75rem;color:var(--text-tertiary);margin-top:0.25rem;">
-                        hoặc <span style="color:var(--accent-light)">chọn file từ máy tính</span>
+                        or <span style="color:var(--accent-light)">select file from computer</span>
                     </div>
                     <div style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;font-family:'Geist Mono',monospace;">
-                        Format: MaSV, HoTen, ChuongTrinh, Email
+                        Format: StudentID, FullName, Program, Email
                     </div>
                     <input type="file" id="csvFile" name="csvFile" accept=".csv" class="d-none"
                            onchange="updateFileName(this)" />
                 </div>
                 <div id="fileNameDisplay" class="font-mono fs-xs text-muted-sims mb-3" style="min-height:1.2rem"></div>
                 <div style="background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.65rem 0.875rem;margin-bottom:1rem;font-size:0.75rem;font-family:'Geist Mono',monospace;color:var(--text-tertiary)">
-                    SV2024005,Nguyen Thi E,Cong nghe Thong tin,e.nt@@univ.edu
+                    SV2024005,Nguyen Thi E,Computer Science,e.nt@@univ.edu
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-sims-success">
-                        <i class="fa-solid fa-upload fa-xs"></i> Tải lên & Nhập
+                        <i class="fa-solid fa-upload fa-xs"></i> Upload & Import
                     </button>
-                    <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Hủy</button>
+                    <button type="button" class="btn btn-sims-outline" onclick="toggleImport()">Cancel</button>
                 </div>
             </form>
         </div>
     }
 
-    <!-- Search bar -->
-    <form method="get" class="mb-3 search-bar">
+    <!-- Search bar Cyber Glow Neumorphic -->
+    <form method="get" class="mb-3">
         <input type="hidden" name="tab" value="@ViewBag.Tab" />
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="fa-solid fa-magnifying-glass fa-xs"></i>
-            </span>
-            <input type="text" name="search" value="@ViewBag.Search"
-                   class="form-control" placeholder="Tìm kiếm tên, email..." />
-            @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
-            {
-                <a href="?tab=@ViewBag.Tab" class="btn btn-sims-outline px-2">
-                    <i class="fa-solid fa-xmark fa-xs"></i>
-                </a>
-            }
-            <button class="btn btn-sims-outline" type="submit">Tìm</button>
+        <div class="sims-search-box">
+            <div class="sims-search-input-wrap">
+                <input type="text" name="search" value="@ViewBag.Search"
+                       class="sims-search-input" placeholder="Search by name, email..." />
+                @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
+                {
+                    <a href="?tab=@ViewBag.Tab" class="sims-search-icon-btn me-1" title="Clear search" style="background:rgba(220,38,38,0.12);border-color:rgba(220,38,38,0.25);color:#f87171;">
+                        <i class="fa-solid fa-xmark fa-xs"></i>
+                    </a>
+                }
+                <button class="sims-search-icon-btn" type="submit" title="Search">
+                    <i class="fa-solid fa-magnifying-glass fa-xs"></i>
+                </button>
+            </div>
         </div>
     </form>
 
@@ -126,15 +127,15 @@
             <div class="sims-card">
                 <div class="sims-empty">
                     <i class="fa-solid fa-users-slash"></i>
-                    <div class="em-title">Không tìm thấy giảng viên</div>
+                    <div class="em-title">No faculty members found</div>
                     <div class="em-sub">
                         @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
                         {
-                            <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
+                            <span>No results for "<strong>@ViewBag.Search</strong>". Try clearing search filters.</span>
                         }
                         else
                         {
-                            <span>Chưa có giảng viên nào trong hệ thống.</span>
+                            <span>No faculty members in the system yet.</span>
                         }
                     </div>
                 </div>
@@ -146,11 +147,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Họ và tên</th>
-                            <th>Mã GV</th>
-                            <th>Gmail</th>
-                            <th>Khóa học</th>
-                            <th class="text-center" style="width:100px">Thao tác</th>
+                            <th>Full Name</th>
+                            <th>Faculty ID</th>
+                            <th>Email</th>
+                            <th>Assigned Courses</th>
+                            <th class="text-center" style="width:100px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -186,14 +187,14 @@
                                     @if (courseList.Length == 0 || (courseList.Length == 1 && courseList[0] == "null"))
                                     {
                                         <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-secondary);font-size:0.75rem;cursor:not-allowed;" disabled>
-                                            <option>null</option>
+                                            <option>None</option>
                                         </select>
                                     }
                                     else if (courseList.Length == 1)
                                     {
                                         <select class="form-select form-select-sm" style="max-width:180px;background-color:var(--bg-card);border-color:var(--border-subtle);color:var(--text-primary);font-size:0.75rem;">
                                             <option>@courseList[0]</option>
-                                            <option disabled style="color:var(--text-muted);font-style:italic;">null</option>
+                                            <option disabled style="color:var(--text-muted);font-style:italic;">None</option>
                                         </select>
                                     }
                                     else
@@ -208,9 +209,9 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <button class="btn btn-sims-danger btn-sm py-1 px-2"
+                                        <button class="btn-sims-delete-anim" title="Delete Account"
                                                 onclick="confirmDeleteUser('@l.StudentId')">
-                                            <i class="fa-solid fa-trash fa-xs"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -220,7 +221,7 @@
                 </table>
             </div>
             <div class="mt-2 fs-xs text-muted-sims font-mono">
-                Hiển thị @lecturers.Count / @ViewBag.LecturersCount giảng viên
+                Showing @lecturers.Count / @ViewBag.LecturersCount faculty members
             </div>
         }
     }
@@ -231,15 +232,15 @@
             <div class="sims-card">
                 <div class="sims-empty">
                     <i class="fa-solid fa-users-slash"></i>
-                    <div class="em-title">Không tìm thấy sinh viên</div>
+                    <div class="em-title">No students found</div>
                     <div class="em-sub">
                         @if (!string.IsNullOrEmpty(ViewBag.Search?.ToString()))
                         {
-                            <span>Không có kết quả cho "<strong>@ViewBag.Search</strong>". Thử xóa bộ lọc tìm kiếm.</span>
+                            <span>No results for "<strong>@ViewBag.Search</strong>". Try clearing search filters.</span>
                         }
                         else
                         {
-                            <span>Chưa có sinh viên nào. Thêm sinh viên đầu tiên hoặc nhập từ CSV.</span>
+                            <span>No students registered yet. Add your first student or import from CSV.</span>
                         }
                     </div>
                 </div>
@@ -251,11 +252,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Sinh viên</th>
-                            <th>Mã SV</th>
-                            <th>Chương trình</th>
+                            <th>Student</th>
+                            <th>Student ID</th>
+                            <th>Program</th>
                             <th>Email</th>
-                            <th class="text-center" style="width:100px">Thao tác</th>
+                            <th class="text-center" style="width:100px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -291,9 +292,9 @@
                                            class="btn btn-sims-outline btn-sm py-1 px-2">
                                             <i class="fa-solid fa-pen fa-xs"></i>
                                         </a>
-                                        <button class="btn btn-sims-danger btn-sm py-1 px-2"
+                                        <button class="btn-sims-delete-anim" title="Delete Student"
                                                 onclick="confirmDelete('@s.StudentId', '@s.FullName')">
-                                            <i class="fa-solid fa-trash fa-xs"></i>
+                                            <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
                                 </td>
@@ -303,7 +304,7 @@
                 </table>
             </div>
             <div class="mt-2 fs-xs text-muted-sims font-mono">
-                Hiển thị @Model.Count / @ViewBag.StudentsCount sinh viên
+                Showing @Model.Count / @ViewBag.StudentsCount students
             </div>
         }
     }
@@ -317,14 +318,14 @@
                 <div style="width:40px;height:40px;background:var(--danger-muted);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;">
                     <i class="fa-solid fa-trash" style="color:#f87171;font-size:1rem;"></i>
                 </div>
-                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Xác nhận xóa</div>
+                <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.4rem;">Confirm Delete</div>
                 <div id="deleteMsg" style="font-size:0.8rem;color:var(--text-tertiary);margin-bottom:1.25rem;"></div>
                 <div class="d-flex gap-2">
                     <form id="deleteForm" method="post" class="flex-grow-1">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-sims-danger w-100">Xóa</button>
+                        <button type="submit" class="btn btn-sims-danger w-100">Delete</button>
                     </form>
-                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Hủy</button>
+                    <button class="btn btn-sims-outline" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -358,7 +359,7 @@ function confirmDelete(id, name) {
     if (modalEl && modalEl.parentNode !== document.body) {
         document.body.appendChild(modalEl);
     }
-    document.getElementById('deleteMsg').innerHTML = `Xóa sinh viên <strong style="color:var(--text-primary)">${name}</strong>? Hành động này không thể hoàn tác.`;
+    document.getElementById('deleteMsg').innerHTML = `Delete student <strong style="color:var(--text-primary)">${name}</strong>? This action cannot be undone.`;
     document.getElementById('deleteForm').action = '/Students/Delete/' + id;
     new bootstrap.Modal(modalEl).show();
 }
@@ -367,7 +368,7 @@ function confirmDeleteUser(username) {
     if (modalEl && modalEl.parentNode !== document.body) {
         document.body.appendChild(modalEl);
     }
-    document.getElementById('deleteMsg').innerHTML = `Xóa tài khoản giảng viên <strong style="color:var(--text-primary)">${username}</strong>? Hành động này cũng sẽ xóa tài khoản đăng nhập tương ứng.`;
+    document.getElementById('deleteMsg').innerHTML = `Delete faculty member <strong style="color:var(--text-primary)">${username}</strong>? This will also remove the corresponding user account.`;
     document.getElementById('deleteForm').action = '/Students/DeleteUser?username=' + encodeURIComponent(username);
     new bootstrap.Modal(modalEl).show();
 }

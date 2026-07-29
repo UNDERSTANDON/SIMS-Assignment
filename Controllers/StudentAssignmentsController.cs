@@ -101,7 +101,7 @@ namespace SIMS_WEB.Controllers
             if (assignment == null) return NotFound();
             if (string.IsNullOrWhiteSpace(studentId))
             {
-                TempData["Error"] = "Vui lòng chọn sinh viên";
+                TempData["Error"] = "Please select a student";
                 return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
             }
 
@@ -125,14 +125,14 @@ namespace SIMS_WEB.Controllers
                 if (file.Length > maxSubmissionFileSize)
                 {
                     var sizeMB = (file.Length / (1024 * 1024.0)).ToString("F2");
-                    TempData["Error"] = $"Tệp tải lên ({sizeMB} MB) vượt quá dung lượng cho phép (10 MB).";
+                    TempData["Error"] = $"Uploaded file ({sizeMB} MB) exceeds allowed limit (10 MB).";
                     return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
                 }
 
                 // Validate file extension
                 if (!allowedExtensions.Contains(extension))
                 {
-                    TempData["Error"] = $"Định dạng tệp '{extension}' không được hỗ trợ. Các định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP";
+                    TempData["Error"] = $"File extension '{extension}' is not supported. Supported extensions: PDF, DOC, DOCX, TXT, ZIP";
                     return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
                 }
 
@@ -160,7 +160,7 @@ namespace SIMS_WEB.Controllers
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed to save submission file: {ex}");
-                    TempData["Error"] = "Không thể lưu tệp được tải lên. Vui lòng thử lại hoặc liên hệ quản trị.";
+                    TempData["Error"] = "Unable to save uploaded file. Please try again or contact support.";
                     return RedirectToAction("Submit", new { courseCode = assignment.CourseCode, assignmentId });
                 }
             }
@@ -188,7 +188,7 @@ namespace SIMS_WEB.Controllers
                 _submissions.AddSubmission(submission);
             }
 
-            TempData["Success"] = "Nộp bài thành công";
+            TempData["Success"] = "Assignment submitted successfully";
             return RedirectToAction("Index", new { studentId });
         }
     }

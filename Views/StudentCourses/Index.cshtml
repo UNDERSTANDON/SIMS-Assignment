@@ -1,11 +1,11 @@
 @model List<SIMS_WEB.Models.Course>
 @{
-    ViewData["Title"] = "Khóa học";
+    ViewData["Title"] = "My Courses";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
-        <h1 class="sims-page-title">Khóa học</h1>
+        <h1 class="sims-page-title">My Courses</h1>
     </div>
 
     <div class="sims-card p-3">
@@ -15,9 +15,9 @@
                 <div class="col-md-4 mb-3">
                     <div class="sims-card p-3">
                         <h5>@c.Title</h5>
-                        <div style="color: #ffffff !important;">Mã: <code style="color: #ffffff !important;">@c.Code</code></div>
+                        <div style="color: #ffffff !important;">Code: <code style="color: #ffffff !important;">@c.Code</code></div>
                         <div class="mt-2">
-                            <a asp-action="Details" asp-route-id="@c.Code" class="btn btn-sims-outline">Mở khóa học</a>
+                            <a asp-action="Details" asp-route-id="@c.Code" class="btn btn-sims-outline">Open Course</a>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.EnrollmentViewModel
 @{
-    ViewData["Title"] = "Ghi danh / Xếp lớp";
+    ViewData["Title"] = "Enrollments & Class Assignment";
     ViewData["ActivePage"] = "Enrollment";
 }
 
@@ -20,12 +20,12 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-list-check fa-sm"></i>
-            Ghi danh / Xếp lớp
+            Enrollments & Class Assignment
         </h1>
         <div class="d-flex align-items-center gap-2">
             <span class="pattern-badge pattern-facade">Facade Pattern</span>
             <a asp-controller="Dashboard" asp-action="Index" class="btn btn-sims-outline">
-                <i class="fa-solid fa-arrow-left fa-xs"></i> Bảng điều khiển
+                <i class="fa-solid fa-arrow-left fa-xs"></i> Dashboard
             </a>
         </div>
     </div>
@@ -36,7 +36,7 @@
             <div class="sims-card">
                 <div class="sims-card-header">
                     <i class="fa-solid fa-pen-to-square" style="color:var(--accent-light)"></i>
-                    Biểu mẫu ghi danh
+                    Enrollment Form
                 </div>
 
                 @if (Model.Message != null)
@@ -51,9 +51,9 @@
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
-                        <label asp-for="StudentId" class="form-label"></label>
+                        <label class="form-label">Student</label>
                         <select asp-for="StudentId" class="form-select">
-                        <option value="">-- Chọn sinh viên --</option>
+                        <option value="">-- Select Student --</option>
                             @foreach (var s in Model.Students)
                             {
                                 <option value="@s.StudentId">@s.FullName (@s.StudentId)</option>
@@ -63,9 +63,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="CourseCode" class="form-label"></label>
+                        <label class="form-label">Course</label>
                         <select asp-for="CourseCode" class="form-select" onchange="updateCapacity(this)">
-                            <option value="">-- Chọn khóa học --</option>
+                            <option value="">-- Select Course --</option>
                             @foreach (var c in Model.Courses)
                             {
                                 <option value="@c.Code"
@@ -79,50 +79,50 @@
                         <span asp-validation-for="CourseCode" class="invalid-feedback d-block"></span>
                     </div>
 
-                    <!-- Capacity indicator — Section 4.5: loading/state feedback -->
+                    <!-- Capacity indicator -->
                     <div id="capInfo" style="display:none;background:var(--surface-2);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:0.75rem;margin-bottom:1rem;">
                         <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:0.4rem;">
-                            <span style="color:var(--text-tertiary)">Sĩ số hiện tại</span>
+                            <span style="color:var(--text-tertiary)">Current Capacity</span>
                             <span id="capText" class="font-mono" style="font-weight:600"></span>
                         </div>
                         <div class="sims-progress mb-2">
                             <div class="sims-progress-bar" id="capBar" style="width:0%"></div>
                         </div>
                         <div id="fullWarn" class="sims-alert sims-alert-danger" style="display:none;padding:0.5rem 0.65rem;font-size:0.75rem;">
-                            <i class="fa-solid fa-ban fa-xs"></i> Khóa học đã đầy sĩ số
+                            <i class="fa-solid fa-ban fa-xs"></i> Course capacity reached
                         </div>
                     </div>
 
                     <button type="submit" class="btn btn-sims-primary w-100">
-                        <i class="fa-solid fa-plus-circle fa-xs"></i> Ghi danh ngay
+                        <i class="fa-solid fa-plus-circle fa-xs"></i> Enroll Now
                     </button>
                 </form>
 
-                <!-- Facade Pattern steps — animated only on success -->
+                <!-- Facade Pattern steps -->
                 @if (Model.IsSuccess)
                 {
                     <div style="margin-top:1.25rem;border-top:1px solid var(--border-subtle);padding-top:1rem;">
-                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">FACADE - SERVICES DA CHAY</div>
+                        <div class="font-mono fs-xs text-muted-sims mb-2" style="letter-spacing:0.08em;">FACADE - SERVICES EXECUTED</div>
                         <div style="display:flex;flex-direction:column;gap:0.4rem;">
                             <div class="facade-step visible">
                                 <div class="step-icon" style="background:var(--accent-ghost)"><i class="fa-solid fa-user-check fa-xs" style="color:var(--accent-light)"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">AccountService</div>
-                                    <div class="fs-xs text-muted-sims">Tạo tài khoản sinh viên</div>
+                                    <div class="fs-xs text-muted-sims">Create student profile & access</div>
                                 </div>
                             </div>
                             <div class="facade-step visible" style="transition-delay:0.15s">
                                 <div class="step-icon" style="background:var(--success-muted)"><i class="fa-solid fa-file-invoice-dollar fa-xs" style="color:#4ade80"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">BillingService</div>
-                                    <div class="fs-xs text-muted-sims">Khởi tạo hóa đơn học phí</div>
+                                    <div class="fs-xs text-muted-sims">Generate tuition invoice</div>
                                 </div>
                             </div>
                             <div class="facade-step visible" style="transition-delay:0.3s">
                                 <div class="step-icon" style="background:var(--warning-muted)"><i class="fa-solid fa-bell fa-xs" style="color:#fbbf24"></i></div>
                                 <div>
                                     <div style="font-size:0.75rem;font-weight:600;font-family:'Geist Mono',monospace;">NotificationService</div>
-                                    <div class="fs-xs text-muted-sims">Gửi email xác nhận ghi danh</div>
+                                    <div class="fs-xs text-muted-sims">Send enrollment confirmation email</div>
                                 </div>
                             </div>
                         </div>
@@ -136,12 +136,12 @@
             <div class="sims-card-header" style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:0.5rem;">
                 <div style="display:flex;align-items:center;gap:0.5rem;">
                     <i class="fa-solid fa-users" style="color:var(--accent-light)"></i>
-                    <span>Danh sách ghi danh</span>
+                    <span>Enrollment Records</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-sims-outline btn-sm active" id="btnViewStudent" onclick="switchEnrollView('student')">Lọc theo sinh viên</button>
-                        <button type="button" class="btn btn-sims-outline btn-sm" id="btnViewCourse" onclick="switchEnrollView('course')">Lọc theo khóa học</button>
+                        <button type="button" class="btn btn-sims-outline btn-sm active" id="btnViewStudent" onclick="switchEnrollView('student')">Filter by Student</button>
+                        <button type="button" class="btn btn-sims-outline btn-sm" id="btnViewCourse" onclick="switchEnrollView('course')">Filter by Course</button>
                     </div>
                     <span class="sims-badge badge-primary font-mono" id="enrollCountBadge">@Model.EnrolledList.Count</span>
                 </div>
@@ -149,23 +149,31 @@
 
             <!-- Search wrapper for Student filter -->
             <div class="mb-3" id="studentSearchWrapper" style="padding: 1rem 1rem 0 1rem;">
-                <div class="input-group">
-                    <span class="input-group-text bg-card-sims"><i class="fa-solid fa-magnifying-glass fa-xs"></i></span>
-                    <input type="text" id="studentSearchInput" placeholder="Nhập họ tên hoặc mã số sinh viên..." class="form-control" oninput="filterStudentTable()" />
+                <div class="sims-search-box">
+                    <div class="sims-search-input-wrap">
+                        <input type="text" id="studentSearchInput" placeholder="Enter name or student ID..." class="sims-search-input" oninput="filterStudentTable()" />
+                        <button class="sims-search-icon-btn" type="button" title="Search">
+                            <i class="fa-solid fa-magnifying-glass fa-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="studentSearchEmpty" class="text-muted-sims fs-xs mt-2" style="display:none; font-style:italic;">
-                    Không tìm thấy sinh viên phù hợp.
+                    No matching students found.
                 </div>
             </div>
 
             <!-- Search wrapper for Course filter -->
             <div class="mb-3" id="courseSearchWrapper" style="display:none; padding: 1rem 1rem 0 1rem;">
-                <div class="input-group">
-                    <span class="input-group-text bg-card-sims"><i class="fa-solid fa-magnifying-glass fa-xs"></i></span>
-                    <input type="text" id="courseSearchInput" placeholder="Nhập tên hoặc mã khóa học..." class="form-control" oninput="filterCourseTable()" />
+                <div class="sims-search-box">
+                    <div class="sims-search-input-wrap">
+                        <input type="text" id="courseSearchInput" placeholder="Enter course name or code..." class="sims-search-input" oninput="filterCourseTable()" />
+                        <button class="sims-search-icon-btn" type="button" title="Search">
+                            <i class="fa-solid fa-magnifying-glass fa-xs"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="courseSearchEmpty" class="text-muted-sims fs-xs mt-2" style="display:none; font-style:italic;">
-                    Không tìm thấy khóa học phù hợp.
+                    No matching courses found.
                 </div>
             </div>
 
@@ -175,8 +183,8 @@
                 {
                     <div class="sims-empty py-3" style="border:none;">
                         <i class="fa-solid fa-clipboard-list"></i>
-                        <div class="em-title">Chưa có ghi danh nào</div>
-                        <div class="em-sub">Dùng form bên trái để ghi danh sinh viên vào khóa học.</div>
+                        <div class="em-title">No enrollment records</div>
+                        <div class="em-sub">Use the form on the left to enroll students into courses.</div>
                     </div>
                 }
                 else
@@ -184,12 +192,12 @@
                     <table class="table" id="studentTable" style="display:none;">
                         <thead>
                             <tr>
-                                <th>Học sinh</th>
-                                <th>Khóa học</th>
-                                <th>Giảng viên</th>
-                                <th>Điểm số</th>
-                                <th>Kết quả</th>
-                                <th class="text-center" style="width:70px">Thao tác</th>
+                                <th>Student</th>
+                                <th>Course</th>
+                                <th>Instructor</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                                <th class="text-center" style="width:70px">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -239,11 +247,11 @@
                                         <span class="sims-badge pass-val" id="pass-@g.Key">null</span>
                                     </td>
                                     <td class="text-center">
-                                        <form asp-action="Unenroll" asp-controller="Enrollment" method="post" onsubmit="return confirm('Hủy ghi danh sinh viên ' + '@studentName' + ' khỏi lớp ' + document.getElementById('unenroll-course-' + '@g.Key').value + '?');" style="display:inline-block">
+                                        <form asp-action="Unenroll" asp-controller="Enrollment" method="post" onsubmit="return confirm('Unenroll student ' + '@studentName' + ' from course ' + document.getElementById('unenroll-course-' + '@g.Key').value + '?');" style="display:inline-block">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="studentId" value="@g.Key" />
                                             <input type="hidden" id="unenroll-course-@g.Key" name="courseCode" value="" />
-                                            <button type="submit" class="btn btn-sims-danger btn-sm py-1 px-2" title="Hủy ghi danh">
+                                            <button type="submit" class="btn btn-sims-danger btn-sm py-1 px-2" title="Unenroll">
                                                 <i class="fa-solid fa-trash fa-xs"></i>
                                             </button>
                                         </form>
@@ -261,8 +269,8 @@
                 {
                     <div class="sims-empty py-3" style="border:none;">
                         <i class="fa-solid fa-book"></i>
-                        <div class="em-title">Chưa có khóa học nào</div>
-                        <div class="em-sub">Tạo khóa học trước khi thực hiện ghi danh.</div>
+                        <div class="em-title">No courses available</div>
+                        <div class="em-sub">Create courses before enrolling students.</div>
                     </div>
                 }
                 else
@@ -270,9 +278,9 @@
                     <table class="table" id="courseTable" style="display:none;">
                         <thead>
                             <tr>
-                                <th>Khóa học</th>
-                                <th>Giảng viên</th>
-                                <th>Sinh viên đăng ký</th>
+                                <th>Course</th>
+                                <th>Instructor</th>
+                                <th>Enrolled Students</th>
                             </tr>
                         </thead>
                         <tbody>

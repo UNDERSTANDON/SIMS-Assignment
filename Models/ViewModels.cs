@@ -4,16 +4,16 @@ namespace SIMS_WEB.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [Display(Name = "Tên đăng nhập")]
+        [Required(ErrorMessage = "Username is required")]
+        [Display(Name = "Username")]
         public string Username { get; set; } = "";
 
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
+        [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
-        [Display(Name = "Vai trò")]
+        [Display(Name = "Role")]
         public string Role { get; set; } = "Admin";
 
         public string? ErrorMessage { get; set; }
@@ -24,30 +24,30 @@ namespace SIMS_WEB.Models
 
     public class RegisterViewModel
     {
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [MinLength(4, ErrorMessage = "Tên đăng nhập tối thiểu 4 ký tự")]
-        [Display(Name = "Tên đăng nhập")]
+        [Required(ErrorMessage = "Username is required")]
+        [MinLength(4, ErrorMessage = "Username must be at least 4 characters")]
+        [Display(Name = "Username")]
         public string Username { get; set; } = "";
 
-        [Required(ErrorMessage = "Email không được để trống")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự")]
+        [Required(ErrorMessage = "Password is required")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
-        [Required(ErrorMessage = "Xác nhận mật khẩu không được để trống")]
+        [Required(ErrorMessage = "Confirm password is required")]
         [DataType(DataType.Password)]
-        [Compare("Password", ErrorMessage = "Mật khẩu xác nhận không khớp")]
-        [Display(Name = "Xác nhận mật khẩu")]
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        [Display(Name = "Confirm Password")]
         public string ConfirmPassword { get; set; } = "";
 
-        [Required(ErrorMessage = "Vui lòng chọn vai trò")]
-        [Display(Name = "Vai trò")]
+        [Required(ErrorMessage = "Please select a role")]
+        [Display(Name = "Role")]
         public string Role { get; set; } = "Student";
 
         public string? SuccessMessage { get; set; }
@@ -55,28 +55,28 @@ namespace SIMS_WEB.Models
 
     public class CreateUserViewModel
     {
-        [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
-        [MinLength(4, ErrorMessage = "Tên đăng nhập tối thiểu 4 ký tự")]
-        [Display(Name = "Tên đăng nhập")]
+        [Required(ErrorMessage = "Username is required")]
+        [MinLength(4, ErrorMessage = "Username must be at least 4 characters")]
+        [Display(Name = "Username")]
         public string Username { get; set; } = "";
 
-        [Required(ErrorMessage = "Họ tên không được để trống")]
-        [Display(Name = "Họ và tên")]
+        [Required(ErrorMessage = "Full Name is required")]
+        [Display(Name = "Full Name")]
         public string FullName { get; set; } = "";
 
-        [Required(ErrorMessage = "Email không được để trống")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "Mật khẩu không được để trống")]
-        [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự")]
+        [Required(ErrorMessage = "Password is required")]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu")]
+        [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
-        [Required(ErrorMessage = "Vui lòng chọn vai trò")]
-        [Display(Name = "Vai trò")]
+        [Required(ErrorMessage = "Please select a role")]
+        [Display(Name = "Role")]
         public string Role { get; set; } = "Student";
 
         public string? Message { get; set; }
@@ -85,12 +85,12 @@ namespace SIMS_WEB.Models
 
     public class EnrollmentViewModel
     {
-        [Required(ErrorMessage = "Vui lòng chọn sinh viên")]
-        [Display(Name = "Sinh viên")]
+        [Required(ErrorMessage = "Please select a student")]
+        [Display(Name = "Student")]
         public string StudentId { get; set; } = "";
 
-        [Required(ErrorMessage = "Vui lòng chọn khóa học")]
-        [Display(Name = "Khóa học")]
+        [Required(ErrorMessage = "Please select a course")]
+        [Display(Name = "Course")]
         public string CourseCode { get; set; } = "";
 
         public List<Student> Students { get; set; } = new();
@@ -102,14 +102,14 @@ namespace SIMS_WEB.Models
 
     public class GradeViewModel
     {
-        [Display(Name = "Khóa học")]
+        [Display(Name = "Course")]
         public string CourseCode { get; set; } = "";
 
-        [Display(Name = "Sinh viên")]
+        [Display(Name = "Student")]
         public string StudentId { get; set; } = "";
 
-        [Range(0, 100, ErrorMessage = "Điểm phải từ 0 đến 100")]
-        [Display(Name = "Điểm số")]
+        [Range(0, 100, ErrorMessage = "Score must be between 0 and 100")]
+        [Display(Name = "Score")]
         public double Score { get; set; }
 
         public List<Course> Courses { get; set; } = new();
@@ -125,7 +125,7 @@ namespace SIMS_WEB.Models
 
     public class PaymentViewModel
     {
-        [Display(Name = "Phương thức thanh toán")]
+        [Display(Name = "Payment Method")]
         public string Method { get; set; } = "credit";
 
         // Credit card

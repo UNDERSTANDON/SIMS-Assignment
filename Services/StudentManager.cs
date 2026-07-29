@@ -38,7 +38,7 @@ namespace SIMS_Assignment.Services
                                 {
                                     StudentId = u.Name,
                                     FullName = !string.IsNullOrEmpty(u.FullName) ? u.FullName : u.Name,
-                                    Program = "Chương trình tự chọn",
+                                    Program = "Elective Program",
                                     Email = u.Email,
                                     DateOfBirth = DateTime.Now.AddYears(-20)
                                 };

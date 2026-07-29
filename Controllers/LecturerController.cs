@@ -201,13 +201,13 @@ namespace SIMS_WEB.Controllers
                     // error message to the user and log the exception to console (startup logging will
                     // also capture it via the AppDomain handlers in Program.cs).
                     Console.WriteLine($"Failed to save uploaded file: {ex}");
-                    TempData["Error"] = "Không thể lưu tệp được tải lên. Vui lòng thử lại hoặc liên hệ quản trị.";
+                    TempData["Error"] = "Unable to save uploaded file. Please try again or contact support.";
                     return RedirectToAction("Manage", new { id = courseId });
                 }
             }
 
             _materials.AddMaterial(mat);
-            TempData["Success"] = "Đã thêm tài liệu thành công";
+            TempData["Success"] = "Material added successfully";
             return RedirectToAction("Manage", new { id = courseId });
         }
 
@@ -217,13 +217,13 @@ namespace SIMS_WEB.Controllers
             var username = HttpContext.Session.GetString("Username") ?? "";
             if (!await IsCourseAssignedToLecturer(courseCode, username))
             {
-                TempData["Error"] = "Bạn không có quyền thực hiện thao tác này.";
+                TempData["Error"] = "You do not have permission to perform this action.";
                 return RedirectToAction(nameof(Index));
             }
 
             if (string.IsNullOrWhiteSpace(title))
             {
-                TempData["Error"] = "Tiêu đề không được để trống";
+                TempData["Error"] = "Title cannot be empty";
                 return RedirectToAction("Manage", new { id = courseCode });
             }
             var a = new Assignment
@@ -327,7 +327,7 @@ namespace SIMS_WEB.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error downloading submission: {ex.Message}");
-                return StatusCode(500, "Lỗi tải tệp");
+                return StatusCode(500, "File download error");
             }
         }
 
@@ -337,7 +337,7 @@ namespace SIMS_WEB.Controllers
             ViewData["ActivePage"] = "Profile";
             var username = HttpContext.Session.GetString("Username") ?? string.Empty;
             var user = await _storage.GetUserByNameAsync(username);
-            if (user == null) return NotFound("Giảng viên không tồn tại trong hệ thống");
+            if (user == null) return NotFound("Lecturer does not exist in the system");
             return View("Profile", user);
         }
 
@@ -347,17 +347,17 @@ namespace SIMS_WEB.Controllers
             ViewData["ActivePage"] = "Profile";
             var username = HttpContext.Session.GetString("Username") ?? string.Empty;
             var user = await _storage.GetUserByNameAsync(username);
-            if (user == null) return NotFound("Giảng viên không tồn tại trong hệ thống");
+            if (user == null) return NotFound("Lecturer does not exist in the system");
 
             if (string.IsNullOrWhiteSpace(fullName))
             {
-                TempData["Error"] = "Họ tên không được để trống";
+                TempData["Error"] = "Full name cannot be empty";
                 return View("Profile", user);
             }
 
             if (string.IsNullOrWhiteSpace(email))
             {
-                TempData["Error"] = "Email không được để trống";
+                TempData["Error"] = "Email cannot be empty";
                 return View("Profile", user);
             }
 
@@ -412,14 +412,14 @@ namespace SIMS_WEB.Controllers
         [HttpGet]
         public IActionResult CreateCourse()
         {
-            TempData["Error"] = "Bạn không có quyền thực hiện thao tác này. Chỉ Admin mới có quyền quản lý khóa học.";
+            TempData["Error"] = "You do not have permission. Only Admins can manage courses.";
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public IActionResult CreateCourse(Course model)
         {
-            TempData["Error"] = "Bạn không có quyền thực hiện thao tác này. Chỉ Admin mới có quyền quản lý khóa học.";
+            TempData["Error"] = "You do not have permission. Only Admins can manage courses.";
             return RedirectToAction("Index");
         }
 
@@ -427,7 +427,7 @@ namespace SIMS_WEB.Controllers
         {
             ViewData["ActivePage"] = "FacultyCourses";
             var course = _store.Courses.FirstOrDefault(c => c.Code == courseCode);
-            if (course == null) return NotFound("Khóa học không tồn tại");
+            if (course == null) return NotFound("Course does not exist");
 
             var allAssignments = _assignments.GetAll().Where(a => a.CourseCode == courseCode).ToList();
             var selectedAssignment = !string.IsNullOrEmpty(assignmentId) 

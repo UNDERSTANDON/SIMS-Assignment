@@ -1,37 +1,37 @@
 @model SIMS_WEB.Models.Course
 @{
-    ViewData["Title"] = "Sửa Khóa học";
+    ViewData["Title"] = "Edit Course";
     ViewData["ActivePage"] = "Courses";
 }
 
 <div class="sims-page" style="max-width:640px">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
-            <i class="fa-solid fa-pen fa-sm"></i> Sửa Khóa học
+            <i class="fa-solid fa-pen fa-sm"></i> Edit Course
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
     <div class="sims-card">
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
-                <label class="form-label">MÃ KHÓA HỌC</label>
+                <label class="form-label">COURSE CODE</label>
                 <input asp-for="Code" class="form-control font-mono" readonly style="color:var(--text-secondary) !important; background:var(--bg) !important; cursor:not-allowed;" />
             </div>
             <div class="mb-3">
-                <label asp-for="Title" class="form-label"></label>
+                <label class="form-label">COURSE TITLE</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="invalid-feedback d-block"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Capacity" class="form-label"></label>
+                <label class="form-label">STUDENT CAPACITY</label>
                 <input asp-for="Capacity" type="number" class="form-control font-mono" min="1" max="500" />
                 <span asp-validation-for="Capacity" class="invalid-feedback d-block"></span>
             </div>
             <div class="mb-4">
-                <label asp-for="Instructor" class="form-label"></label>
+                <label class="form-label">INSTRUCTOR</label>
                 <input asp-for="Instructor" class="form-control" list="lecturerList" autocomplete="off" />
                 <datalist id="lecturerList">
                     @foreach (var l in ViewBag.Lecturers as List<SIMS_Assignment.Models.User> ?? new())
@@ -43,9 +43,9 @@
             </div>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-sims-success">
-                    <i class="fa-solid fa-floppy-disk fa-xs"></i> Lưu thay đổi
+                    <i class="fa-solid fa-floppy-disk fa-xs"></i> Save Changes
                 </button>
-                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
+                <a asp-action="Index" class="btn btn-sims-outline">Cancel</a>
             </div>
         </form>
     </div>

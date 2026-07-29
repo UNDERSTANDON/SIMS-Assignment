@@ -1,6 +1,6 @@
 @model SIMS_WEB.Controllers.StudentCourseDetailsViewModel
 @{
-    ViewData["Title"] = "Khóa học";
+    ViewData["Title"] = "Course Details";
 }
 
 <div class="sims-page">
@@ -11,10 +11,10 @@
     @if (!Model.IsEnrolled)
     {
         <div class="sims-card p-4 text-center">
-            <h4>Bạn chưa ghi danh vào khóa học này</h4>
-            <p class="text-muted">Để truy cập tài liệu và bài tập, hãy ghi danh vào khóa học.</p>
+            <h4>You are not enrolled in this course</h4>
+            <p class="text-muted">Enroll in this course to access materials and assignments.</p>
             <form asp-action="Enroll" asp-route-id="@Model.Course.Code" method="post">
-                <button class="btn btn-sims-primary btn-lg">Ghi danh ngay</button>
+                <button class="btn btn-sims-primary btn-lg">Enroll Now</button>
             </form>
         </div>
     }
@@ -24,10 +24,10 @@
             <!-- LEFT: Materials -->
             <div class="col-md-6">
                 <div class="sims-card p-3 mb-3">
-                    <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-folder-open me-1"></i> Tài liệu học tập</h5>
+                    <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-folder-open me-1"></i> Course Materials</h5>
                     @if (!Model.Materials.Any()) 
                     { 
-                        <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-3">Chưa có tài liệu học tập nào.</div> 
+                        <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-3">No course materials available.</div> 
                     }
                     else
                     {
@@ -43,7 +43,7 @@
                                     @if(!string.IsNullOrEmpty(m.FilePath)) 
                                     { 
                                         <a asp-action="DownloadMaterial" asp-route-materialId="@m.Id" class="btn btn-sm btn-link p-0 mt-2 d-inline-flex align-items-center gap-1" style="color: #ffffff !important; text-decoration: underline; font-size: 0.8rem;">
-                                            <i class="fa-solid fa-download fa-xs"></i> Tải xuống
+                                            <i class="fa-solid fa-download fa-xs"></i> Download
                                         </a> 
                                     }
                                 </li>
@@ -56,10 +56,10 @@
             <!-- RIGHT: Assignments -->
             <div class="col-md-6">
                 <div class="sims-card p-3 mb-3">
-                    <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-file-signature me-1"></i> Bài tập về nhà</h5>
+                    <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-file-signature me-1"></i> Homework & Assignments</h5>
                     @if (!Model.Assignments.Any()) 
                     { 
-                        <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-3">Chưa có bài tập nào được giao.</div> 
+                        <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-3">No assignments given yet.</div> 
                     }
                     else
                     {
@@ -69,12 +69,12 @@
                                 <li class="mb-3 p-2 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <strong style="color: #ffffff !important;">@a.Title</strong>
-                                        <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Hạn: @a.DueDate.ToString("g")</span>
+                                        <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Due: @a.DueDate.ToString("g")</span>
                                     </div>
                                     <div class="fs-sm mt-1" style="color: #ffffff !important; opacity: 0.8;">@a.Description</div>
                                     <div class="mt-2">
                                         <a asp-controller="StudentAssignments" asp-action="Submit" asp-route-assignmentId="@a.Id" asp-route-courseCode="@Model.Course.Code" class="btn btn-sims-outline btn-sm">
-                                            <i class="fa-solid fa-upload fa-xs me-1"></i> Nộp bài
+                                            <i class="fa-solid fa-upload fa-xs me-1"></i> Submit Work
                                         </a>
                                     </div>
                                 </li>
