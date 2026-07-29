@@ -1,16 +1,16 @@
 @model SIMS_WEB.Controllers.StudentAssignmentsViewModel
 @{
-    ViewData["Title"] = "Bài tập - Sinh viên";
+    ViewData["Title"] = "Student Assignments";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-file-signature fa-sm"></i>
-            Bài tập đã được giao
+            Assigned Tasks & Homework
         </h1>
         <a asp-controller="StudentCourses" asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -35,7 +35,7 @@
         {
             <div style="color: #ffffff !important; opacity: 0.7;" class="text-center py-4">
                 <i class="fa-solid fa-folder-open fa-2x mb-2 d-block" style="opacity: 0.5;"></i>
-                Không có bài tập nào được giao cho bạn.
+                No assignments assigned to you.
             </div>
         }
         else
@@ -52,12 +52,12 @@
                                     @course?.Title (@a.CourseCode)
                                 </span>
                             </div>
-                            <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Hạn nộp: @a.DueDate.ToString("g")</span>
+                            <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Due Date: @a.DueDate.ToString("g")</span>
                         </div>
                         <div class="fs-sm mt-2 mb-3" style="color: #ffffff !important; opacity: 0.8;">@a.Description</div>
                         <div>
                             <a asp-action="Submit" asp-route-courseCode="@a.CourseCode" asp-route-assignmentId="@a.Id" class="btn btn-sims-primary btn-sm">
-                                <i class="fa-solid fa-paper-plane fa-xs me-1"></i> Nộp bài
+                                <i class="fa-solid fa-paper-plane fa-xs me-1"></i> Submit Work
                             </a>
                         </div>
                     </li>

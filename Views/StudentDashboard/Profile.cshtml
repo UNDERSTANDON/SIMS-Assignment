@@ -1,6 +1,6 @@
 @model SIMS_Assignment.Models.User
 @{
-    ViewData["Title"] = "Thông tin cá nhân";
+    ViewData["Title"] = "Student Profile";
     ViewData["ActivePage"] = "StudentProfile";
 
     var currentAvatar = "/Account/GetAvatar?id=" + Model.Name;
@@ -12,7 +12,7 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-graduation-cap fa-sm"></i>
-            Thông tin cá nhân
+            Student Profile
         </h1>
     </div>
 
@@ -41,25 +41,25 @@
                     <input type="hidden" name="avatarBase64" id="avatarBase64" />
 
                     <div class="mb-3">
-                        <label class="form-label" style="color: #ffffff !important;">Mã số sinh viên</label>
+                        <label class="form-label" style="color: #ffffff !important;">Student ID</label>
                         <input class="form-control font-mono" value="@Model.Name" readonly style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1); cursor: not-allowed;" />
-                        <small class="text-muted">Mã số sinh viên cố định của bạn trong hệ thống.</small>
+                        <small class="text-muted">Your fixed student ID in the system.</small>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="color: #ffffff !important;">Họ và tên sinh viên</label>
-                        <input name="fullName" class="form-control" value="@Model.FullName" placeholder="Nhập họ và tên sinh viên..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
+                        <label class="form-label" style="color: #ffffff !important;">Full Name</label>
+                        <input name="fullName" class="form-control" value="@Model.FullName" placeholder="Enter student full name..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
                         <span class="invalid-feedback d-block"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="color: #ffffff !important;">Địa chỉ Email</label>
-                        <input name="email" class="form-control" value="@Model.Email" type="email" placeholder="Nhập địa chỉ email..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
+                        <label class="form-label" style="color: #ffffff !important;">Email Address</label>
+                        <input name="email" class="form-control" value="@Model.Email" type="email" placeholder="Enter email address..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" required />
                     </div>
 
                     <div class="mt-4">
                         <button type="submit" class="btn btn-sims-success" id="btnSave">
-                            <i class="fa-solid fa-floppy-disk fa-xs me-1"></i> Lưu thay đổi
+                            <i class="fa-solid fa-floppy-disk fa-xs me-1"></i> Save Changes
                         </button>
                     </div>
                 </form>
@@ -70,7 +70,7 @@
         <div class="col-md-5">
             <div class="sims-card p-4 text-center h-100 d-flex flex-column align-items-center justify-content-between">
                 <div>
-                    <h5 style="color: #ffffff !important; margin-bottom: 1.5rem;">Ảnh đại diện</h5>
+                    <h5 style="color: #ffffff !important; margin-bottom: 1.5rem;">Profile Picture</h5>
                     
                     <!-- Current Avatar Preview -->
                     <div class="mb-3 position-relative d-inline-block">
@@ -89,17 +89,17 @@
                     
                     <div>
                         <button type="button" class="btn btn-sims-outline btn-sm" onclick="document.getElementById('avatarUpload').click();">
-                            <i class="fa-solid fa-camera me-1"></i> Chọn ảnh mới
+                            <i class="fa-solid fa-camera me-1"></i> Choose New Picture
                         </button>
                         <input type="file" id="avatarUpload" accept="image/*" style="display:none;" />
                     </div>
                 </div>
 
-                <!-- Crop UI Panel (hidden by default) -->
+                <!-- Crop UI Panel -->
                 <div id="cropContainer" style="display:none; width: 100%; margin-top: 1.5rem; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
                     <div style="color: #ffffff !important; font-size: 0.8rem; margin-bottom: 0.5rem;" class="d-flex align-items-center justify-content-between">
-                        <span><i class="fa-solid fa-scissors fa-xs me-1"></i> Cắt ảnh đại diện (Tỉ lệ 1:1)</span>
-                        <span class="text-muted">Kéo để di chuyển</span>
+                        <span><i class="fa-solid fa-scissors fa-xs me-1"></i> Crop Picture (1:1 Ratio)</span>
+                        <span class="text-muted">Drag to pan</span>
                     </div>
 
                     <!-- Interaction Canvas -->
@@ -109,14 +109,14 @@
                     <div class="mt-2 px-2">
                         <div class="d-flex justify-content-between text-muted" style="font-size:0.75rem;">
                             <span><i class="fa-solid fa-minus"></i></span>
-                            <span>Thu nhỏ / Phóng to</span>
+                            <span>Zoom Out / In</span>
                             <span><i class="fa-solid fa-plus"></i></span>
                         </div>
                         <input type="range" id="zoomRange" min="10" max="300" value="100" class="form-range" />
                     </div>
 
                     <button type="button" class="btn btn-sims-primary btn-sm mt-3 w-100" id="btnConfirmCrop">
-                        <i class="fa-solid fa-check me-1"></i> Đồng ý cắt ảnh
+                        <i class="fa-solid fa-check me-1"></i> Confirm Crop
                     </button>
                 </div>
             </div>

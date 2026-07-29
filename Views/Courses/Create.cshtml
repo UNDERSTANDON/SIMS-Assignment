@@ -1,7 +1,7 @@
 @model SIMS_WEB.Models.Course
 @{
     bool isEdit = !string.IsNullOrEmpty(Model?.Code);
-    ViewData["Title"] = isEdit ? "Sửa Khóa học" : "Thêm Khóa học";
+    ViewData["Title"] = isEdit ? "Edit Course" : "Add Course";
     ViewData["ActivePage"] = "Courses";
 }
 
@@ -9,10 +9,10 @@
     <div class="sims-page-header">
             <h1 class="sims-page-title">
             <i class="fa-solid @(isEdit ? "fa-pen" : "fa-plus") fa-sm"></i>
-            @(isEdit ? "Sửa Khóa học" : "Thêm Khóa học mới")
+            @(isEdit ? "Edit Course" : "Add New Course")
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -20,27 +20,27 @@
         <form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
-                <label asp-for="Code" class="form-label"></label>
+                <label class="form-label">Course Code</label>
                 @if (isEdit) {
                     <input asp-for="Code" class="form-control font-mono" readonly style="color:var(--text-secondary) !important; background:var(--bg) !important; cursor:not-allowed;" />
                 } else {
-                    <input asp-for="Code" class="form-control font-mono" placeholder="VD: CS101" />
+                    <input asp-for="Code" class="form-control font-mono" placeholder="e.g. CS101" />
                 }
                 <span asp-validation-for="Code" class="invalid-feedback d-block"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Title" class="form-label"></label>
-                <input asp-for="Title" class="form-control" placeholder="VD: Lập trình Cơ bản" />
+                <label class="form-label">Course Title</label>
+                <input asp-for="Title" class="form-control" placeholder="e.g. Intro to Computer Science" />
                 <span asp-validation-for="Title" class="invalid-feedback d-block"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Capacity" class="form-label"></label>
+                <label class="form-label">Student Capacity</label>
                 <input asp-for="Capacity" type="number" class="form-control font-mono" min="1" max="500" />
                 <span asp-validation-for="Capacity" class="invalid-feedback d-block"></span>
             </div>
             <div class="mb-4">
-                <label asp-for="Instructor" class="form-label"></label>
-                <input asp-for="Instructor" class="form-control" placeholder="VD: Nguyễn Văn A" list="lecturerList" autocomplete="off" />
+                <label class="form-label">Instructor</label>
+                <input asp-for="Instructor" class="form-control" placeholder="e.g. Dr. Alex Johnson" list="lecturerList" autocomplete="off" />
                 <datalist id="lecturerList">
                     @foreach (var l in ViewBag.Lecturers as List<SIMS_Assignment.Models.User> ?? new())
                     {
@@ -52,9 +52,9 @@
             <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-sims-success">
                     <i class="fa-solid fa-floppy-disk fa-xs"></i>
-                    @(isEdit ? "Lưu thay đổi" : "Thêm khóa học")
+                    @(isEdit ? "Save Changes" : "Add Course")
                 </button>
-                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
+                <a asp-action="Index" class="btn btn-sims-outline">Cancel</a>
             </div>
         </form>
     </div>

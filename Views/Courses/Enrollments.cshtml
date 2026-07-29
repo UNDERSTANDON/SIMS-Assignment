@@ -1,16 +1,16 @@
 @model List<SIMS_WEB.Models.Student>
 @{
-    ViewData["Title"] = "Danh sách học sinh đăng ký";
+    ViewData["Title"] = "Enrolled Students List";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-users fa-sm"></i>
-            Danh sách học sinh: @ViewBag.Course.Title (@ViewBag.Course.Code)
+            Enrolled Students: @ViewBag.Course.Title (@ViewBag.Course.Code)
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -18,7 +18,7 @@
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <span class="text-muted-sims" style="font-size: 0.9rem;">Tổng số học sinh đăng ký:</span>
+                    <span class="text-muted-sims" style="font-size: 0.9rem;">Total Enrolled Students:</span>
                     <span class="sims-badge badge-success ms-2" style="font-size: 1.1rem;">@Model.Count</span>
                 </div>
             </div>
@@ -28,8 +28,8 @@
         {
             <div class="sims-empty" style="padding: 3rem 1rem;">
                 <i class="fa-solid fa-inbox"></i>
-                <div class="em-title">Chưa có học sinh nào đăng ký</div>
-                <div class="em-sub">Sinh viên sẽ xuất hiện ở đây khi đăng ký khóa học.</div>
+                <div class="em-title">No students enrolled yet</div>
+                <div class="em-sub">Students will appear here once enrolled in this course.</div>
             </div>
         }
         else
@@ -38,11 +38,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>STT</th>
-                            <th>MSSV</th>
-                            <th>Họ và Tên</th>
+                            <th>No.</th>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
                             <th>Email</th>
-                            <th>Chương Trình</th>
+                            <th>Program</th>
                         </tr>
                     </thead>
                     <tbody>

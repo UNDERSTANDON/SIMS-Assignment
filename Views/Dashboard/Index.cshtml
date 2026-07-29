@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Bảng điều khiển";
+    ViewData["Title"] = "Dashboard";
     ViewData["ActivePage"] = "Dashboard";
     var role     = ViewBag.Role     as string ?? "Admin";
     var username = ViewBag.Username as string ?? "";
@@ -105,25 +105,25 @@
                     <!-- Slide Container -->
                     <div id="statCarousel" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
                         
-                        <!-- Slide 1: Sinh viên -->
+                        <!-- Slide 1: Students -->
                         <div class="stat-slide" id="slide-student" style="display:flex;align-items:center;gap:0.75rem;width:100%;">
                             <div class="sims-stat-icon" style="background:var(--accent-ghost)">
                                 <i class="fa-solid fa-graduation-cap" style="color:var(--accent-light)"></i>
                             </div>
                             <div>
                                 <div class="sims-stat-num" style="color:var(--accent-light)">@total_students</div>
-                                <div class="sims-stat-label">Sinh viên</div>
+                                <div class="sims-stat-label">Students</div>
                             </div>
                         </div>
 
-                        <!-- Slide 2: Giảng viên -->
+                        <!-- Slide 2: Faculty -->
                         <div class="stat-slide" id="slide-faculty" style="display:none;align-items:center;gap:0.75rem;width:100%;">
                             <div class="sims-stat-icon" style="background:var(--success-muted)">
                                 <i class="fa-solid fa-chalkboard-user" style="color:#4ade80"></i>
                             </div>
                             <div>
                                 <div class="sims-stat-num" style="color:#4ade80">@ViewBag.TotalLecturers</div>
-                                <div class="sims-stat-label">Giảng viên</div>
+                                <div class="sims-stat-label">Faculty</div>
                             </div>
                         </div>
 
@@ -134,7 +134,7 @@
                             </div>
                             <div>
                                 <div class="sims-stat-num" style="color:#60a5fa">@ViewBag.TotalAdmins</div>
-                                <div class="sims-stat-label">Quản trị viên</div>
+                                <div class="sims-stat-label">Administrators</div>
                             </div>
                         </div>
 
@@ -153,7 +153,7 @@
                     </div>
                     <div>
                         <div class="sims-stat-num text-success-sims">@total_courses</div>
-                        <div class="sims-stat-label">Khóa học</div>
+                        <div class="sims-stat-label">Courses</div>
                     </div>
                 </div>
                 <div class="sims-stat-card">
@@ -162,7 +162,7 @@
                     </div>
                     <div>
                         <div class="sims-stat-num" style="color:#a78bfa">@total_enrolled</div>
-                        <div class="sims-stat-label">Ghi danh</div>
+                        <div class="sims-stat-label">Enrollments</div>
                     </div>
                 </div>
                 <div class="sims-stat-card">
@@ -179,59 +179,63 @@
             <!-- QUICK ACCESS GRID — 5 items -->
             <div class="quick-grid" style="grid-template-columns: repeat(5, 1fr);">
                 <a asp-controller="Students" asp-action="Index" class="quick-card">
+                    <div class="quick-card-border"></div>
                     <i class="fa-solid fa-user-group" style="color:var(--accent-light)"></i>
-                    <div class="qc-title">Người dùng</div>
-                    <div class="qc-desc">Quản lý Sinh viên và Giảng viên</div>
+                    <div class="qc-title">Users</div>
+                    <div class="qc-desc">Manage Students & Faculty</div>
                 </a>
                 <a asp-controller="Courses" asp-action="Index" class="quick-card">
+                    <div class="quick-card-border"></div>
                     <i class="fa-solid fa-book" style="color:#4ade80"></i>
-                    <div class="qc-title">Khóa học</div>
-                    <div class="qc-desc">Quản lý chương trình học</div>
+                    <div class="qc-title">Courses</div>
+                    <div class="qc-desc">Manage Academic Courses</div>
                 </a>
                 <a asp-controller="Enrollment" asp-action="Index" class="quick-card">
+                    <div class="quick-card-border"></div>
                     <i class="fa-solid fa-list-check" style="color:#a78bfa"></i>
-                    <div class="qc-title">Ghi danh</div>
-                    <div class="qc-desc">Xếp lớp, ghi danh sinh viên</div>
+                    <div class="qc-title">Enrollments</div>
+                    <div class="qc-desc">Class Assignment & Registration</div>
                 </a>
                 <a asp-controller="Grades" asp-action="Index" class="quick-card">
+                    <div class="quick-card-border"></div>
                     <i class="fa-solid fa-star" style="color:#fbbf24"></i>
-                    <div class="qc-title">Điểm số</div>
-                    <div class="qc-desc">Cập nhật và xem bảng điểm</div>
+                    <div class="qc-title">Grades</div>
+                    <div class="qc-desc">Gradebook & Transcripts</div>
                 </a>
                 <a asp-controller="Account" asp-action="CreateUser" class="quick-card">
+                    <div class="quick-card-border"></div>
                     <i class="fa-solid fa-user-gear" style="color:#60a5fa"></i>
-                    <div class="qc-title">Tài khoản</div>
-                    <div class="qc-desc">Tạo tài khoản Admin / GV / SV</div>
+                    <div class="qc-title">Account</div>
+                    <div class="qc-desc">Create Admin / Faculty / Student</div>
                 </a>
             </div>
 
-            <!-- PATTERN SECTION — different layout from above (Section 4.7 section-layout-repetition ban) -->
-            <!-- 3 items → 3 cells, no empty cells. Real visual variation in each cell. -->
+            <!-- PATTERN SECTION -->
             <div class="pattern-grid">
-                <!-- Cell 1: image background (bento background diversity) -->
+                <!-- Cell 1: Facade Pattern -->
                 <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border-subtle);min-height:140px;background:var(--surface)">
                     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(37,99,235,0.15),rgba(37,99,235,0.03))"></div>
                     <div style="position:relative;padding:1.25rem;">
                         <span class="pattern-badge pattern-facade mb-2 d-inline-flex">Facade Pattern</span>
-                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Ghi danh tự động</div>
-                        <div style="font-size:0.75rem;color:var(--text-tertiary);">AccountService + BillingService + NotificationService chạy đồng thời khi ghi danh</div>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Auto Enrollment</div>
+                        <div style="font-size:0.75rem;color:var(--text-tertiary);">AccountService + BillingService + NotificationService execute simultaneously</div>
                     </div>
                 </div>
-                <!-- Cell 2: accent gradient background -->
+                <!-- Cell 2: Observer Pattern -->
                 <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid rgba(217,119,6,0.2);min-height:140px;background:var(--warning-muted)">
                     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(217,119,6,0.1),transparent)"></div>
                     <div style="position:relative;padding:1.25rem;">
                         <span class="pattern-badge pattern-observer mb-2 d-inline-flex">Observer Pattern</span>
-                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Thông báo điểm số</div>
-                        <div style="font-size:0.75rem;color:var(--text-tertiary);">Giảng viên lưu điểm → Sinh viên nhận thông báo real-time</div>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Grade Notifications</div>
+                        <div style="font-size:0.75rem;color:var(--text-tertiary);">Faculty submits grades → Student receives instant notification</div>
                     </div>
                 </div>
-                <!-- Cell 3: success gradient background -->
+                <!-- Cell 3: Strategy Pattern -->
                 <div style="position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid rgba(22,163,74,0.2);min-height:140px;background:var(--success-muted)">
                     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(22,163,74,0.1),transparent)"></div>
                     <div style="position:relative;padding:1.25rem;">
                         <span class="pattern-badge pattern-strategy mb-2 d-inline-flex">Strategy Pattern</span>
-                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Thanh toán linh hoạt</div>
+                        <div style="font-weight:700;font-size:0.875rem;margin-bottom:0.3rem;">Flexible Payment</div>
                         <div style="font-size:0.75rem;color:var(--text-tertiary);">Credit Card (2.5%) / Bank Transfer (0%) / E-Wallet (1%)</div>
                     </div>
                 </div>
@@ -247,8 +251,8 @@
                             <i class="fa-solid fa-star" style="color:#fbbf24"></i>
                         </div>
                         <div>
-                            <div class="qc-title" style="text-align:left;">Cập nhật điểm số</div>
-                            <div class="qc-desc" style="text-align:left;">Xem danh sách và nhập điểm</div>
+                            <div class="qc-title" style="text-align:left;">Grade Entry</div>
+                            <div class="qc-desc" style="text-align:left;">View course list and enter grades</div>
                         </div>
                     </div>
                     <span class="pattern-badge pattern-observer">Observer Pattern</span>
@@ -259,7 +263,7 @@
                     <div class="bento-overlay">
                         <div>
                             <div class="bento-kpi">24/7</div>
-                            <div class="bento-kpi-label">Hệ thống hoạt động liên tục</div>
+                            <div class="bento-kpi-label">System Active & Uptime</div>
                         </div>
                     </div>
                 </div>
@@ -275,11 +279,11 @@
                             <i class="fa-solid fa-graduation-cap" style="color:var(--accent-light)"></i>
                         </div>
                         <div>
-                            <div class="qc-title" style="text-align:left;">Bảng điểm của tôi</div>
-                            <div class="qc-desc" style="text-align:left;">Xem điểm và xếp loại học kỳ</div>
+                            <div class="qc-title" style="text-align:left;">My Transcripts</div>
+                            <div class="qc-desc" style="text-align:left;">View grades & semester GPA</div>
                         </div>
                     </div>
-                    <span class="pattern-badge pattern-observer">Observer: nhận thông báo điểm</span>
+                    <span class="pattern-badge pattern-observer">Observer: Grade Updates</span>
                 </a>
                 <a asp-controller="Payment" asp-action="Index" class="quick-card" style="text-align:left;">
                     <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
@@ -287,8 +291,8 @@
                             <i class="fa-solid fa-credit-card" style="color:#4ade80"></i>
                         </div>
                         <div>
-                    <div class="qc-title" style="text-align:left;">Thanh toán Học phí</div>
-                            <div class="qc-desc" style="text-align:left;">3 phương thức thanh toán</div>
+                            <div class="qc-title" style="text-align:left;">Tuition Payment</div>
+                            <div class="qc-desc" style="text-align:left;">3 payment methods</div>
                         </div>
                     </div>
                     <span class="pattern-badge pattern-strategy">Strategy Pattern</span>

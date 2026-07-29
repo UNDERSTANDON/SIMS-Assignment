@@ -1,6 +1,6 @@
 @model SIMS_WEB.Models.Course
 @{
-    ViewData["Title"] = "Thêm Khóa học";
+    ViewData["Title"] = "Add Course";
     ViewData["ActivePage"] = "CreateCourse";
 }
 
@@ -8,10 +8,10 @@
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-plus fa-sm"></i>
-            Thêm Khóa học mới
+            Add New Course
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -35,35 +35,35 @@
         <form asp-action="CreateCourse" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
-                <label asp-for="Code" class="form-label" style="color: #ffffff !important;"></label>
-                <input asp-for="Code" class="form-control font-mono" placeholder="VD: CS101" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
+                <label class="form-label" style="color: #ffffff !important;">Course Code</label>
+                <input asp-for="Code" class="form-control font-mono" placeholder="e.g. CS101" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
                 <span asp-validation-for="Code" class="invalid-feedback d-block"></span>
             </div>
             
             <div class="mb-3">
-                <label asp-for="Title" class="form-label" style="color: #ffffff !important;"></label>
-                <input asp-for="Title" class="form-control" placeholder="VD: Lập trình Cơ bản" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
+                <label class="form-label" style="color: #ffffff !important;">Course Title</label>
+                <input asp-for="Title" class="form-control" placeholder="e.g. Intro to Computer Science" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
                 <span asp-validation-for="Title" class="invalid-feedback d-block"></span>
             </div>
             
             <div class="mb-3">
-                <label asp-for="Capacity" class="form-label" style="color: #ffffff !important;"></label>
+                <label class="form-label" style="color: #ffffff !important;">Student Capacity</label>
                 <input asp-for="Capacity" type="number" class="form-control font-mono" min="1" max="500" value="30" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
                 <span asp-validation-for="Capacity" class="invalid-feedback d-block"></span>
             </div>
             
             <div class="mb-4">
-                <label class="form-label" style="color: #ffffff !important;">Giảng viên phụ trách</label>
+                <label class="form-label" style="color: #ffffff !important;">Instructor</label>
                 <input class="form-control" value="@Model.Instructor" readonly style="background: rgba(255,255,255,0.08); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.15); cursor: not-allowed;" />
                 <input type="hidden" name="Instructor" value="@Model.Instructor" />
-                <small class="text-muted d-block mt-1">Được gán cố định cho tài khoản của bạn.</small>
+                <small class="text-muted d-block mt-1">Automatically assigned to your account.</small>
             </div>
             
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-sims-success">
-                    <i class="fa-solid fa-floppy-disk fa-xs me-1"></i> Thêm khóa học
+                    <i class="fa-solid fa-floppy-disk fa-xs me-1"></i> Add Course
                 </button>
-                <a asp-action="Index" class="btn btn-sims-outline">Hủy</a>
+                <a asp-action="Index" class="btn btn-sims-outline">Cancel</a>
             </div>
         </form>
     </div>

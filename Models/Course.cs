@@ -16,23 +16,23 @@ namespace SIMS_WEB.Models
 {
     public class Course
     {
-        [Required(ErrorMessage = "Mã khóa học không được để trống")]
-        [Display(Name = "Mã Khóa học")]
+        [Required(ErrorMessage = "Course code is required")]
+        [Display(Name = "Course Code")]
         public string Code { get; set; } = "";
 
-        [Required(ErrorMessage = "Tên khóa học không được để trống")]
-        [Display(Name = "Tên Khóa học")]
+        [Required(ErrorMessage = "Course title is required")]
+        [Display(Name = "Course Title")]
         public string Title { get; set; } = "";
 
         [Required]
-        [Range(1, 500, ErrorMessage = "Sĩ số phải từ 1 đến 500")]
-        [Display(Name = "Sĩ số tối đa")]
+        [Range(1, 500, ErrorMessage = "Capacity must be between 1 and 500")]
+        [Display(Name = "Max Capacity")]
         public int Capacity { get; set; } = 30;
 
-        [Display(Name = "Số SV đã đăng ký")]
+        [Display(Name = "Enrolled Count")]
         public int EnrolledCount { get; set; } = 0;
 
-        [Display(Name = "Giảng viên")]
+        [Display(Name = "Instructor")]
         public string Instructor { get; set; } = "";
 
         public int CapacityPercent => Capacity > 0 ? (EnrolledCount * 100 / Capacity) : 0;
@@ -62,11 +62,11 @@ namespace SIMS_WEB.Models
 
         public string GradeLabel => Score switch
         {
-            >= 90 => "A - Xuất sắc",
-            >= 80 => "B - Khá",
-            >= 65 => "C - Trung bình",
-            >= 50 => "D - Yếu",
-            _ => "F - Không đạt"
+            >= 90 => "A - Excellent",
+            >= 80 => "B - Good",
+            >= 65 => "C - Average",
+            >= 50 => "D - Pass",
+            _ => "F - Fail"
         };
 
         public string GradeBadgeClass => Score switch

@@ -1,17 +1,17 @@
 @model CourseEnrollmentsViewModel
 @{
-    ViewData["Title"] = "Sinh viên đã đăng ký";
+    ViewData["Title"] = "Enrolled Students";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
-        <h1 class="sims-page-title">Sinh viên: @Model.Course.Title (<code>@Model.Course.Code</code>)</h1>
+        <h1 class="sims-page-title">Enrolled Students: @Model.Course.Title (<code>@Model.Course.Code</code>)</h1>
     </div>
 
     <div class="sims-card p-3">
         <div class="mb-3">
-            <h5>Tổng số sinh viên đã đăng ký: <strong>@Model.EnrollmentCount / @Model.Course.Capacity</strong></h5>
-            <p class="text-muted">Sức chứa: @Model.Course.CapacityPercent%</p>
+            <h5>Total Enrolled Students: <strong>@Model.EnrollmentCount / @Model.Course.Capacity</strong></h5>
+            <p class="text-muted">Capacity Usage: @Model.Course.CapacityPercent%</p>
         </div>
 
         @if (Model.EnrolledStudents.Any())
@@ -21,10 +21,10 @@
                     <thead>
                         <tr>
                             <th style="color: #ffffff !important; width: 60px;"></th>
-                            <th style="color: #ffffff !important;">MSSV</th>
-                            <th style="color: #ffffff !important;">Họ tên</th>
+                            <th style="color: #ffffff !important;">Student ID</th>
+                            <th style="color: #ffffff !important;">Full Name</th>
                             <th style="color: #ffffff !important;">Email</th>
-                            <th style="color: #ffffff !important;">Chương trình đào tạo</th>
+                            <th style="color: #ffffff !important;">Academic Program</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,10 +60,10 @@
         {
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
-                Chưa có sinh viên nào đăng ký khóa học này.
+                No students enrolled in this course yet.
             </div>
         }
 
-        <a asp-action="Index" class="btn btn-sims-outline mt-3">Quay lại</a>
+        <a asp-action="Index" class="btn btn-sims-outline mt-3">Back</a>
     </div>
 </div>
