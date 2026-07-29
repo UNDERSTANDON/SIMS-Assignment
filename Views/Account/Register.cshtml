@@ -1,70 +1,349 @@
 @model SIMS_WEB.Models.RegisterViewModel
 @{
-    ViewData["Title"] = "Đăng ký";
+    ViewData["Title"] = "Register";
     Layout = "_Layout";
 }
 
-<div class="login-page">
-    <div class="login-card" style="max-width:440px">
-        <div class="login-logo">
-            <div class="logo-mark"><i class="fa-solid fa-user-plus"></i></div>
-            <h1>Đăng ký tài khoản</h1>
-            <p>Tạo tài khoản mới để sử dụng hệ thống SIMS</p>
+<style>
+/* ═══════════════════════════════════════════════
+   SIMS 3D FLIP CARD AUTH SYSTEM (Sci-Fi Glassmorphism)
+   ═══════════════════════════════════════════════ */
+
+.sims-auth-wrapper {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Cyber Toggle Pill */
+.sims-auth-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(20, 20, 26, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.sims-auth-toggle-btn {
+    padding: 0.45rem 1.4rem;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sims-auth-toggle-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(37, 99, 235, 0.5);
+}
+
+/* 3D Perspective Card Wrapper */
+.sims-flip-card {
+    perspective: 1200px;
+    width: 100%;
+    max-width: 440px;
+}
+
+.sims-flip-card-inner {
+    position: relative;
+    width: 100%;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+}
+
+/* Flipped State for Register */
+.sims-flip-card.flipped .sims-flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Card Surfaces (Front & Back) */
+.sims-card-face {
+    width: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: rgba(20, 20, 26, 0.78);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 2rem 2rem 1.75rem;
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 32px 80px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    position: relative;
+}
+
+.sims-card-front {
+    z-index: 2;
+}
+
+.sims-card-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotateY(180deg);
+    z-index: 1;
+}
+
+/* Role Selector */
+.role-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+}
+
+.role-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.role-option input[type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0; height: 0;
+}
+
+.role-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.55rem 0.35rem;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+    text-align: center;
+    font-weight: 500;
+}
+
+.role-label i { font-size: 0.95rem; }
+
+.role-option input:checked + .role-label {
+    border-color: var(--accent-light);
+    background: var(--accent-ghost);
+    color: var(--accent-light);
+    box-shadow: 0 0 0 1px var(--accent-ring);
+}
+
+.role-option.admin input:checked + .role-label  { border-color: #f59e0b; background: rgba(217,119,6,0.08); color: #f59e0b; box-shadow: 0 0 0 1px rgba(217,119,6,0.2); }
+.role-option.faculty input:checked + .role-label{ border-color: #22c55e; background: rgba(22,163,74,0.08); color: #22c55e; box-shadow: 0 0 0 1px rgba(22,163,74,0.2); }
+</style>
+
+<!-- Background Parallax Starfield -->
+<div class="sims-starfield-bg">
+    <div class="sims-stars-sm"></div>
+    <div class="sims-stars-md"></div>
+    <div class="sims-stars-lg"></div>
+</div>
+
+<div class="sims-auth-wrapper">
+
+    <!-- 3D Toggle Switcher -->
+    <div class="sims-auth-toggle">
+        <button type="button" class="sims-auth-toggle-btn" id="btnLoginTab" onclick="showAuthMode('login')">
+            <i class="fa-solid fa-right-to-bracket fa-xs"></i> Sign In
+        </button>
+        <button type="button" class="sims-auth-toggle-btn active" id="btnRegisterTab" onclick="showAuthMode('register')">
+            <i class="fa-solid fa-user-plus fa-xs"></i> Register
+        </button>
+    </div>
+
+    <!-- 3D FLIP CARD CONTAINER (Pre-flipped for Register) -->
+    <div class="sims-flip-card flipped" id="flipCard">
+        <div class="sims-flip-card-inner">
+
+            <!-- ════════════════ FRONT: LOGIN FORM ════════════════ -->
+            <div class="sims-card-face sims-card-front">
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div style="width:34px;height:34px;background:var(--accent-ghost);border:1px solid var(--accent-ring);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-graduation-cap fa-sm" style="color:var(--accent-light)"></i>
+                        </div>
+                        <span class="font-mono fw-700" style="font-size:1rem;letter-spacing:-0.02em;">SIMS</span>
+                    </div>
+                    <h1 style="font-size:1.4rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:0.25rem;">Sign In</h1>
+                    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Select your role and enter credentials</p>
+                </div>
+
+                <!-- Role selector -->
+                <div class="mb-3">
+                    <div class="form-label fs-xs">Role</div>
+                    <div class="role-group">
+                        <label class="role-option admin">
+                            <input type="radio" name="RoleSelect" value="Admin" onchange="setRole('Admin')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-shield-halved"></i> Admin
+                            </span>
+                        </label>
+                        <label class="role-option faculty">
+                            <input type="radio" name="RoleSelect" value="Faculty" onchange="setRole('Faculty')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-chalkboard-teacher"></i> Faculty
+                            </span>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="RoleSelect" value="Student" checked onchange="setRole('Student')" />
+                            <span class="role-label">
+                                <i class="fa-solid fa-graduation-cap"></i> Student
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <form asp-action="Login" asp-controller="Account" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Role" value="Student" id="roleHidden" />
+
+                    <div class="mb-3">
+                        <label class="form-label fs-xs">Username</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-user icon"></i>
+                            <input name="Username" class="form-control" placeholder="Enter username" autocomplete="username" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fs-xs">Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock icon"></i>
+                            <input name="Password" type="password" class="form-control" placeholder="Enter password" id="pwdInput" autocomplete="current-password" />
+                            <i class="fa-solid fa-eye-slash icon-right" id="togglePwd" onclick="togglePassword()" title="Show/Hide password"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-sims-primary w-100" style="font-size:0.88rem; padding:0.65rem 1rem !important; justify-content:center;">
+                        <i class="fa-solid fa-right-to-bracket fa-sm"></i> Sign In
+                    </button>
+                </form>
+            </div>
+
+            <!-- ════════════════ BACK: REGISTER FORM ════════════════ -->
+            <div class="sims-card-face sims-card-back">
+                <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div style="width:34px;height:34px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;">
+                            <i class="fa-solid fa-user-plus fa-sm" style="color:#22c55e"></i>
+                        </div>
+                        <span class="font-mono fw-700" style="font-size:1rem;letter-spacing:-0.02em;">SIMS</span>
+                    </div>
+                    <h1 style="font-size:1.4rem;font-weight:800;letter-spacing:-0.04em;margin-bottom:0.2rem;">Create Account</h1>
+                    <p style="font-size:0.78rem;color:var(--text-tertiary);margin:0;">Register a new account to access SIMS</p>
+                </div>
+
+                <form asp-action="Register" asp-controller="Account" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Username -->
+                    <div class="mb-2">
+                        <label class="form-label fs-xs">Username</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-user icon"></i>
+                            <input asp-for="Username" class="form-control" placeholder="Enter new username" autofocus />
+                        </div>
+                        <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-2">
+                        <label class="form-label fs-xs">Email</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-envelope icon"></i>
+                            <input asp-for="Email" class="form-control" placeholder="email@univ.edu" />
+                        </div>
+                        <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <input type="hidden" asp-for="Role" value="Student" />
+
+                    <!-- Password -->
+                    <div class="mb-2">
+                        <label class="form-label fs-xs">Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock icon"></i>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="At least 6 characters" />
+                        </div>
+                        <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-3">
+                        <label class="form-label fs-xs">Confirm Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock icon"></i>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Re-enter password" />
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="invalid-feedback d-block"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-sims-success w-100" style="font-size:0.88rem; padding:0.65rem 1rem !important; justify-content:center;">
+                        <i class="fa-solid fa-user-plus fa-sm"></i> Register Account
+                    </button>
+                </form>
+            </div>
+
         </div>
-
-        <form asp-action="Register" asp-controller="Account" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <div class="input-icon-wrap">
-                    <i class="fa-solid fa-user icon"></i>
-                    <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập" autofocus />
-                </div>
-                <span asp-validation-for="Username" class="invalid-feedback d-block"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <div class="input-icon-wrap">
-                    <i class="fa-solid fa-envelope icon"></i>
-                    <input asp-for="Email" class="form-control" placeholder="email@univ.edu" />
-                </div>
-                <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
-            </div>
-
-            <input type="hidden" asp-for="Role" value="Student" />
-
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <div class="input-icon-wrap">
-                    <i class="fa-solid fa-lock icon"></i>
-                    <input asp-for="Password" class="form-control" placeholder="Tối thiểu 6 ký tự" />
-                </div>
-                <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
-            </div>
-
-            <div class="mb-4">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <div class="input-icon-wrap">
-                    <i class="fa-solid fa-lock icon"></i>
-                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" />
-                </div>
-                <span asp-validation-for="ConfirmPassword" class="invalid-feedback d-block"></span>
-            </div>
-
-            <button type="submit" class="btn btn-sims-primary w-100 mb-3" style="justify-content:center">
-                <i class="fa-solid fa-user-plus"></i> Đăng ký
-            </button>
-
-            <div class="text-center fs-xs text-muted-sims">
-                Đã có tài khoản?
-                <a asp-action="Login" asp-controller="Account">Đăng nhập ngay</a>
-            </div>
-        </form>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<partial name="_ValidationScriptsPartial" />
+<script>
+function showAuthMode(mode) {
+    const flipCard = document.getElementById('flipCard');
+    const btnLogin = document.getElementById('btnLoginTab');
+    const btnRegister = document.getElementById('btnRegisterTab');
+
+    if (mode === 'register') {
+        flipCard.classList.add('flipped');
+        btnRegister.classList.add('active');
+        btnLogin.classList.remove('active');
+    } else {
+        flipCard.classList.remove('flipped');
+        btnLogin.classList.add('active');
+        btnRegister.classList.remove('active');
+    }
+}
+
+function setRole(val) {
+    const hidden = document.getElementById('roleHidden');
+    if (hidden) hidden.value = val;
+}
+
+function togglePassword() {
+    const input = document.getElementById('pwdInput');
+    const icon  = document.getElementById('togglePwd');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    }
+}
+</script>
 }

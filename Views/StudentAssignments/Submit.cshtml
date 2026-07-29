@@ -1,16 +1,16 @@
 @model SIMS_WEB.Controllers.SubmitViewModel
 @{
-    ViewData["Title"] = "Nộp bài";
+    ViewData["Title"] = "Submit Assignment";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-file-arrow-up fa-sm"></i>
-            Nộp bài: @Model.Assignment.Title
+            Submit Assignment: @Model.Assignment.Title
         </h1>
         <a asp-action="Index" asp-route-studentId="@Model.StudentId" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -38,7 +38,7 @@
 
             <!-- Display current student name -->
             <div class="mb-3">
-                <label class="form-label" style="color: #ffffff !important;">Sinh viên nộp bài</label>
+                <label class="form-label" style="color: #ffffff !important;">Submitting Student</label>
                 @{
                     var currentStudent = Model.Students.FirstOrDefault(s => s.StudentId == Model.StudentId);
                     var studentDisplayName = currentStudent != null ? $"{currentStudent.FullName} ({currentStudent.StudentId})" : Model.StudentId;
@@ -48,7 +48,7 @@
 
             <!-- Display student's enrolled courses -->
             <div class="mb-3">
-                <label class="form-label" style="color: #ffffff !important;">Khóa học đăng ký</label>
+                <label class="form-label" style="color: #ffffff !important;">Enrolled Course</label>
                 <select name="courseCode" class="form-select" disabled style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">
                     @foreach(var c in Model.EnrolledCourses)
                     {
@@ -65,17 +65,17 @@
                 <input type="hidden" name="courseCode" value="@Model.Course.Code" />
             </div>
 
-            <!-- Content text area (prefilled if submitted previously) -->
+            <!-- Content text area -->
             <div class="mb-3">
-                <label class="form-label" style="color: #ffffff !important;">Nội dung / Liên kết bài nộp</label>
-                <textarea name="content" class="form-control" rows="6" placeholder="Nhập câu trả lời hoặc liên kết tài liệu tại đây..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">@Model.ExistingSubmission?.Content</textarea>
+                <label class="form-label" style="color: #ffffff !important;">Submission Text / Link</label>
+                <textarea name="content" class="form-control" rows="6" placeholder="Enter your answer or document links here..." style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);">@Model.ExistingSubmission?.Content</textarea>
             </div>
 
-            <!-- File upload (retains reference to old file if exists) -->
+            <!-- File upload -->
             <div class="mb-4">
-                <label class="form-label" style="color: #ffffff !important;">Tệp đính kèm (tùy chọn)</label>
+                <label class="form-label" style="color: #ffffff !important;">File Attachment (Optional)</label>
                 <small class="form-text" style="color: rgba(255,255,255,0.7); display: block; margin-bottom: 0.5rem;">
-                    Dung lượng tối đa: 10 MB | Định dạng hỗ trợ: PDF, DOC, DOCX, TXT, ZIP
+                    Max size: 10 MB | Supported formats: PDF, DOC, DOCX, TXT, ZIP
                 </small>
                 <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.txt,.zip" style="background: rgba(255,255,255,0.05); color: #ffffff !important; border: 1px solid rgba(255,255,255,0.1);" />
                 
@@ -83,7 +83,7 @@
                 {
                     <div class="mt-2 p-2 rounded d-flex align-items-center gap-2" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); width: fit-content;">
                         <i class="fa-solid fa-file-arrow-down" style="color: #ffffff !important;"></i>
-                        <span style="color: #ffffff !important; font-size: 0.9rem;">Tệp đã nộp:</span>
+                        <span style="color: #ffffff !important; font-size: 0.9rem;">Previously Submitted File:</span>
                         <a href="/@Model.ExistingSubmission.FilePath" style="color: #ffffff !important; text-decoration: underline; font-weight: 500;" download>
                             @Model.ExistingSubmission.OriginalFileName
                         </a>
@@ -92,9 +92,9 @@
             </div>
 
             <button type="submit" class="btn btn-sims-primary">
-                <i class="fa-solid fa-paper-plane fa-xs me-1"></i> Nộp bài
+                <i class="fa-solid fa-paper-plane fa-xs me-1"></i> Submit Work
             </button>
-            <a asp-action="Index" asp-route-studentId="@Model.StudentId" class="btn btn-sims-outline ms-2">Hủy</a>
+            <a asp-action="Index" asp-route-studentId="@Model.StudentId" class="btn btn-sims-outline ms-2">Cancel</a>
         </form>
     </div>
 </div>

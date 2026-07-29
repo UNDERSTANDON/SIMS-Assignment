@@ -1,16 +1,16 @@
 @model SIMS_WEB.Controllers.LecturerCourseViewModel
 @{
-    ViewData["Title"] = "Quản lý khóa học";
+    ViewData["Title"] = "Manage Course";
 }
 
 <div class="sims-page">
     <div class="sims-page-header">
         <h1 class="sims-page-title">
             <i class="fa-solid fa-graduation-cap fa-sm"></i>
-            Quản lý: @Model.Course.Title (<code>@Model.Course.Code</code>)
+            Manage: @Model.Course.Title (<code>@Model.Course.Code</code>)
         </h1>
         <a asp-action="Index" class="btn btn-sims-outline">
-            <i class="fa-solid fa-arrow-left fa-xs"></i> Quay lại
+            <i class="fa-solid fa-arrow-left fa-xs"></i> Back
         </a>
     </div>
 
@@ -34,26 +34,26 @@
         <!-- LEFT: Materials -->
         <div class="col-md-6">
             <div class="sims-card mb-3 p-3">
-                <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-folder-open me-1"></i> Thêm tài liệu mới</h5>
+                <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-folder-open me-1"></i> Add New Material</h5>
                 <form asp-controller="Lecturer" asp-action="AddMaterial" method="post" enctype="multipart/form-data" class="mb-4">
                     <input type="hidden" name="courseId" value="@Model.Course.Code" />
                     <div class="mb-2">
-                        <input name="title" class="form-control" placeholder="Tiêu đề tài liệu" required />
+                        <input name="title" class="form-control" placeholder="Material Title" required />
                     </div>
                     <div class="mb-2">
-                        <input name="description" class="form-control" placeholder="Mô tả tài liệu (tùy chọn)" />
+                        <input name="description" class="form-control" placeholder="Description (optional)" />
                     </div>
                     <div class="mb-2">
                         <input type="file" name="file" class="form-control" />
                     </div>
                     <button type="submit" class="btn btn-sims-primary w-100">
-                        <i class="fa-solid fa-plus fa-xs"></i> Thêm tài liệu
+                        <i class="fa-solid fa-plus fa-xs"></i> Add Material
                     </button>
                 </form>
 
                 <hr style="border-top: 1px solid var(--border-subtle); margin: 1.5rem 0;" />
 
-                <h5 style="color: #ffffff !important;" class="mb-3"><i class="fa-solid fa-clock-rotate-left fa-xs me-1"></i> Lịch sử tài liệu</h5>
+                <h5 style="color: #ffffff !important;" class="mb-3"><i class="fa-solid fa-clock-rotate-left fa-xs me-1"></i> Course Materials History</h5>
                 @if (Model.Materials.Any())
                 {
                     <ul class="list-unstyled mb-0">
@@ -68,7 +68,7 @@
                                 @if(!string.IsNullOrEmpty(m.FilePath)) 
                                 { 
                                     <a asp-action="DownloadMaterial" asp-route-materialId="@m.Id" class="btn btn-sm btn-link p-0 mt-2 d-inline-flex align-items-center gap-1" style="color: #ffffff !important; text-decoration: underline; font-size: 0.8rem;">
-                                        <i class="fa-solid fa-download fa-xs"></i> Tải xuống tệp đính kèm
+                                        <i class="fa-solid fa-download fa-xs"></i> Download Attachment
                                     </a> 
                                 }
                             </li>
@@ -77,7 +77,7 @@
                 }
                 else
                 {
-                    <p class="fs-sm text-center py-2" style="color: #ffffff !important; opacity: 0.7;">Chưa có tài liệu nào được tải lên.</p>
+                    <p class="fs-sm text-center py-2" style="color: #ffffff !important; opacity: 0.7;">No materials uploaded yet.</p>
                 }
             </div>
         </div>
@@ -85,26 +85,26 @@
         <!-- RIGHT: Assignments -->
         <div class="col-md-6">
             <div class="sims-card mb-3 p-3">
-                <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-file-signature me-1"></i> Tạo bài tập mới</h5>
+                <h5 class="mb-3 text-primary-sims"><i class="fa-solid fa-file-signature me-1"></i> Create New Assignment</h5>
                 <form asp-controller="Lecturer" asp-action="AddAssignment" method="post" class="mb-4">
                     <input type="hidden" name="courseCode" value="@Model.Course.Code" />
                     <div class="mb-2">
-                        <input name="title" class="form-control" placeholder="Tiêu đề bài tập" required />
+                        <input name="title" class="form-control" placeholder="Assignment Title" required />
                     </div>
                     <div class="mb-2">
-                        <textarea name="description" class="form-control" placeholder="Mô tả chi tiết" rows="2"></textarea>
+                        <textarea name="description" class="form-control" placeholder="Detailed Description" rows="2"></textarea>
                     </div>
                     <div class="mb-2">
                         <input type="datetime-local" name="dueDate" class="form-control" required />
                     </div>
                     <button type="submit" class="btn btn-sims-primary w-100">
-                        <i class="fa-solid fa-plus fa-xs"></i> Tạo bài tập
+                        <i class="fa-solid fa-plus fa-xs"></i> Create Assignment
                     </button>
                 </form>
 
                 <hr style="border-top: 1px solid var(--border-subtle); margin: 1.5rem 0;" />
 
-                <h5 style="color: #ffffff !important;" class="mb-3"><i class="fa-solid fa-clock-rotate-left fa-xs me-1"></i> Lịch sử bài tập</h5>
+                <h5 style="color: #ffffff !important;" class="mb-3"><i class="fa-solid fa-clock-rotate-left fa-xs me-1"></i> Assignment History</h5>
                 @if (Model.Assignments.Any())
                 {
                     <ul class="list-unstyled mb-0">
@@ -113,7 +113,7 @@
                             <li class="mb-3 p-2 rounded" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <strong style="color: #ffffff !important;">@a.Title</strong>
-                                    <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Hạn: @a.DueDate.ToString("g")</span>
+                                    <span class="fs-xs font-mono" style="color: #ffffff !important; opacity: 0.85;">Due: @a.DueDate.ToString("g")</span>
                                 </div>
                                 <div class="fs-sm mt-1" style="color: #ffffff !important; opacity: 0.8;">@a.Description</div>
                             </li>
@@ -122,7 +122,7 @@
                 }
                 else
                 {
-                    <p class="fs-sm text-center py-2" style="color: #ffffff !important; opacity: 0.7;">Chưa có bài tập nào được tạo.</p>
+                    <p class="fs-sm text-center py-2" style="color: #ffffff !important; opacity: 0.7;">No assignments created yet.</p>
                 }
             </div>
         </div>

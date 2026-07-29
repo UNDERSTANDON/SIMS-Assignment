@@ -1,8 +1,8 @@
 @{
-    ViewData["Title"] = "Giảng viên - Khóa học";
+    ViewData["Title"] = "Faculty - Courses";
 }
 
-<h2>Khóa học</h2>
+<h2>My Courses</h2>
 
 @if (TempData["Error"] != null)
 {
@@ -23,10 +23,10 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Tên</th>
-                <th>Mã</th>
-                <th>Giảng viên</th>
-                <th>Thao tác</th>
+                <th>Course Name</th>
+                <th>Course Code</th>
+                <th>Instructor</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -37,9 +37,9 @@
                     <td><code>@c.Code</code></td>
                     <td>@c.Instructor</td>
                     <td>
-                        <a class="btn btn-sims-outline btn-sm" asp-action="Manage" asp-route-id="@c.Code">Quản lý</a>
-                        <a class="btn btn-sims-primary btn-sm ms-2" asp-action="Enrollments" asp-route-courseCode="@c.Code">Sinh viên</a>
-                        <a class="btn btn-sims-success btn-sm ms-2" asp-action="CourseAssignments" asp-route-courseCode="@c.Code">Quản lý bài tập</a>
+                        <a class="btn btn-sims-outline btn-sm" asp-action="Manage" asp-route-id="@c.Code">Manage</a>
+                        <a class="btn btn-sims-primary btn-sm ms-2" asp-action="Enrollments" asp-route-courseCode="@c.Code">Students</a>
+                        <a class="btn btn-sims-success btn-sm ms-2" asp-action="CourseAssignments" asp-route-courseCode="@c.Code">Assignments</a>
                     </td>
                 </tr>
             }

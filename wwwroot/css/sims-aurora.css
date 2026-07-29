@@ -1,0 +1,258 @@
+/**
+ * SIMS 2026 Modern Dark UI - Ambient Aurora & Micro-Grid System
+ * High Performance GPU Accelerated Background with Role Personalization
+ */
+
+/* Root & Role Color Variables */
+:root {
+  --aurora-color-1: rgba(37, 99, 235, 0.22); /* Default Royal Blue */
+  --aurora-color-2: rgba(59, 130, 246, 0.15); /* Default Light Blue */
+}
+
+/* Admin Role Color Scheme: Electric Royal Blue & Solar Gold Glow */
+[data-user-role="Admin"] {
+  --aurora-color-1: rgba(37, 99, 235, 0.25);
+  --aurora-color-2: rgba(245, 158, 11, 0.14);
+}
+
+/* Faculty Role Color Scheme: Academic Mint & Molecular Book Background */
+[data-user-role="Faculty"] {
+  --aurora-color-1: rgba(16, 185, 129, 0.25);
+  --aurora-color-2: rgba(20, 184, 166, 0.20);
+}
+
+[data-user-role="Faculty"] .sims-aurora-bg {
+  background: #090e0c url('/img/faculty_book_bg.png?v=2026') center/cover no-repeat !important;
+}
+
+[data-user-role="Faculty"] .sims-aurora-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 75% 75%, rgba(8, 14, 12, 0.4) 0%, rgba(8, 14, 12, 0.8) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Student Role Color Scheme: Cyber Cyan, Purple Pastel & Book Background */
+[data-user-role="Student"] {
+  --aurora-color-1: rgba(167, 139, 250, 0.25);
+  --aurora-color-2: rgba(6, 182, 212, 0.20);
+}
+
+[data-user-role="Student"] .sims-aurora-bg {
+  background: #0d0a14 url('/img/student_book_bg.png?v=2026') center/cover no-repeat !important;
+}
+
+[data-user-role="Student"] .sims-aurora-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 75% 75%, rgba(13, 10, 20, 0.35) 0%, rgba(13, 10, 20, 0.78) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Fullscreen Background Wrapper */
+.sims-aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #08080a;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Micro-Grid Texture Overlay (2026 Tech Mesh) */
+.sims-aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 60%, transparent 100%);
+  opacity: 0.8;
+}
+
+/* Dual Ambient Aurora Glow Orbs */
+.sims-aurora-orb-1,
+.sims-aurora-orb-2 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform;
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sims-aurora-orb-1 {
+  top: -10%;
+  left: 15%;
+  width: 55vw;
+  height: 55vw;
+  max-width: 700px;
+  max-height: 700px;
+  background: radial-gradient(circle, var(--aurora-color-1) 0%, transparent 70%);
+  transform: translate3d(calc(var(--mouse-x, 0) * 40px), calc(var(--mouse-y, 0) * 40px), 0);
+  animation: simsAuroraPulse1 14s ease-in-out infinite alternate;
+}
+
+.sims-aurora-orb-2 {
+  bottom: -10%;
+  right: 15%;
+  width: 50vw;
+  height: 50vw;
+  max-width: 650px;
+  max-height: 650px;
+  background: radial-gradient(circle, var(--aurora-color-2) 0%, transparent 70%);
+  transform: translate3d(calc(var(--mouse-x, 0) * -30px), calc(var(--mouse-y, 0) * -30px), 0);
+  animation: simsAuroraPulse2 18s ease-in-out infinite alternate;
+}
+
+@keyframes simsAuroraPulse1 {
+  0%   { opacity: 0.7; transform: scale(1) translate3d(calc(var(--mouse-x, 0) * 40px), calc(var(--mouse-y, 0) * 40px), 0); }
+  100% { opacity: 1;   transform: scale(1.15) translate3d(calc(var(--mouse-x, 0) * 40px), calc(var(--mouse-y, 0) * 40px), 0); }
+}
+
+@keyframes simsAuroraPulse2 {
+  0%   { opacity: 0.8; transform: scale(1.1) translate3d(calc(var(--mouse-x, 0) * -30px), calc(var(--mouse-y, 0) * -30px), 0); }
+  100% { opacity: 0.6; transform: scale(0.95) translate3d(calc(var(--mouse-x, 0) * -30px), calc(var(--mouse-y, 0) * -30px), 0); }
+}
+
+/* =========================================================
+   ROLE-ADAPTIVE GLASSMORPHISM CARD & FORM SYSTEM (2026)
+   ========================================================= */
+
+/* General Glassmorphic Surface for all cards & panels */
+.sims-card,
+.sims-stat-card,
+.quick-card,
+.sims-table-wrap,
+.login-panel,
+.sci-card,
+.dash-bento,
+.pattern-cell {
+  backdrop-filter: blur(24px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+  border-radius: var(--r-xl) !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Faculty Role: Academic Mint Glassmorphism */
+[data-user-role="Faculty"] .sims-card,
+[data-user-role="Faculty"] .sims-stat-card,
+[data-user-role="Faculty"] .quick-card,
+[data-user-role="Faculty"] .sims-table-wrap {
+  background: rgba(10, 22, 18, 0.72) !important;
+  border: 1px solid rgba(16, 185, 129, 0.22) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(52, 211, 153, 0.15) !important;
+}
+
+[data-user-role="Faculty"] .sims-card:hover,
+[data-user-role="Faculty"] .sims-stat-card:hover,
+[data-user-role="Faculty"] .quick-card:hover {
+  border-color: rgba(52, 211, 153, 0.45) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 24px rgba(16, 185, 129, 0.22) !important;
+}
+
+/* Admin Role: Royal Blue & Amber Gold Glassmorphism */
+[data-user-role="Admin"] .sims-card,
+[data-user-role="Admin"] .sims-stat-card,
+[data-user-role="Admin"] .quick-card,
+[data-user-role="Admin"] .sims-table-wrap {
+  background: rgba(12, 18, 30, 0.74) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(96, 165, 250, 0.15) !important;
+}
+
+[data-user-role="Admin"] .sims-card:hover,
+[data-user-role="Admin"] .sims-stat-card:hover,
+[data-user-role="Admin"] .quick-card:hover {
+  border-color: rgba(96, 165, 250, 0.45) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 24px rgba(37, 99, 235, 0.22) !important;
+}
+
+/* Student Role: Cyber Cyan & Purple Glassmorphism */
+[data-user-role="Student"] .sims-card,
+[data-user-role="Student"] .sims-stat-card,
+[data-user-role="Student"] .quick-card,
+[data-user-role="Student"] .sims-table-wrap {
+  background: rgba(16, 14, 28, 0.72) !important;
+  border: 1px solid rgba(167, 139, 250, 0.22) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(192, 132, 252, 0.15) !important;
+}
+
+[data-user-role="Student"] .sims-card:hover,
+[data-user-role="Student"] .sims-stat-card:hover,
+[data-user-role="Student"] .quick-card:hover {
+  border-color: rgba(192, 132, 252, 0.45) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 24px rgba(167, 139, 250, 0.22) !important;
+}
+
+/* Semi-Transparent Inputs & Glowing Focus States */
+.form-control,
+.form-select,
+.input-icon-wrap .form-control {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: var(--r-md) !important;
+  color: var(--text-primary) !important;
+  transition: all 0.3s ease !important;
+}
+
+[data-user-role="Faculty"] .form-control:focus,
+[data-user-role="Faculty"] .form-select:focus {
+  border-color: rgba(52, 211, 153, 0.6) !important;
+  background: rgba(10, 22, 18, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18), 0 0 16px rgba(16, 185, 129, 0.15) !important;
+}
+
+[data-user-role="Admin"] .form-control:focus,
+[data-user-role="Admin"] .form-select:focus {
+  border-color: rgba(96, 165, 250, 0.6) !important;
+  background: rgba(12, 18, 30, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18), 0 0 16px rgba(37, 99, 235, 0.15) !important;
+}
+
+[data-user-role="Student"] .form-control:focus,
+[data-user-role="Student"] .form-select:focus {
+  border-color: rgba(34, 211, 238, 0.6) !important;
+  background: rgba(10, 18, 32, 0.85) !important;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.18), 0 0 16px rgba(6, 182, 212, 0.15) !important;
+}
+
+/* Form Labels Highlight */
+[data-user-role="Faculty"] .form-label { color: #34d399 !important; font-weight: 600; }
+[data-user-role="Admin"] .form-label   { color: #60a5fa !important; font-weight: 600; }
+[data-user-role="Student"] .form-label { color: #c084fc !important; font-weight: 600; }
+
+/* Table Glassmorphism & Hover Glow */
+.table {
+  color: var(--text-primary) !important;
+}
+
+.table th {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: var(--text-secondary) !important;
+}
+
+.table td {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-user-role="Faculty"] .table-hover tbody tr:hover td {
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+[data-user-role="Admin"] .table-hover tbody tr:hover td {
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+
+[data-user-role="Student"] .table-hover tbody tr:hover td {
+  background: rgba(167, 139, 250, 0.12) !important;
+}

@@ -132,10 +132,10 @@ namespace SIMS_WEB.Controllers
             var ok = await _students.CreateAsync(model);
             if (!ok)
             {
-                ModelState.AddModelError("StudentId", "Mã sinh viên đã tồn tại trong hệ thống");
+                ModelState.AddModelError("StudentId", "Student ID already exists in system");
                 return View(model);
             }
-            TempData["Success"] = $"Đã thêm sinh viên {model.FullName} thành công!";
+            TempData["Success"] = $"Successfully added student {model.FullName}!";
             return RedirectToAction("Index");
         }
 
@@ -153,7 +153,7 @@ namespace SIMS_WEB.Controllers
             if (!ModelState.IsValid) return View(model);
             var ok = await _students.UpdateAsync(model);
             if (!ok) return NotFound();
-            TempData["Success"] = "Cập nhật sinh viên thành công!";
+            TempData["Success"] = "Student updated successfully!";
             return RedirectToAction("Index");
         }
 
@@ -163,11 +163,11 @@ namespace SIMS_WEB.Controllers
             var removed = await _students.DeleteAsync(id);
             if (removed)
             {
-                TempData["Success"] = "Đã xóa sinh viên thành công!";
+                TempData["Success"] = "Successfully deleted student!";
             }
             else
             {
-                TempData["Error"] = "Không tìm thấy sinh viên để xóa";
+                TempData["Error"] = "Student to delete not found";
             }
             return RedirectToAction("Index");
         }
@@ -177,11 +177,11 @@ namespace SIMS_WEB.Controllers
         {
             if (csvFile == null || csvFile.Length == 0)
             {
-                TempData["Error"] = "Vui lòng chọn file CSV hợp lệ";
+                TempData["Error"] = "Please select a valid CSV file";
                 return RedirectToAction("Index");
             }
             var count = await _students.ImportFromStreamAsync(csvFile.OpenReadStream());
-            TempData["Success"] = $"Import thành công {count} sinh viên từ CSV!";
+            TempData["Success"] = $"Successfully imported {count} students from CSV!";
             return RedirectToAction("Index");
         }
 
@@ -200,9 +200,9 @@ namespace SIMS_WEB.Controllers
             }
 
             if (ok)
-                TempData["Success"] = $"Đã xóa người dùng {username} thành công!";
+                TempData["Success"] = $"Successfully deleted user {username}!";
             else
-                TempData["Error"] = "Không tìm thấy người dùng để xóa";
+                TempData["Error"] = "User to delete not found";
 
             return RedirectToAction("Index", new { tab = "faculty" });
         }
@@ -249,10 +249,10 @@ namespace SIMS_WEB.Controllers
             {
                 var users = await _storage.GetAllUsersAsync();
                 ViewBag.Lecturers = users.Where(u => u.Role == "Faculty" || u.Role == "Lecturer").ToList();
-                ModelState.AddModelError("Code", "Mã khóa học đã tồn tại");
+                ModelState.AddModelError("Code", "Course code already exists");
                 return View(model);
             }
-            TempData["Success"] = $"Đã thêm khóa học {model.Title} thành công!";
+            TempData["Success"] = $"Successfully added course {model.Title}!";
             return RedirectToAction("Index");
         }
 
@@ -279,7 +279,7 @@ namespace SIMS_WEB.Controllers
             }
             var ok = await _courses.UpdateAsync(model);
             if (!ok) return NotFound();
-            TempData["Success"] = "Cập nhật khóa học thành công!";
+            TempData["Success"] = "Course updated successfully!";
             return RedirectToAction("Index");
         }
 
@@ -289,11 +289,11 @@ namespace SIMS_WEB.Controllers
             var removed = await _courses.DeleteAsync(id);
             if (removed)
             {
-                TempData["Success"] = "Đã xóa khóa học thành công!";
+                TempData["Success"] = "Successfully deleted course!";
             }
             else
             {
-                TempData["Error"] = "Không tìm thấy khóa học để xóa";
+                TempData["Error"] = "Course to delete not found";
             }
             return RedirectToAction("Index");
         }
@@ -450,12 +450,12 @@ namespace SIMS_WEB.Controllers
         {
             var store = SimsDataStore.Instance;
             if (model.Score < 0 || model.Score > 100)
-                ModelState.AddModelError("Score", "Điểm phải từ 0 đến 100");
+                ModelState.AddModelError("Score", "Score must be between 0 and 100");
 
             if (ModelState.IsValid)
             {
                 store.SaveGrade(model.StudentId, model.CourseCode, model.Score);
-                TempData["Success"] = $"Đã lưu điểm cho sinh viên thành công! Observer đã gửi thông báo tới sinh viên.";
+                TempData["Success"] = $"Successfully saved student grade! Observer notification sent.";
                 return RedirectToAction(nameof(Index), new { courseCode = model.CourseCode });
             }
 
@@ -503,7 +503,7 @@ namespace SIMS_WEB.Controllers
             var removed = store.Grades.RemoveAll(g => g.StudentId == studentId && g.CourseCode == courseCode);
             if (removed > 0)
             {
-                TempData["Success"] = "Đã xóa điểm số của sinh viên thành công.";
+                TempData["Success"] = "Successfully deleted student grade.";
                 try
                 {
                     SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(store.Grades);
@@ -512,7 +512,7 @@ namespace SIMS_WEB.Controllers
             }
             else
             {
-                TempData["Error"] = "Không tìm thấy điểm số của sinh viên để xóa.";
+                TempData["Error"] = "Student grade to delete not found.";
             }
             return RedirectToAction(nameof(Index), new { courseCode = courseCode });
         }
@@ -524,11 +524,11 @@ namespace SIMS_WEB.Controllers
             if (ok)
             {
                 SimsDataStore.Instance.Grades.RemoveAll(g => g.StudentId == studentId && g.CourseCode == courseCode);
-                TempData["Success"] = "Đã xóa sinh viên khỏi lớp học thành công.";
+                TempData["Success"] = "Successfully unenrolled student from class.";
             }
             else
             {
-                TempData["Error"] = "Xóa sinh viên khỏi lớp học thất bại.";
+                TempData["Error"] = "Failed to unenroll student from class.";
             }
             return RedirectToAction(nameof(Index), new { courseCode = courseCode });
         }
@@ -551,7 +551,7 @@ namespace SIMS_WEB.Controllers
             var store = SimsDataStore.Instance;
             var username = HttpContext.Session.GetString("Username") ?? string.Empty;
             var student = store.Students.FirstOrDefault(s => string.Equals(s.StudentId, username, StringComparison.OrdinalIgnoreCase));
-            ViewBag.StudentName = student?.FullName ?? "Sinh viên";
+            ViewBag.StudentName = student?.FullName ?? "Student";
             ViewBag.Grades = store.Grades.Where(g => string.Equals(g.StudentId, username, StringComparison.OrdinalIgnoreCase)).ToList();
             ViewBag.Courses = store.Courses;
             return View();
@@ -571,7 +571,7 @@ namespace SIMS_WEB.Controllers
             ViewData["ActivePage"] = "StudentProfile";
             var username = HttpContext.Session.GetString("Username") ?? string.Empty;
             var user = await _storage.GetUserByNameAsync(username);
-            if (user == null) return NotFound("Sinh viên không tồn tại trong hệ thống");
+            if (user == null) return NotFound("Student does not exist in the system");
             return View("Profile", user);
         }
 
@@ -581,17 +581,17 @@ namespace SIMS_WEB.Controllers
             ViewData["ActivePage"] = "StudentProfile";
             var username = HttpContext.Session.GetString("Username") ?? string.Empty;
             var user = await _storage.GetUserByNameAsync(username);
-            if (user == null) return NotFound("Sinh viên không tồn tại trong hệ thống");
+            if (user == null) return NotFound("Student does not exist in the system");
 
             if (string.IsNullOrWhiteSpace(fullName))
             {
-                TempData["Error"] = "Họ tên không được để trống";
+                TempData["Error"] = "Full name cannot be empty";
                 return View("Profile", user);
             }
 
             if (string.IsNullOrWhiteSpace(email))
             {
-                TempData["Error"] = "Email không được để trống";
+                TempData["Error"] = "Email cannot be empty";
                 return View("Profile", user);
             }
 
@@ -640,7 +640,7 @@ namespace SIMS_WEB.Controllers
                 }
             }
 
-            TempData["Success"] = "Cập nhật thông tin cá nhân thành công!";
+            TempData["Success"] = "Profile updated successfully!";
             return RedirectToAction("Profile");
         }
     }
@@ -657,10 +657,10 @@ namespace SIMS_WEB.Controllers
             model.IsSuccess = true;
             model.Message = model.Method switch
             {
-                "credit"  => $"Thanh toán thẻ tín dụng thành công! Tổng: {model.Total:N0} VNĐ (phí 2.5%)",
-                "bank"    => $"Chuyển khoản ngân hàng thành công! Tổng: {model.Total:N0} VNĐ (miễn phí)",
-                "ewallet" => $"Thanh toán ví điện tử thành công! Tổng: {model.Total:N0} VNĐ (phí 1.0%)",
-                _         => "Thanh toán thành công!"
+                "credit"  => $"Credit card payment successful! Total: {model.Total:N0} VND (2.5% fee)",
+                "bank"    => $"Bank transfer successful! Total: {model.Total:N0} VND (No fee)",
+                "ewallet" => $"E-wallet payment successful! Total: {model.Total:N0} VND (1.0% fee)",
+                _         => "Payment successful!"
             };
             return View("Index", model);
         }

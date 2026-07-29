@@ -16,25 +16,25 @@ namespace SIMS_WEB.Models
     {
         public string Id { get; set; } = "";
 
-        [Required(ErrorMessage = "Mã sinh viên không được để trống")]
-        [Display(Name = "Mã Sinh viên")]
+        [Required(ErrorMessage = "Student ID is required")]
+        [Display(Name = "Student ID")]
         public string StudentId { get; set; } = "";
 
-        [Required(ErrorMessage = "Họ tên không được để trống")]
-        [MaxLength(255, ErrorMessage = "Họ tên không được vượt quá 255 ký tự")]
-        [RegularExpression(@"^[\p{L}\s\d]+$", ErrorMessage = "Họ tên không được chứa ký tự đặc biệt")]
-        [Display(Name = "Họ và Tên")]
+        [Required(ErrorMessage = "Full Name is required")]
+        [MaxLength(255, ErrorMessage = "Full Name cannot exceed 255 characters")]
+        [RegularExpression(@"^[\p{L}\s\d]+$", ErrorMessage = "Full Name cannot contain special characters")]
+        [Display(Name = "Full Name")]
         public string FullName { get; set; } = "";
 
-        [Required(ErrorMessage = "Vui lòng chọn chương trình học")]
-        [Display(Name = "Chương trình học")]
+        [Required(ErrorMessage = "Please select a program")]
+        [Display(Name = "Program")]
         public string Program { get; set; } = "";
 
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
-        [Display(Name = "Ngày sinh")]
+        [Display(Name = "Date of Birth")]
         public DateTime? DateOfBirth { get; set; }
     }
 }

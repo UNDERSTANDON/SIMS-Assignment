@@ -55,10 +55,10 @@ namespace SIMS_WEB.Models
             {
                 Students.AddRange(new[]
                 {
-                    new Student { StudentId = "SV2024001", FullName = "Nguyễn Văn An",    Program = "Công nghệ Thông tin",  Email = "an.nv@univ.edu" },
-                    new Student { StudentId = "SV2024002", FullName = "Trần Thị Bình",   Program = "Kỹ thuật Phần mềm",   Email = "binh.tt@univ.edu" },
-                    new Student { StudentId = "SV2024003", FullName = "Lê Hoàng Cường",  Program = "Khoa học Máy tính",    Email = "cuong.lh@univ.edu" },
-                    new Student { StudentId = "SV2024004", FullName = "Phạm Thị Dung",   Program = "Quản trị Kinh doanh",  Email = "dung.pt@univ.edu" },
+                    new Student { StudentId = "SV2024001", FullName = "An Nguyen",     Program = "Information Technology", Email = "an.nv@univ.edu" },
+                    new Student { StudentId = "SV2024002", FullName = "Binh Tran",     Program = "Software Engineering",   Email = "binh.tt@univ.edu" },
+                    new Student { StudentId = "SV2024003", FullName = "Cuong Le",      Program = "Computer Science",       Email = "cuong.lh@univ.edu" },
+                    new Student { StudentId = "SV2024004", FullName = "Dung Pham",     Program = "Business Administration", Email = "dung.pt@univ.edu" },
                 });
             }
 
@@ -66,10 +66,10 @@ namespace SIMS_WEB.Models
             {
                 Courses.AddRange(new[]
                 {
-                    new Course { Code = "CS101", Title = "Lập trình Căn bản",     Capacity = 40, EnrolledCount = 12, Instructor = "GV. Nguyễn" },
-                    new Course { Code = "CS202", Title = "Cấu trúc Dữ liệu",     Capacity = 35, EnrolledCount = 28, Instructor = "GV. Trần" },
-                    new Course { Code = "BA301", Title = "Quản trị Kinh doanh",   Capacity = 50, EnrolledCount = 45, Instructor = "GV. Lê" },
-                    new Course { Code = "SE401", Title = "Kỹ nghệ Phần mềm",     Capacity = 30, EnrolledCount = 5,  Instructor = "GV. Phạm" },
+                    new Course { Code = "CS101", Title = "Intro to Programming",  Capacity = 40, EnrolledCount = 12, Instructor = "GV. Nguyen" },
+                    new Course { Code = "CS202", Title = "Data Structures",      Capacity = 35, EnrolledCount = 28, Instructor = "GV. Tran" },
+                    new Course { Code = "BA301", Title = "Business Administration", Capacity = 50, EnrolledCount = 45, Instructor = "GV. Le" },
+                    new Course { Code = "SE401", Title = "Software Engineering", Capacity = 30, EnrolledCount = 5,  Instructor = "GV. Pham" },
                 });
             }
         }
@@ -78,16 +78,16 @@ namespace SIMS_WEB.Models
         public (bool success, string message) Enroll(string studentId, string courseCode)
         {
             var course = Courses.FirstOrDefault(c => c.Code == courseCode);
-            if (course == null) return (false, "Khóa học không tồn tại");
+            if (course == null) return (false, "Course does not exist");
 
             bool duplicate = Enrollments.Any(e => e.StudentId == studentId && e.CourseCode == courseCode);
-            if (duplicate) return (false, "Sinh viên đã đăng ký khóa học này rồi");
+            if (duplicate) return (false, "Student is already enrolled in this course");
 
-            if (course.IsFull) return (false, $"Khóa học đã đủ sĩ số ({course.Capacity}/{course.Capacity})");
+            if (course.IsFull) return (false, $"Course is full ({course.Capacity}/{course.Capacity})");
 
             Enrollments.Add(new Enrollment { StudentId = studentId, CourseCode = courseCode });
             course.EnrolledCount++;
-            return (true, "Ghi danh thành công");
+            return (true, "Enrollment successful");
         }
 
         // ============ Grade helpers ============
@@ -139,7 +139,7 @@ namespace SIMS_WEB.Models
                 SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(Grades);
             }
             catch { }
- 
+
             return true;
         }
 
@@ -162,7 +162,7 @@ namespace SIMS_WEB.Models
                 SIMS_WEB.Storage.ModelFilePersistence.SaveGrades(Grades);
             }
             catch { }
- 
+
             // Finally remove the course
             Courses.Remove(course);
             return true;
