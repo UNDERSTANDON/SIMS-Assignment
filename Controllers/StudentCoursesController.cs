@@ -8,6 +8,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace SIMS_WEB.Controllers
 {
@@ -26,28 +27,36 @@ namespace SIMS_WEB.Controllers
             _env = env;
         }
 
+        private string GetCurrentStudentId()
+        {
+            var sessionStudent = HttpContext.Session.GetString("StudentId");
+            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            if (!string.IsNullOrEmpty(sessionStudent)) return sessionStudent;
+
+            var studentObj = _store.Students.FirstOrDefault(s => string.Equals(s.StudentId, username, StringComparison.OrdinalIgnoreCase));
+            if (studentObj != null) return studentObj.StudentId;
+
+            return username;
+        }
+
         public IActionResult Index()
         {
             ViewData["ActivePage"] = "StudentCourses";
-            var sessionStudent = HttpContext.Session.GetString("StudentId");
-            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
+            string studentId = GetCurrentStudentId();
 
-            List<Course> courses;
-            if (!string.IsNullOrEmpty(sessionStudent))
-            {
-                var enrolledCodes = _store.Enrollments.Where(e => e.StudentId == sessionStudent).Select(e => e.CourseCode).ToHashSet();
-                courses = _store.Courses.Where(c => enrolledCodes.Contains(c.Code)).ToList();
-            }
-            else if (username == "sinhvien")
-            {
-                courses = _store.Courses;
-            }
-            else
-            {
-                courses = _store.Courses;
-            }
+            var enrolledCodes = _store.Enrollments
+                .Where(e => e.StudentId == studentId && e.IsEnrolled)
+                .Select(e => e.CourseCode)
+                .ToHashSet();
 
-            return View(courses);
+            var allCourses = _store.Courses.ToList();
+            var enrolledCourses = allCourses.Where(c => enrolledCodes.Contains(c.Code)).ToList();
+
+            ViewBag.AllCourses = allCourses;
+            ViewBag.EnrolledCodes = enrolledCodes;
+            ViewBag.StudentId = studentId;
+
+            return View(enrolledCourses);
         }
 
         public IActionResult Details(string id)
@@ -55,18 +64,12 @@ namespace SIMS_WEB.Controllers
             var course = _store.Courses.FirstOrDefault(c => c.Code == id);
             if (course == null) return NotFound();
 
-            var sessionStudent = HttpContext.Session.GetString("StudentId");
-            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
-            string studentId = sessionStudent;
-            if (string.IsNullOrEmpty(studentId) && username == "sinhvien")
-            {
-                studentId = _store.Students.FirstOrDefault()?.StudentId;
-            }
+            string studentId = GetCurrentStudentId();
 
             bool enrolled = false;
             if (!string.IsNullOrEmpty(studentId))
             {
-                enrolled = _store.Enrollments.Any(e => e.StudentId == studentId && e.CourseCode == id);
+                enrolled = _store.Enrollments.Any(e => e.StudentId == studentId && e.CourseCode == id && e.IsEnrolled);
             }
 
             var vm = new StudentCourseDetailsViewModel
@@ -81,28 +84,53 @@ namespace SIMS_WEB.Controllers
             return View(vm);
         }
 
+        [HttpPost]
         public IActionResult Enroll(string id)
         {
-            var sessionStudent = HttpContext.Session.GetString("StudentId");
-            var username = HttpContext.Session.GetString("Username") ?? string.Empty;
-            string studentId = sessionStudent;
-            if (string.IsNullOrEmpty(studentId) && username == "sinhvien")
-            {
-                studentId = _store.Students.FirstOrDefault()?.StudentId;
-            }
+            string studentId = GetCurrentStudentId();
 
             if (string.IsNullOrEmpty(studentId))
             {
-                return RedirectToAction("Details", new { id });
+                TempData["Error"] = "Student profile not found in session.";
+                return RedirectToAction("Index");
             }
 
             var (success, message) = _store.Enroll(studentId, id);
             if (success)
             {
                 try { ModelFilePersistence.SaveEnrollments(_store.Enrollments); } catch { }
+                try { ModelFilePersistence.SaveCourses(_store.Courses); } catch { }
+                TempData["Success"] = $"Successfully enrolled in course {id}!";
             }
-            ModelFilePersistence.SaveCourses(_store.Courses);
-            return RedirectToAction("Details", new { id });
+            else
+            {
+                TempData["Error"] = message;
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult Unenroll(string id)
+        {
+            string studentId = GetCurrentStudentId();
+            var enrollment = _store.Enrollments.FirstOrDefault(e => e.StudentId == studentId && e.CourseCode == id && e.IsEnrolled);
+            if (enrollment != null)
+            {
+                _store.Enrollments.Remove(enrollment);
+                var course = _store.Courses.FirstOrDefault(c => c.Code == id);
+                if (course != null && course.EnrolledCount > 0)
+                {
+                    course.EnrolledCount--;
+                }
+                try { ModelFilePersistence.SaveEnrollments(_store.Enrollments); } catch { }
+                try { ModelFilePersistence.SaveCourses(_store.Courses); } catch { }
+                TempData["Success"] = $"Successfully unenrolled from course {id}!";
+            }
+            else
+            {
+                TempData["Error"] = "Enrollment record not found.";
+            }
+            return RedirectToAction("Index");
         }
 
         public IActionResult DownloadMaterial(string materialId)
@@ -111,16 +139,16 @@ namespace SIMS_WEB.Controllers
             {
                 var material = _materials.GetAll().FirstOrDefault(m => m.Id == materialId);
                 if (material == null)
-                    return NotFound("Tài liệu không tìm thấy");
+                    return NotFound("Material not found");
 
                 var fileMapping = _materials.GetFileMapping(materialId);
 
                 if (string.IsNullOrWhiteSpace(material.FilePath))
-                    return BadRequest("Tài liệu này không có tệp đính kèm");
+                    return BadRequest("Material has no attached file");
 
                 var filePath = Path.Combine(_env.ContentRootPath, material.FilePath);
                 if (!System.IO.File.Exists(filePath))
-                    return NotFound("Tệp không tìm thấy trên máy chủ");
+                    return NotFound("File not found on server");
 
                 var fileBytes = System.IO.File.ReadAllBytes(filePath);
                 var fileName = fileMapping?.OriginalFileName
@@ -132,7 +160,7 @@ namespace SIMS_WEB.Controllers
             catch (System.Exception ex)
             {
                 System.Console.WriteLine($"Error downloading material: {ex.Message}");
-                return StatusCode(500, "Lỗi tải tệp");
+                return StatusCode(500, "File download error");
             }
         }
 
