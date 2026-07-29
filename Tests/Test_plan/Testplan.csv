@@ -1,0 +1,63 @@
+ID,Type,Component/Feature,Scenario Description,Expected Outcome,Priority,Automation Status
+1,Automation,Account/Login,Successful login with valid student credentials,User is authenticated and redirected to the student dashboard,High,Ready
+2,Automation,Account/Login,Failed login with an incorrect password,Error message is shown and the user remains on the login page,High,Ready
+3,Automation,Account/Login,Login with a non-existent username,The system rejects the login and shows an invalid credential message,High,Ready
+4,Automation,Account/Login,Login with an empty username,Validation fails and the login form is not accepted,Medium,Ready
+5,Automation,Account/Login,Login with an empty password,Validation fails and the login form is not accepted,Medium,Ready
+6,Automation,Account/Login,Repeated failed logins trigger the lockout mechanism,The account is temporarily locked after the threshold is reached,Medium,Ready
+7,Automation,Account/Login,Login with a role mismatch for an existing account,The system rejects the login and shows a role error,High,Ready
+8,Automation,Account/Register,Register a new student account,The new user is created and can log in afterward,Medium,Ready
+9,Automation,Account/Register,Register a user with an already existing username,The registration is rejected with a duplicate-user error,Medium,Ready
+10,Automation,Account/Register,Register a user with empty required fields,The registration is rejected with validation errors,Medium,Ready
+11,Automation,Account/Register,Register a user with a password that is too short,Registration is rejected if the app enforces password rules,Low,Ready
+12,Automation,Lecturer/AddMaterial,Lecturer uploads a valid file to an assigned course,The file is stored and a success message is shown,High,Ready
+13,Automation,Lecturer/AddMaterial,Lecturer uploads a file with a valid title and description,The file is stored with the supplied metadata,Medium,Ready
+14,Automation,Lecturer/AddMaterial,Lecturer attempts to upload to an unassigned course,The action is denied and no file is stored,High,Ready
+15,Automation,Lecturer/AddMaterial,Upload is attempted without a title,Validation fails and the upload is rejected,Medium,Ready
+16,Automation,Lecturer/AddMaterial,Upload is attempted without a file,The upload is rejected and no material is created,Medium,Ready
+17,Automation,Lecturer/AddMaterial,Upload is attempted with a very large file,The system rejects the upload or handles it gracefully,Low,Ready
+18,Automation,Lecturer/AddMaterial,Upload a file with a supported extension,The file is accepted and the stored path is valid,Medium,Ready
+19,Automation,Lecturer/AddMaterial,Upload a file with an unsupported extension,The system rejects the file or handles it gracefully,Low,Ready
+20,Automation,Lecturer/AddAssignment,Lecturer creates a new assignment for an assigned course,The assignment appears in the course management view,Medium,Ready
+21,Automation,Lecturer/AddAssignment,Lecturer creates an assignment without a title,Validation fails and the assignment is not created,Medium,Ready
+22,Automation,Lecturer/AddAssignment,Lecturer creates an assignment for an unassigned course,The action is denied,Medium,Ready
+23,Automation,Lecturer/AddAssignment,Lecturer creates an assignment with a due date in the past,The assignment is rejected or flagged as invalid,Low,Ready
+24,Automation,Lecturer/AddAssignment,Lecturer creates multiple assignments in the same course,All assignments are stored separately and shown correctly,Medium,Ready
+25,Automation,Storage/CsvStorage,Save and retrieve a user record through the storage layer,The user data persists and can be read back correctly,High,Ready
+26,Automation,Storage/CsvStorage,Save and retrieve a course record through the storage layer,The course data persists and can be read back correctly,High,Ready
+27,Automation,Storage/CsvStorage,Save a new user twice with the same ID,The storage writes the latest state without corrupting data,Medium,Ready
+28,Automation,Storage/CsvStorage,Delete an existing course record,The course is removed from the persisted storage,Medium,Ready
+29,Automation,Storage/CsvStorage,Delete a non-existent course record,The system returns a not-found style result without crashing,Low,Ready
+30,Automation,Storage/CsvStorage,Read users when the storage file is empty,The system returns an empty list safely,Medium,Ready
+31,Automation,Storage/CsvStorage,Read courses when the storage file is empty,The system returns an empty list safely,Medium,Ready
+32,Automation,Access Control,Student attempts to access a lecturer-only action,The request is denied and the user is redirected appropriately,High,Ready
+33,Automation,Access Control,Lecturer attempts to access an admin-only area,The request is denied and access is blocked,Medium,Ready
+34,Automation,Access Control,Unauthenticated user attempts to access a protected page,The user is redirected to the login page,High,Ready
+35,Automation,Access Control,Admin accesses the dashboard successfully,The admin page loads correctly,Medium,Ready
+36,Automation,Access Control,Student accesses the student dashboard successfully,The student page loads correctly,Medium,Ready
+37,Automation,Access Control,Lecturer accesses the lecturer dashboard successfully,The lecturer page loads correctly,Medium,Ready
+38,Automation,End-to-End Flow,Login -> upload material -> verify file persistence,The full flow completes without data loss,Medium,Ready
+39,Automation,End-to-End Flow,Login -> create assignment -> verify assignment appears,The assignment is visible after creation,Medium,Ready
+40,Automation,End-to-End Flow,Login -> register new account -> login again,The user can register and then authenticate immediately,Medium,Ready
+41,Automation,UI/Login,Login page displays the expected form fields,The username, password, and role input controls are visible,Medium,Ready
+42,Automation,UI/Login,Login page shows validation feedback for invalid credentials,The form displays the appropriate error message,Medium,Ready
+43,Automation,UI/Login,Login page preserves user input after a failed attempt,The form fields keep the submitted values,Low,Ready
+44,Automation,UI/Lecturer,Course management page loads for a lecturer,The page renders with the expected content,Medium,Ready
+45,Automation,UI/Lecturer,Material upload form is available for assigned courses,The upload form is visible and ready to submit,Medium,Ready
+46,Automation,UI/Lecturer,Assignment creation form is available for assigned courses,The form is visible and ready to submit,Medium,Ready
+47,Automation,UI/Student,Student dashboard page loads for a valid student,The page renders without errors,Medium,Ready
+48,Automation,UI/Student,Student dashboard shows the expected navigation links,The links for common student actions are present,Low,Ready
+49,Automation,Session,User logs in and the session is created,The session cookie or server-side session is established,Medium,Ready
+50,Automation,Session,User logs out and the session is cleared,The session state is removed and access is blocked,Medium,Ready
+51,Automation,Session,User accesses a protected page without a session,The user is redirected to login,Medium,Ready
+52,Automation,Session,User remains authenticated across multiple requests,The user can continue using the app without re-login,Medium,Ready
+53,Automation,Model Validation,Course creation form submits valid data,The valid course model is accepted,Low,Ready
+54,Automation,Model Validation,Course creation form submits invalid data,The invalid model is rejected with validation errors,Low,Ready
+55,Automation,Model Validation,Assignment creation form submits valid data,The valid assignment model is accepted,Low,Ready
+56,Automation,Model Validation,Assignment creation form submits invalid data,The invalid assignment model is rejected,Low,Ready
+57,Automation,Model Validation,Material upload form submits valid metadata,The metadata is accepted and stored,Low,Ready
+58,Automation,Model Validation,Material upload form submits invalid metadata,The invalid metadata is rejected,Low,Ready
+59,Automation,Error Handling,Unexpected storage file missing scenario,The application handles the missing file gracefully,Medium,Ready
+60,Automation,Error Handling,Unexpected invalid data in storage,The application handles parsing errors without crashing,Medium,Ready
+61,Automation,Error Handling,Upload failure due to file system issue,The user sees a friendly error and the app remains stable,Medium,Ready
+62,Automation,Error Handling,Failed login due to inactive or unavailable storage,The app surfaces a clear error without a crash,Low,Ready
